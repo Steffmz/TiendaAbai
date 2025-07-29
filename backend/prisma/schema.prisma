@@ -1,0 +1,170 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+//----------- ENUMS -----------//
+enum Role {
+  Empleado
+  Administrador
+}
+
+enum TipoPunto {
+  ACUMULACION
+  CANJE
+  ASIGNACION_MANUAL
+  AJUSTE
+  EXPIRACION
+}
+
+enum EstadoPedido {
+  Pendiente
+  Enviado
+  Entregado
+  Cancelado
+}
+
+
+//----------- MODELS -----------//
+
+model Usuario {
+  id              Int               @id @default(autoincrement())
+  cedula          String            @unique
+  nombreCompleto  String
+  cargo           String
+  sede            String
+  email           String            @unique
+  contrasena      String
+  rol             Role              @default(Empleado)
+  puntosTotales   Int               @default(0)
+  activo          Boolean           @default(true)
+  fechaRegistro   DateTime          @default(now())
+  
+  historialPuntos HistorialPuntos[]
+  pedidos         Pedido[]
+  carrito         Carrito[]
+  notificaciones  Notificacion[]
+
+  @@map("usuarios") // Mapea este modelo a la tabla 'usuarios'
+}
+
+model Categoria {
+  id            Int         @id @default(autoincrement())
+  nombre        String      @unique
+  descripcion   String?     @db.Text
+  activo        Boolean     @default(true)
+  fechaCreacion DateTime    @default(now())
+  
+  productos     Producto[]
+
+  @@map("categorias")
+}
+
+model Producto {
+  id              Int               @id @default(autoincrement())
+  nombre          String
+  descripcion     String?           @db.Text
+  precioPuntos    Int
+  stock           Int               @default(0)
+  imagenUrl       String?
+  estado          Boolean           @default(true)
+  fechaCreacion   DateTime          @default(now())
+
+  categoria       Categoria         @relation(fields: [categoriaId], references: [id])
+  categoriaId     Int
+
+  campanas        Campana[]
+  carrito         Carrito[]
+  pedidoDetalles  PedidoDetalle[]
+
+  @@map("productos")
+}
+
+model Campana {
+  id            Int         @id @default(autoincrement())
+  titulo        String
+  descripcion   String?     @db.Text
+  fechaInicio   DateTime    @db.Date
+  fechaFin      DateTime    @db.Date
+  aprobada      Boolean     @default(false)
+  fechaCreacion DateTime    @default(now())
+
+  productos     Producto[] // Prisma maneja la tabla pívot automáticamente
+
+  @@map("campanas")
+}
+
+model Carrito {
+  id            Int       @id @default(autoincrement())
+  cantidad      Int
+  fechaAgregado DateTime  @default(now())
+
+  usuario       Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  usuarioId     Int
+  producto      Producto  @relation(fields: [productoId], references: [id], onDelete: Cascade)
+  productoId    Int
+
+  @@unique([usuarioId, productoId]) // Evita duplicados del mismo producto para un usuario
+  @@map("carrito")
+}
+
+model HistorialPuntos {
+  id          Int         @id @default(autoincrement())
+  puntos      Int
+  tipo        TipoPunto
+  descripcion String?
+  origenId    Int?
+  fecha       DateTime    @default(now())
+
+  usuario     Usuario     @relation(fields: [usuarioId], references: [id], onDelete: NoAction)
+  usuarioId   Int
+
+  @@map("historial_puntos")
+}
+
+model Pedido {
+  id           Int             @id @default(autoincrement())
+  fecha        DateTime        @default(now())
+  estado       EstadoPedido    @default(Pendiente)
+  totalPuntos  Int
+
+  usuario      Usuario         @relation(fields: [usuarioId], references: [id], onDelete: NoAction)
+  usuarioId    Int
+
+  detalles     PedidoDetalle[]
+
+  @@map("pedido")
+}
+
+model PedidoDetalle {
+  id             Int      @id @default(autoincrement())
+  cantidad       Int
+  puntosUnitarios Int
+
+  pedido         Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  pedidoId       Int
+  producto       Producto @relation(fields: [productoId], references: [id], onDelete: Restrict)
+  productoId     Int
+
+  @@map("pedido_detalle")
+}
+
+model Notificacion {
+  id          Int      @id @default(autoincrement())
+  titulo      String
+  mensaje     String   @db.Text
+  leido       Boolean  @default(false)
+  fechaEnvio  DateTime @default(now())
+
+  usuario     Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  usuarioId   Int
+
+  @@map("notificaciones")
+}
