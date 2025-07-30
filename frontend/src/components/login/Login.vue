@@ -1,8 +1,7 @@
- <style src="./Login.css"></style>
+<style src="./Login.css"></style>
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from "vue";
-
 
 const cedula = ref("");
 const password = ref("");
@@ -19,7 +18,6 @@ const login = () => console.log("Login:", cedula.value, password.value);
 const register = () => console.log("Registro:", registro.value);
 const closeModal = () => (showModal.value = false);
 
-
 onMounted(() => {
   const canvas = document.getElementById("magneticCanvas");
   const ctx = canvas.getContext("2d");
@@ -28,16 +26,16 @@ onMounted(() => {
   let height = (canvas.height = window.innerHeight);
 
   const particles = [];
-  const particleCount = 150; 
-  const maxDistance = 200; 
-  const speed = 1; 
+  const particleCount = 150;
+  const maxDistance = 200;
+  const speed = 1;
 
   class Particle {
     constructor() {
       this.x = Math.random() * width;
       this.y = Math.random() * height;
-      this.radius = 5; 
-      this.color = "#1E3A8A"; 
+      this.radius = 5;
+      this.color = "#1E3A8A";
       this.vx = (Math.random() - 0.5) * speed;
       this.vy = (Math.random() - 0.5) * speed;
     }
@@ -55,7 +53,6 @@ onMounted(() => {
       this.x += this.vx;
       this.y += this.vy;
 
-   
       if (this.x < 0 || this.x > width) this.vx *= -1;
       if (this.y < 0 || this.y > height) this.vy *= -1;
 
@@ -63,18 +60,15 @@ onMounted(() => {
     }
   }
 
- 
   for (let i = 0; i < particleCount; i++) {
     particles.push(new Particle());
   }
-
 
   function animate() {
     ctx.clearRect(0, 0, width, height);
     particles.forEach((p, i) => {
       p.update();
 
-      // Conexiones
       for (let j = i + 1; j < particles.length; j++) {
         const dx = p.x - particles[j].x;
         const dy = p.y - particles[j].y;
@@ -82,9 +76,9 @@ onMounted(() => {
 
         if (distance < maxDistance) {
           ctx.beginPath();
-          ctx.strokeStyle = `rgba(255,255,255, ${1 - distance / maxDistance})`; 
+          ctx.strokeStyle = `rgba(255,255,255, ${1 - distance / maxDistance})`;
           ctx.lineWidth = 1;
-          ctx.shadowColor = "#FFFFFF"; 
+          ctx.shadowColor = "#FFFFFF";
           ctx.shadowBlur = 6;
           ctx.moveTo(p.x, p.y);
           ctx.lineTo(particles[j].x, particles[j].y);
@@ -98,7 +92,6 @@ onMounted(() => {
 
   animate();
 
- 
   const handleResize = () => {
     width = canvas.width = window.innerWidth;
     height = canvas.height = window.innerHeight;
@@ -112,21 +105,28 @@ onMounted(() => {
 </script>
 
 <template>
- 
   <div class="electro-background">
     <canvas id="magneticCanvas"></canvas>
   </div>
 
-
   <div class="page-container">
     <div class="login-wrapper">
       <div class="login-left">
-        <img src="../../assets/img/abai2.jpeg" alt="Imagen Tienda Puntos" />
+        <img src="../../assets/img/abai3.jpg" alt="Imagen Tienda Puntos" />
       </div>
 
       <div class="login-right">
         <div class="login-card">
+          <!-- Logo arriba de BIENVENIDOS -->
+          <div class="logo-container">
+            <img
+              src="../../assets/img/abai-logo.png"
+              alt="Logo Abai"
+              class="logo-abai"
+            />
+          </div>
           <h2 class="title">BIENVENIDOS</h2>
+
           <form @submit.prevent="login">
             <div class="input-group">
               <label for="cedula">Cédula</label>
