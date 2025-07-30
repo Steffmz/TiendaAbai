@@ -131,8 +131,6 @@ const speed = 1;
           ctx.beginPath();
           ctx.strokeStyle = `rgba(255,255,255, ${1 - distance / maxDistance})`; 
           ctx.lineWidth = 1;
-          ctx.shadowColor = "#FFFFFF"; 
-          ctx.shadowBlur = 6;
           ctx.moveTo(p.x, p.y);
           ctx.lineTo(particles[j].x, particles[j].y);
           ctx.stroke();
