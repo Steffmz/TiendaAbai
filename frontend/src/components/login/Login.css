@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Quicksand&display=swap');
 
 :root {
   --primary-color: #1e40af;
@@ -26,13 +27,21 @@
   box-sizing: border-box;
 }
 
+/* Login.css */
+
 body {
+  font-family: "Quicksand", sans-serif;
   background: linear-gradient(135deg, #0043c9 10%, #e4b96fd8 50%, #1e40af 100%);
   background-size: 400% 400%;
   animation: gradientBackground 15s ease infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
   min-height: 100vh;
   line-height: 1.6;
   overflow: auto;
+  background: linear-gradient(135deg, #0043c9 10%, #e4b96fd8 50%, #1e40af 100%);
 }
 
 @keyframes gradientBackground {
@@ -101,7 +110,6 @@ body {
   z-index: 1;
 }
 
-/* Columna derecha - Formulario */
 .login-right {
   display: flex;
   align-items: center;
@@ -174,7 +182,7 @@ body {
   text-align: center;
 }
 
-.input-group input {
+.login-card .input-group input {
   width: 100%;
   text-align: center;
   padding: 20px 24px;
@@ -189,6 +197,7 @@ body {
     inset -2px -2px 5px rgba(255, 255, 255, 0.9);
   position: relative;
 }
+
 
 .input-group input:focus {
   outline: none;
@@ -514,7 +523,6 @@ body {
   animation: fadeIn 0.4s ease-out;
 }
 
-/* Mejoras adicionales */
 .input-group input:valid {
   border-color: var(--accent-color);
 }
@@ -546,6 +554,33 @@ body {
 
 .modal-content::-webkit-scrollbar-thumb:hover {
   background: var(--gold-hover);
+}
+
+.error-text {
+  color: #e53e3e; 
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.modal-content .input-group input {
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #ffffff; 
+  border: 1px solid #d1d5db;   
+  color: #111827;                
+  padding: 0.75rem;               
+  border-radius: 6px;             
+  -webkit-appearance: none;       
+  -moz-appearance: none;          
+  appearance: none;
+  /* IMPORTANTE: Aseguramos que el texto esté alineado a la izquierda */
+  text-align: left;
+}
+
+.modal-content .input-group input:focus {
+  outline: none;
+  border-color: #3b82f6; 
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4); 
 }
 
 
