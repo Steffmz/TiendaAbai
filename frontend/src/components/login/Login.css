@@ -29,6 +29,8 @@
 
 /* Login.css */
 
+/* Login.css */
+
 body {
   font-family: "Quicksand", sans-serif;
   background: linear-gradient(135deg, #0043c9 10%, #e4b96fd8 50%, #1e40af 100%);
@@ -41,7 +43,6 @@ body {
   min-height: 100vh;
   line-height: 1.6;
   overflow: auto;
-  background: linear-gradient(135deg, #0043c9 10%, #e4b96fd8 50%, #1e40af 100%);
 }
 
 @keyframes gradientBackground {
@@ -66,12 +67,26 @@ body {
   display: block;
 }
 
+
+.logo-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.logo-abai {
+  max-width: 150px;
+  height: auto;
+  display: block;
+  animation: fadeIn 1s ease-out;
+}
+
 .login-wrapper {
   display: grid;
   grid-template-columns: 1fr 1fr;
   max-width: 1200px;
   width: 100%;
-  height: 70vh;
+  min-height: 60vh; 
   background: var(--white);
   border-radius: 24px;
   overflow: hidden;
@@ -79,6 +94,7 @@ body {
   backdrop-filter: blur(20px);
   position: relative;
 }
+
 
 /* Columna izquierda - Imagen */
 .login-left {
@@ -92,7 +108,7 @@ body {
 }
 
 .login-left img {
-  width: 140%;
+  width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center center;
@@ -114,7 +130,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 60px 50px;
+  padding: 60px 40px;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
   backdrop-filter: blur(10px);
   position: relative;

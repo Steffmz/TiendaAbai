@@ -3,6 +3,9 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import axios from 'axios';
+import { useRouter } from 'vue-router'; // Asegúrate de tener esta línea
+
+const router = useRouter(); // Y esta
 
 // --- Variables reactivas ---
 const cedula = ref("");
@@ -10,7 +13,7 @@ const password = ref("");
 const showModal = ref(false);
 const errorMessage = ref("");
 
-// ✅ Objeto de registro con el nuevo campo "centroDeCostosNombre"
+// Objeto de registro con el campo "centroDeCostosNombre"
 const registro = ref({
   nombreCompleto: "",
   cargo: "",
@@ -34,9 +37,7 @@ const login = async () => {
     const { token } = response.data;
     localStorage.setItem('authToken', token);
     
-    alert('¡Inicio de sesión exitoso!');
-    // TODO: Redirigir al usuario al dashboard
-    // window.location.href = '/dashboard';
+    router.push('/'); // Redirige al usuario
 
   } catch (error) {
     if (error.response) {
@@ -55,7 +56,6 @@ const register = async () => {
     
     alert('¡Registro exitoso! Ahora puedes iniciar sesión.');
     closeModal();
-    // ✅ Limpiar formulario incluyendo el nuevo campo
     registro.value = { nombreCompleto: "", cargo: "", sede: "", centroDeCostosNombre: "", email: "", cedula: "", contrasena: "", rol: 'Empleado' };
   
   } catch (error) {
@@ -89,8 +89,8 @@ onMounted(() => {
     constructor() {
       this.x = Math.random() * width;
       this.y = Math.random() * height;
-      this.radius = 5; 
-      this.color = "#1E3A8A"; 
+      this.radius = 5;
+      this.color = "#1E3A8A";
       this.vx = (Math.random() - 0.5) * speed;
       this.vy = (Math.random() - 0.5) * speed;
     }
@@ -130,7 +130,7 @@ onMounted(() => {
 
         if (distance < maxDistance) {
           ctx.beginPath();
-          ctx.strokeStyle = `rgba(255,255,255, ${1 - distance / maxDistance})`; 
+          ctx.strokeStyle = `rgba(255,255,255, ${1 - distance / maxDistance})`;
           ctx.lineWidth = 1;
           ctx.moveTo(p.x, p.y);
           ctx.lineTo(particles[j].x, particles[j].y);
@@ -162,13 +162,20 @@ onMounted(() => {
   </div>
 
   <div class="page-container">
-    <div class="login-wrapper">
+    <div class.login-wrapper">
       <div class="login-left">
-        <img src="../../assets/img/abai2.jpeg" alt="Imagen Tienda Puntos" />
+        <img src="../../assets/img/abai3.jpg" alt="Imagen Tienda Puntos" />
       </div>
 
       <div class="login-right">
         <div class="login-card">
+          <div class="logo-container">
+            <img
+              src="../../assets/img/abai-logo.png"
+              alt="Logo Abai"
+              class="logo-abai"
+            />
+          </div>
           <h2 class="title">BIENVENIDOS</h2>
           <p v-if="errorMessage && !showModal" class="error-text">{{ errorMessage }}</p>
           <form @submit.prevent="login">

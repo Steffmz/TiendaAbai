@@ -1,5 +1,5 @@
-// frontend/src/main.js
 
+// frontend/src/main.js
 import { createApp } from 'vue'
 import App from './App.vue'
 
