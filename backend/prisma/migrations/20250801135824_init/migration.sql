@@ -11,6 +11,7 @@ CREATE TABLE `usuarios` (
     `puntosTotales` INTEGER NOT NULL DEFAULT 0,
     `activo` BOOLEAN NOT NULL DEFAULT true,
     `fechaRegistro` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `centroDeCostosId` INTEGER NOT NULL,
 
     UNIQUE INDEX `usuarios_cedula_key`(`cedula`),
     UNIQUE INDEX `usuarios_email_key`(`email`),
@@ -117,6 +118,15 @@ CREATE TABLE `notificaciones` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `centros_de_costos` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `nombre` VARCHAR(191) NOT NULL,
+
+    UNIQUE INDEX `centros_de_costos_nombre_key`(`nombre`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `_CampanaToProducto` (
     `A` INTEGER NOT NULL,
     `B` INTEGER NOT NULL,
@@ -124,6 +134,9 @@ CREATE TABLE `_CampanaToProducto` (
     UNIQUE INDEX `_CampanaToProducto_AB_unique`(`A`, `B`),
     INDEX `_CampanaToProducto_B_index`(`B`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- AddForeignKey
+ALTER TABLE `usuarios` ADD CONSTRAINT `usuarios_centroDeCostosId_fkey` FOREIGN KEY (`centroDeCostosId`) REFERENCES `centros_de_costos`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `productos` ADD CONSTRAINT `productos_categoriaId_fkey` FOREIGN KEY (`categoriaId`) REFERENCES `categorias`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

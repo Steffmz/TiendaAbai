@@ -17,7 +17,6 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-
 *, 
 body, 
 button, 
@@ -27,7 +26,6 @@ textarea {
   font-family: inherit;
 }
 
-/* 4. Estilos generales */
 a {
   font-weight: 500;
   color: #646cff;
@@ -36,7 +34,7 @@ a {
 a:hover {
   color: #535bf2;
 }
-
+|x
 body {
   margin: 0;
   display: flex;
@@ -45,13 +43,11 @@ body {
   min-height: 100vh;
 }
 
-/* 5. Títulos */
 h1, h2, h3, h4, h5, h6 {
   font-weight: 400; 
   letter-spacing: 0.03em;
 }
 
-/* 6. Botones */
 button {
   border-radius: 8px;
   border: 1px solid transparent;
@@ -70,7 +66,6 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-/* 7. Inputs y campos de texto */
 input, select, textarea {
   font-size: 1rem;
   padding: 0.6em;
@@ -78,7 +73,6 @@ input, select, textarea {
   border: 1px solid #ccc;
   color: #000000;
 }
-
 
 .card {
   padding: 2em;
@@ -91,7 +85,6 @@ input, select, textarea {
   text-align: center;
 }
 
-/* 9. Modo claro */
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
