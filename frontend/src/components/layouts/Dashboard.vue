@@ -13,7 +13,7 @@
       
       <div class="content">
         <!-- Mostrar Categorías -->
-        <Categorias v-if="activeSection === 'categorias'" />
+        <!--<Categorias v-if="activeSection === 'categorias'" />
 
         <!-- Mostrar Usuarios -->
         <div v-if="activeSection === 'usuarios'">
@@ -49,11 +49,11 @@
 <script>
 import Sidebar from '../menu/Sidebar.vue';
 import Topbar from '../menu/Topbar.vue';
-import Categorias from '../categorias/Categorias.vue';
+//import Categorias from '../categorias/Categorias.vue';
 
 export default {
   name: "Dashboard",
-  components: { Sidebar, Topbar, Categorias },
+  components: { Sidebar, Topbar },
   data() {
     return {
       isCollapsed: false,

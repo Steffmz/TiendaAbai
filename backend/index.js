@@ -121,6 +121,54 @@ app.post('/auth/login', async (req, res) => {
   }
 });
 
+// backend/index.js
+
+// --- Middleware de Autenticación (Protector de Rutas) ---
+const authMiddleware = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Formato: "Bearer TOKEN"
+
+  if (!token) {
+    return res.status(401).json({ message: 'No se proveyó un token.' });
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, usuario) => {
+    if (err) {
+      return res.status(403).json({ message: 'Token no válido.' });
+    }
+    req.usuario = usuario;
+    next();
+  });
+};
+
+/*
+* Endpoint PROTEGIDO para obtener el perfil del usuario logueado
+*/
+app.get('/api/perfil', authMiddleware, async (req, res) => {
+  try {
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: req.usuario.userId },
+      select: { // Seleccionamos qué campos devolver para no enviar la contraseña
+        id: true,
+        nombreCompleto: true,
+        email: true,
+        puntosTotales: true,
+        rol: true,
+        sede: true,
+        cargo: true,
+      }
+    });
+
+    if (!usuario) {
+      return res.status(404).json({ message: 'Usuario no encontrado.' });
+    }
+    res.json(usuario);
+    
+  } catch (error) {
+    console.error("Error al obtener perfil:", error);
+    res.status(500).json({ message: 'Error al obtener el perfil.' });
+  }
+});
 
 /**
  * Endpoint para OBTENER todos los usuarios (para pruebas)
