@@ -1,12 +1,12 @@
 <template>
-  <div class="dashboard">
+  <div class="dashboard-layout">
     <Sidebar 
       :isCollapsed="isCollapsed" 
       @toggle="toggleSidebar"
     />
 
-    <div class="main-content">
-      <Topbar @toggle="toggleSidebar" />
+    <div class="main-content" :class="{ collapsed: isCollapsed }">
+      <Topbar />
       
       <div class="page-content">
         <router-view />
