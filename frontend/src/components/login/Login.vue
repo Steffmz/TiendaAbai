@@ -10,14 +10,16 @@ const password = ref("");
 const showModal = ref(false);
 const errorMessage = ref("");
 
+// ✅ Objeto de registro con el nuevo campo "centroDeCostosNombre"
 const registro = ref({
   nombreCompleto: "",
   cargo: "",
   sede: "",
+  centroDeCostosNombre: "",
   email: "",
   cedula: "",
   contrasena: "",
-  rol: 'Empleado' // Rol por defecto al registrar
+  rol: 'Empleado'
 });
 
 // --- Lógica de Login ---
@@ -26,7 +28,7 @@ const login = async () => {
   try {
     const response = await axios.post('http://localhost:3000/auth/login', {
       cedula: cedula.value,
-      contrasena: password.value, // El backend espera 'contrasena'
+      contrasena: password.value,
     });
     
     const { token } = response.data;
@@ -53,8 +55,8 @@ const register = async () => {
     
     alert('¡Registro exitoso! Ahora puedes iniciar sesión.');
     closeModal();
-    // Limpiar formulario
-    registro.value = { nombreCompleto: "", cargo: "", sede: "", email: "", cedula: "", contrasena: "", rol: 'Empleado' };
+    // ✅ Limpiar formulario incluyendo el nuevo campo
+    registro.value = { nombreCompleto: "", cargo: "", sede: "", centroDeCostosNombre: "", email: "", cedula: "", contrasena: "", rol: 'Empleado' };
   
   } catch (error) {
      if (error.response) {
@@ -70,7 +72,7 @@ const closeModal = () => {
     errorMessage.value = '';
 };
 
-// --- Animación del Canvas (sin cambios) ---
+// --- Animación del Canvas (Optimizada) ---
 onMounted(() => {
   const canvas = document.getElementById("magneticCanvas");
   const ctx = canvas.getContext("2d");
@@ -79,10 +81,9 @@ onMounted(() => {
   let height = (canvas.height = window.innerHeight);
 
   const particles = [];
-  // CÓDIGO OPTIMIZADO
-const particleCount = 75; // Reducido a la mitad, ¡el cambio más grande!
-const maxDistance = 140; // Una distancia menor, menos líneas
-const speed = 1;
+  const particleCount = 75;
+  const maxDistance = 140;
+  const speed = 1;
 
   class Particle {
     constructor() {
@@ -209,6 +210,11 @@ const speed = 1;
           <div class="input-group">
             <label for="sede-reg">Sede</label>
             <input type="text" id="sede-reg" v-model="registro.sede" placeholder="Ingresa tu sede" required />
+          </div>
+
+          <div class="input-group">
+            <label for="centro-costos-reg">Centro de Costos</label>
+            <input type="text" id="centro-costos-reg" v-model="registro.centroDeCostosNombre" placeholder="Ej: Marketing, Operaciones" required />
           </div>
 
           <div class="input-group">
