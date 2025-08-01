@@ -53,6 +53,9 @@ model Usuario {
   activo          Boolean           @default(true)
   fechaRegistro   DateTime          @default(now())
   
+  centroDeCostos    CentroDeCostos @relation("UsuarioToCentroDeCostos", fields: [centroDeCostosId], references: [id])
+  centroDeCostosId  Int
+
   historialPuntos HistorialPuntos[]
   pedidos         Pedido[]
   carrito         Carrito[]
@@ -173,4 +176,13 @@ model Notificacion {
   usuarioId   Int
 
   @@map("notificaciones")
+}
+
+model CentroDeCostos {
+  id      Int       @id @default(autoincrement())
+  nombre  String    @unique
+  
+  usuarios Usuario[] @relation("UsuarioToCentroDeCostos") // Se le da un nombre a la relación
+
+  @@map("centros_de_costos")
 }

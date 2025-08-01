@@ -1,70 +1,46 @@
-// backend/index.js
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { PrismaClient } = require('@prisma/client'); // 1. Importar
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { PrismaClient } = require('@prisma/client');
 
-const prisma = new PrismaClient(); // 2. Crear instancia
+// --- INICIALIZACIONES ---
+const prisma = new PrismaClient();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middlewares
+// --- MIDDLEWARES ---
 app.use(cors());
-app.use(express.json());
+app.use(express.json()); // Para que Express entienda JSON en el body
 
-// --- RUTAS DE EJEMPLO ---
+// --- RUTAS DE LA APLICACIÓN ---
 
-// Ruta para ver todos los usuarios
-app.get('/usuarios', async (req, res) => {
-  try {
-    const usuarios = await prisma.usuario.findMany(); // 3. Usar Prisma Client
-    res.json(usuarios);
-  } catch (error) {
-    res.status(500).json({ message: 'Error al obtener los usuarios', error: error.message });
-  }
-});
-
-// Ruta para crear un producto
-app.post('/productos', async (req, res) => {
-    try {
-        const nuevoProducto = await prisma.producto.create({
-            data: req.body, // Asegúrate de que el body coincida con el modelo
-        });
-        res.status(201).json(nuevoProducto);
-    } catch (error) {
-        res.status(500).json({ message: 'Error al crear el producto', error: error.message });
-    }
-});
-
-
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en el puerto ${PORT}`);
-});
-
-// backend/index.js
-
-// ... (importaciones existentes de express, cors, prisma)
-const bcrypt = require('bcryptjs'); // <-- AÑADE ESTA LÍNEA
-
-// ... (código existente de app.use, etc.)
-
-/*
-* Endpoint para CREAR un nuevo usuario (Registro)
-*/
+/**
+ * Endpoint para CREAR un nuevo usuario (Registro)
+ * Incluye la lógica para crear el centro de costos si no existe.
+ */
 app.post('/usuarios', async (req, res) => {
-  // Extraemos los datos del cuerpo de la petición
-  const { cedula, nombreCompleto, cargo, sede, email, contrasena, rol } = req.body;
+  // Extraemos todos los datos necesarios del cuerpo de la petición
+  const { cedula, nombreCompleto, cargo, sede, email, contrasena, rol, centroDeCostosNombre } = req.body;
 
   try {
-    // 1. Validar que los datos necesarios están presentes
-    if (!email || !contrasena || !cedula || !nombreCompleto) {
-      return res.status(400).json({ message: "La cédula, nombre, email y contraseña son requeridos." });
+    // Validar que los datos necesarios están presentes
+    if (!email || !contrasena || !cedula || !nombreCompleto || !cargo || !sede || !centroDeCostosNombre) {
+      return res.status(400).json({ message: "Todos los campos, incluido el centro de costos, son requeridos." });
     }
+    
+    // Encriptar la contraseña antes de guardarla
+    const hashedPassword = await bcrypt.hash(contrasena, 10);
 
-    // 2. Encriptar la contraseña
-    const hashedPassword = await bcrypt.hash(contrasena, 10); // 10 es el "costo" del hash
+    // Lógica para encontrar o crear el centro de costos
+    const centroDeCostos = await prisma.centroDeCostos.upsert({
+      where: { nombre: centroDeCostosNombre },
+      update: {}, // Si ya existe, no hacemos nada
+      create: { nombre: centroDeCostosNombre }, // Si no existe, lo creamos
+    });
 
-    // 3. Crear el usuario en la base de datos con la contraseña encriptada
+    // Crear el nuevo usuario en la base de datos
     const nuevoUsuario = await prisma.usuario.create({
       data: {
         cedula,
@@ -72,79 +48,104 @@ app.post('/usuarios', async (req, res) => {
         cargo,
         sede,
         email,
-        contrasena: hashedPassword, // Guardamos la contraseña encriptada
-        rol, // rol puede ser 'Empleado' o 'Administrador'
+        contrasena: hashedPassword,
+        rol,
+            centroDeCostos: {
+      connect: {
+        id: centroDeCostos.id, // Conéctate a un centro de costos con este ID
       },
+    },
+  },
     });
 
-    // 4. Devolver el usuario creado (sin la contraseña)
+    // Devolvemos el usuario creado (excluyendo la contraseña por seguridad)
     const { contrasena: _, ...usuarioSinContrasena } = nuevoUsuario;
     res.status(201).json(usuarioSinContrasena);
 
   } catch (error) {
-    // Manejar errores comunes, como un email o cédula que ya existen
-    if (error.code === 'P2002') { // Código de error de Prisma para 'unique constraint violation'
-      return res.status(409).json({ message: `El ${error.meta.target[0]} ya está en uso.` });
+    // Manejar error de campos únicos (email o cédula duplicados)
+    if (error.code === 'P2002') {
+      return res.status(409).json({ message: `El campo '${error.meta.target[0]}' ya está en uso.` });
     }
-
-    console.error(error);
-    res.status(500).json({ message: 'Error al crear el usuario.' });
+    
+    console.error("Error al crear usuario:", error);
+    res.status(500).json({ message: 'Error interno del servidor al crear el usuario.' });
   }
 });
 
-// ... (tu ruta GET /usuarios y app.listen existentes)
 
-// backend/index.js
-
-// ... (importaciones existentes de express, cors, prisma, bcrypt)
-const jwt = require('jsonwebtoken'); // <-- AÑADE ESTA LÍNEA
-
-// ... (código existente)
-
-/*
-* Endpoint para INICIAR SESIÓN (Login)
-*/
+/**
+ * Endpoint para INICIAR SESIÓN (Login)
+ * Devuelve un token JWT si las credenciales son correctas.
+ */
 app.post('/auth/login', async (req, res) => {
   const { cedula, contrasena } = req.body;
 
   try {
-    // 1. Validar que envíen los datos
+    // Validar que envíen los datos
     if (!cedula || !contrasena) {
       return res.status(400).json({ message: 'La cédula y la contraseña son requeridas.' });
     }
 
-    // 2. Buscar al usuario en la base de datos por su cédula
+    // Buscar al usuario en la base de datos por su cédula
     const usuario = await prisma.usuario.findUnique({
       where: { cedula },
     });
 
-    // 3. Si el usuario no existe O la contraseña es incorrecta, enviar el mismo error
-    //    Usamos bcrypt.compare para comparar la contraseña enviada con la hasheada en la BD
+    // Si el usuario no existe O la contraseña es incorrecta, enviar un error
     if (!usuario || !(await bcrypt.compare(contrasena, usuario.contrasena))) {
       return res.status(401).json({ message: 'Credenciales inválidas.' });
     }
 
-    // 4. Si las credenciales son correctas, crear el Token (JWT)
+    // Si las credenciales son correctas, crear el payload para el Token
     const payload = {
         userId: usuario.id,
         rol: usuario.rol,
         nombre: usuario.nombreCompleto
     };
 
+    // Firmar el token con el secreto y definir una expiración
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
         expiresIn: '8h', // El token expirará en 8 horas
     });
 
-    // 5. Enviar el token al cliente
+    // Enviar el token al cliente
     res.json({ 
         message: 'Inicio de sesión exitoso',
         token: token 
     });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error en el servidor.' });
+    console.error("Error en el login:", error);
+    res.status(500).json({ message: 'Error interno del servidor.' });
   }
 });
 
-// ... (tus otras rutas como POST /usuarios, GET /usuarios, etc.)
+
+/**
+ * Endpoint para OBTENER todos los usuarios (para pruebas)
+ */
+app.get('/usuarios', async (req, res) => {
+  try {
+    const usuarios = await prisma.usuario.findMany({
+      // Opcional: Incluir el nombre del centro de costos en la respuesta
+      include: {
+        centroDeCostos: {
+          select: {
+            nombre: true
+          }
+        }
+      }
+    });
+    res.json(usuarios);
+  } catch (error) {
+    console.error("Error al obtener usuarios:", error);
+    res.status(500).json({ message: 'Error interno del servidor al obtener los usuarios.' });
+  }
+});
+
+
+// --- INICIO DEL SERVIDOR ---
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en el puerto ${PORT}`);
+});
