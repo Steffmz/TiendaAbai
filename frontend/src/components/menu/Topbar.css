@@ -1,6 +1,6 @@
 .topbar {
   display: flex;
-  justify-content: space-between;
+
   align-items: center;
   background: linear-gradient(135deg, #74B9E7 0%, #2B7FFF 100%);
   padding: 1rem 2rem;
@@ -32,6 +32,7 @@
   display: flex;
   gap: 1.5rem;
   align-items: center;
+  margin-left: auto;
 }
 
 .actions svg {

@@ -7,45 +7,28 @@
     </div>
 
     <ul class="menu">
-      <li :class="{ active: activeItem === 'usuarios' }" @click="setActive('usuarios')">
-        <span class="iconify" data-icon="mdi:account-group"></span>
-        <span v-if="!isCollapsed">Usuarios</span>
-      </li>
-      <li :class="{ active: activeItem === 'categorias' }" @click="setActive('categorias')">
-        <span class="iconify" data-icon="mdi:format-list-bulleted"></span>
-        <span v-if="!isCollapsed">Categorías</span>
-      </li>
-      <li :class="{ active: activeItem === 'campanas' }" @click="setActive('campanas')">
-        <span class="iconify" data-icon="mdi:bullhorn"></span>
-        <span v-if="!isCollapsed">Campañas</span>
-      </li>
-      <li :class="{ active: activeItem === 'calendario' }" @click="setActive('calendario')">
-        <span class="iconify" data-icon="mdi:calendar"></span>
-        <span v-if="!isCollapsed">Calendario</span>
-      </li>
-      <li :class="{ active: activeItem === 'catalogo' }" @click="setActive('catalogo')">
-        <span class="iconify" data-icon="mdi:apps"></span>
-        <span v-if="!isCollapsed">Catálogo</span>
-      </li>
-    </ul>
+      <router-link to="/dashboard/usuarios" custom v-slot="{ navigate, isActive }">
+        <li :class="{ active: isActive }" @click="navigate">
+          <span class="iconify" data-icon="mdi:account-group"></span>
+          <span v-if="!isCollapsed">Usuarios</span>
+        </li>
+      </router-link>
+
+      <router-link to="/dashboard/categorias" custom v-slot="{ navigate, isActive }">
+        <li :class="{ active: isActive }" @click="navigate">
+          <span class="iconify" data-icon="mdi:format-list-bulleted"></span>
+          <span v-if="!isCollapsed">Categorías</span>
+        </li>
+      </router-link>
+      
+      </ul>
   </aside>
 </template>
 
 <script>
-
+// El script ahora es mucho más simple.
 export default {
   props: ['isCollapsed'],
-  data() {
-    return {
-      activeItem: 'usuarios' 
-    };
-  },
-  methods: {
-    setActive(item) {
-      this.activeItem = item;
-      this.$emit('navigate', item);
-    }
-  }
 };
 </script>
 

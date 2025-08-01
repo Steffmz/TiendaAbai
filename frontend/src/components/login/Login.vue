@@ -3,7 +3,8 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import axios from 'axios';
-import { useRouter } from 'vue-router'; // Asegúrate de tener esta línea
+import { useRouter } from 'vue-router';
+import { jwtDecode } from 'jwt-decode';
 
 const router = useRouter(); // Y esta
 
@@ -36,8 +37,14 @@ const login = async () => {
     
     const { token } = response.data;
     localStorage.setItem('authToken', token);
-    
-    router.push('/'); // Redirige al usuario
+
+    const decodedToken = jwtDecode(token);
+
+        if (decodedToken.rol === 'Administrador') {
+      router.push('/dashboard/usuarios'); // 2. Si es admin, va al dashboard
+    } else {
+      router.push('/'); // 3. Si es empleado, va a la página de inicio normal
+    }
 
   } catch (error) {
     if (error.response) {

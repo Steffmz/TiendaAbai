@@ -4,7 +4,9 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
+// backend/index.js
 
+const adminMiddleware = require('./middleware/adminMiddleware');
 // --- INICIALIZACIONES ---
 const prisma = new PrismaClient();
 const app = express();
@@ -189,6 +191,31 @@ app.get('/usuarios', async (req, res) => {
   } catch (error) {
     console.error("Error al obtener usuarios:", error);
     res.status(500).json({ message: 'Error interno del servidor al obtener los usuarios.' });
+  }
+});
+
+app.get('/api/admin/usuarios', adminMiddleware, async (req, res) => {
+  try {
+    const usuarios = await prisma.usuario.findMany({
+      select: { // Seleccionamos qué campos devolver
+        id: true,
+        cedula: true,
+        nombreCompleto: true,
+        email: true,
+        rol: true,
+        puntosTotales: true,
+        activo: true,
+        centroDeCostos: {
+          select: {
+            nombre: true,
+          }
+        }
+      }
+    });
+    res.json(usuarios);
+  } catch (error) {
+    console.error("Error al obtener usuarios para admin:", error);
+    res.status(500).json({ message: 'Error al obtener la lista de usuarios.' });
   }
 });
 
