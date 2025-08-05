@@ -88,8 +88,8 @@ onMounted(() => {
   let height = (canvas.height = window.innerHeight);
 
   const particles = [];
-  const particleCount = 75;
-  const maxDistance = 140;
+  const particleCount = 150;
+  const maxDistance = 200;
   const speed = 1;
 
   class Particle {
@@ -130,6 +130,7 @@ onMounted(() => {
     ctx.clearRect(0, 0, width, height);
     particles.forEach((p, i) => {
       p.update();
+
       for (let j = i + 1; j < particles.length; j++) {
         const dx = p.x - particles[j].x;
         const dy = p.y - particles[j].y;
@@ -139,6 +140,8 @@ onMounted(() => {
           ctx.beginPath();
           ctx.strokeStyle = `rgba(255,255,255, ${1 - distance / maxDistance})`;
           ctx.lineWidth = 1;
+          ctx.shadowColor = "#FFFFFF";
+          ctx.shadowBlur = 6;
           ctx.moveTo(p.x, p.y);
           ctx.lineTo(particles[j].x, particles[j].y);
           ctx.stroke();
@@ -150,7 +153,7 @@ onMounted(() => {
   }
 
   animate();
-  
+
   const handleResize = () => {
     width = canvas.width = window.innerWidth;
     height = canvas.height = window.innerHeight;
