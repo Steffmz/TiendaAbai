@@ -7,8 +7,8 @@ generator client {
 
 generator erd {
   provider = "prisma-erd-generator"
-  output   = "./ERD.svg" // Define el nombre y formato del archivo de salida
-  theme    = "dark"      // Puedes elegir entre 'dark', 'light', 'neutral'
+  output   = "./ERD.svg"
+  theme    = "dark"
 }
 
 datasource db {
@@ -30,21 +30,35 @@ enum TipoPunto {
   EXPIRACION
 }
 
+// ✅ MODIFICADO: Añadidos estados para el flujo de aprobación
 enum EstadoPedido {
-  Pendiente
+  Pendiente         // El usuario acaba de hacer el pedido
+  RequiereAprobacion // El pedido está esperando por un admin
+  Aprobado          // Un admin lo aprobó
   Enviado
   Entregado
   Cancelado
+  Rechazado         // Un admin lo rechazó
 }
-
 
 //----------- MODELS -----------//
 
+// ✅ NUEVO: Modelo para Cargos
+model Cargo {
+  id      Int       @id @default(autoincrement())
+  nombre  String    @unique
+  usuarios Usuario[]
+
+  @@map("cargos")
+}
+
 model Usuario {
   id              Int               @id @default(autoincrement())
-  cedula          String            @unique
+  cedula          String            @unique @db.VarChar(15)
   nombreCompleto  String
-  cargo           String
+  // ✅ MODIFICADO: 'cargo' ahora es una relación
+  cargoId         Int
+  cargo           Cargo             @relation(fields: [cargoId], references: [id])
   sede            String
   email           String            @unique
   contrasena      String
@@ -53,89 +67,17 @@ model Usuario {
   activo          Boolean           @default(true)
   fechaRegistro   DateTime          @default(now())
   
-  centroDeCostos    CentroDeCostos @relation("UsuarioToCentroDeCostos", fields: [centroDeCostosId], references: [id])
+  centroDeCostos    CentroDeCostos @relation(fields: [centroDeCostosId], references: [id])
   centroDeCostosId  Int
 
   historialPuntos HistorialPuntos[]
   pedidos         Pedido[]
+  // ✅ NUEVO: Relación para saber qué pedidos ha aprobado un admin
+  pedidosAprobados  Pedido[] @relation("AprobadoPor")
   carrito         Carrito[]
   notificaciones  Notificacion[]
 
-  @@map("usuarios") // Mapea este modelo a la tabla 'usuarios'
-}
-
-model Categoria {
-  id            Int         @id @default(autoincrement())
-  nombre        String      @unique
-  descripcion   String?     @db.Text
-  activo        Boolean     @default(true)
-  fechaCreacion DateTime    @default(now())
-  
-  productos     Producto[]
-
-  @@map("categorias")
-}
-
-model Producto {
-  id              Int               @id @default(autoincrement())
-  nombre          String
-  descripcion     String?           @db.Text
-  precioPuntos    Int
-  stock           Int               @default(0)
-  imagenUrl       String?
-  estado          Boolean           @default(true)
-  fechaCreacion   DateTime          @default(now())
-
-  categoria       Categoria         @relation(fields: [categoriaId], references: [id])
-  categoriaId     Int
-
-  campanas        Campana[]
-  carrito         Carrito[]
-  pedidoDetalles  PedidoDetalle[]
-
-  @@map("productos")
-}
-
-model Campana {
-  id            Int         @id @default(autoincrement())
-  titulo        String
-  descripcion   String?     @db.Text
-  fechaInicio   DateTime    @db.Date
-  fechaFin      DateTime    @db.Date
-  aprobada      Boolean     @default(false)
-  fechaCreacion DateTime    @default(now())
-
-  productos     Producto[] // Prisma maneja la tabla pívot automáticamente
-
-  @@map("campanas")
-}
-
-model Carrito {
-  id            Int       @id @default(autoincrement())
-  cantidad      Int
-  fechaAgregado DateTime  @default(now())
-
-  usuario       Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
-  usuarioId     Int
-  producto      Producto  @relation(fields: [productoId], references: [id], onDelete: Cascade)
-  productoId    Int
-
-  @@unique([usuarioId, productoId]) // Evita duplicados del mismo producto para un usuario
-  @@map("carrito")
-}
-
-model HistorialPuntos {
-  id          Int         @id @default(autoincrement())
-  puntos      Int
-  tipo        TipoPunto
-  descripcion String?
-  origenId    Int?
-  fecha       DateTime    @default(now())
-
-  usuario     Usuario     @relation(fields: [usuarioId], references: [id], onDelete: NoAction)
-  usuarioId   Int
-
-  @@map("historial_puntos")
+  @@map("usuarios")
 }
 
 model Pedido {
@@ -147,22 +89,16 @@ model Pedido {
   usuario      Usuario         @relation(fields: [usuarioId], references: [id], onDelete: NoAction)
   usuarioId    Int
 
+  // ✅ NUEVO: Campos para el flujo de aprobación
+  aprobadoPorAdminId Int?            // Opcional: ID del admin que aprobó/rechazó
+  aprobadoPorAdmin   Usuario?        @relation("AprobadoPor", fields: [aprobadoPorAdminId], references: [id], onDelete: SetNull)
+  fechaAprobacion    DateTime?       // Opcional: Fecha de la decisión
+  comentarioAdmin    String? @db.Text // Opcional: Comentarios del admin
+
   detalles     PedidoDetalle[]
+  notificaciones Notificacion[] // Un pedido puede tener varias notificaciones
 
   @@map("pedido")
-}
-
-model PedidoDetalle {
-  id             Int      @id @default(autoincrement())
-  cantidad       Int
-  puntosUnitarios Int
-
-  pedido         Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
-  pedidoId       Int
-  producto       Producto @relation(fields: [productoId], references: [id], onDelete: Restrict)
-  productoId     Int
-
-  @@map("pedido_detalle")
 }
 
 model Notificacion {
@@ -175,14 +111,93 @@ model Notificacion {
   usuario     Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
   usuarioId   Int
 
+  // ✅ NUEVO: Relación opcional con Pedido
+  pedido      Pedido?  @relation(fields: [pedidoId], references: [id], onDelete: SetNull)
+  pedidoId    Int?
+
   @@map("notificaciones")
+}
+
+
+// --- OTROS MODELOS (sin cambios) ---
+
+model Categoria {
+  id            Int         @id @default(autoincrement())
+  nombre        String      @unique
+  descripcion   String?     @db.Text
+  activo        Boolean     @default(true)
+  fechaCreacion DateTime    @default(now())
+  productos     Producto[]
+  @@map("categorias")
+}
+
+model Producto {
+  id              Int               @id @default(autoincrement())
+  nombre          String
+  descripcion     String?           @db.Text
+  precioPuntos    Int
+  stock           Int               @default(0)
+  imagenUrl       String?
+  estado          Boolean           @default(true)
+  fechaCreacion   DateTime          @default(now())
+  categoria       Categoria         @relation(fields: [categoriaId], references: [id])
+  categoriaId     Int
+  campanas        Campana[]
+  carrito         Carrito[]
+  pedidoDetalles  PedidoDetalle[]
+  @@map("productos")
+}
+
+model Campana {
+  id            Int         @id @default(autoincrement())
+  titulo        String
+  descripcion   String?     @db.Text
+  fechaInicio   DateTime    @db.Date
+  fechaFin      DateTime    @db.Date
+  aprobada      Boolean     @default(false)
+  fechaCreacion DateTime    @default(now())
+  productos     Producto[]
+  @@map("campanas")
+}
+
+model Carrito {
+  id            Int       @id @default(autoincrement())
+  cantidad      Int
+  fechaAgregado DateTime  @default(now())
+  usuario       Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  usuarioId     Int
+  producto      Producto  @relation(fields: [productoId], references: [id], onDelete: Cascade)
+  productoId    Int
+  @@unique([usuarioId, productoId])
+  @@map("carrito")
+}
+
+model HistorialPuntos {
+  id          Int         @id @default(autoincrement())
+  puntos      Int
+  tipo        TipoPunto
+  descripcion String?
+  origenId    Int?
+  fecha       DateTime    @default(now())
+  usuario     Usuario     @relation(fields: [usuarioId], references: [id], onDelete: NoAction)
+  usuarioId   Int
+  @@map("historial_puntos")
+}
+
+model PedidoDetalle {
+  id             Int      @id @default(autoincrement())
+  cantidad       Int
+  puntosUnitarios Int
+  pedido         Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  pedidoId       Int
+  producto       Producto @relation(fields: [productoId], references: [id], onDelete: Restrict)
+  productoId     Int
+  @@map("pedido_detalle")
 }
 
 model CentroDeCostos {
   id      Int       @id @default(autoincrement())
   nombre  String    @unique
-  
-  usuarios Usuario[] @relation("UsuarioToCentroDeCostos") // Se le da un nombre a la relación
-
+  usuarios Usuario[]
   @@map("centros_de_costos")
 }
