@@ -31,13 +31,13 @@ enum TipoPunto {
 }
 
 enum EstadoPedido {
-  Pendiente         // El usuario acaba de hacer el pedido
-  RequiereAprobacion // El pedido está esperando por un admin
-  Aprobado          // Un admin lo aprobó
+  Pendiente
+  RequiereAprobacion
+  Aprobado
   Enviado
   Entregado
   Cancelado
-  Rechazado         // Un admin lo rechazó
+  Rechazado
 }
 
 //----------- MODELS -----------//
@@ -46,55 +46,55 @@ model Cargo {
   id      Int       @id @default(autoincrement())
   nombre  String    @unique
   usuarios Usuario[]
-
   @@map("cargos")
 }
 
 model Usuario {
-  id              Int               @id @default(autoincrement())
-  cedula          String            @unique @db.VarChar(15)
-  nombreCompleto  String
-  
-  cargoId         Int
-  cargo           Cargo             @relation(fields: [cargoId], references: [id])
-  sede            String
-  email           String            @unique
-  contrasena      String
-  rol             Role              @default(Empleado)
-  puntosTotales   Int               @default(0)
-  activo          Boolean           @default(true)
-  fechaRegistro   DateTime          @default(now())
-  
-  centroDeCostos    CentroDeCostos @relation(fields: [centroDeCostosId], references: [id])
-  centroDeCostosId  Int
-
-  historialPuntos HistorialPuntos[]
-  pedidos         Pedido[]
-
-  pedidosAprobados  Pedido[] @relation("AprobadoPor")
-  carrito         Carrito[]
-  notificaciones  Notificacion[]
-
+  id                 Int               @id @default(autoincrement())
+  cedula             String            @unique @db.VarChar(15)
+  nombreCompleto     String
+  cargoId            Int
+  cargo              Cargo             @relation(fields: [cargoId], references: [id])
+  sede               String
+  email              String            @unique
+  contrasena         String
+  rol                Role              @default(Empleado)
+  puntosTotales      Int               @default(0)
+  activo             Boolean           @default(true)
+  fechaRegistro      DateTime          @default(now())
+  centroDeCostosId   Int
+  centroDeCostos     CentroDeCostos    @relation(fields: [centroDeCostosId], references: [id])
+  historialPuntosRecibidos HistorialPuntos[] @relation("Beneficiario")
+  historialPuntosCreados   HistorialPuntos[] @relation("AdminCreador")
+  pedidos            Pedido[]
+  pedidosAprobados   Pedido[]          @relation("AprobadoPor")
+  carrito            Carrito[]
+  notificaciones     Notificacion[]
   @@map("usuarios")
 }
 
+model CentroDeCostos {
+  id       Int      @id @default(autoincrement())
+  // ✅ MEJORA: Añadido un código legible y único
+  codigo   String?  @unique @db.VarChar(20)
+  nombre   String
+  usuarios Usuario[]
+  @@map("centros_de_costos")
+}
+
 model Pedido {
-  id           Int             @id @default(autoincrement())
-  fecha        DateTime        @default(now())
-  estado       EstadoPedido    @default(Pendiente)
-  totalPuntos  Int
-
-  usuario      Usuario         @relation(fields: [usuarioId], references: [id], onDelete: NoAction)
-  usuarioId    Int
-
-  aprobadoPorAdminId Int?            // Opcional: ID del admin que aprobó/rechazó
+  id                 Int             @id @default(autoincrement())
+  fecha              DateTime        @default(now())
+  estado             EstadoPedido    @default(Pendiente)
+  totalPuntos        Int
+  usuarioId          Int
+  usuario            Usuario         @relation(fields: [usuarioId], references: [id], onDelete: NoAction)
+  aprobadoPorAdminId Int?
   aprobadoPorAdmin   Usuario?        @relation("AprobadoPor", fields: [aprobadoPorAdminId], references: [id], onDelete: SetNull)
-  fechaAprobacion    DateTime?       // Opcional: Fecha de la decisión
-  comentarioAdmin    String? @db.Text // Opcional: Comentarios del admin
-
-  detalles     PedidoDetalle[]
-  notificaciones Notificacion[] // Un pedido puede tener varias notificaciones
-
+  fechaAprobacion    DateTime?
+  comentarioAdmin    String?         @db.Text
+  detalles           PedidoDetalle[]
+  notificaciones     Notificacion[]
   @@map("pedido")
 }
 
@@ -104,18 +104,12 @@ model Notificacion {
   mensaje     String   @db.Text
   leido       Boolean  @default(false)
   fechaEnvio  DateTime @default(now())
-
-  usuario     Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
   usuarioId   Int
-
-  pedido      Pedido?  @relation(fields: [pedidoId], references: [id], onDelete: SetNull)
+  usuario     Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
   pedidoId    Int?
-
+  pedido      Pedido?  @relation(fields: [pedidoId], references: [id], onDelete: SetNull)
   @@map("notificaciones")
 }
-
-
-// --- OTROS MODELOS (sin cambios) ---
 
 model Categoria {
   id            Int         @id @default(autoincrement())
@@ -136,8 +130,8 @@ model Producto {
   imagenUrl       String?
   estado          Boolean           @default(true)
   fechaCreacion   DateTime          @default(now())
-  categoria       Categoria         @relation(fields: [categoriaId], references: [id])
   categoriaId     Int
+  categoria       Categoria         @relation(fields: [categoriaId], references: [id])
   campanas        Campana[]
   carrito         Carrito[]
   pedidoDetalles  PedidoDetalle[]
@@ -160,23 +154,25 @@ model Carrito {
   id            Int       @id @default(autoincrement())
   cantidad      Int
   fechaAgregado DateTime  @default(now())
-  usuario       Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
   usuarioId     Int
-  producto      Producto  @relation(fields: [productoId], references: [id], onDelete: Cascade)
+  usuario       Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
   productoId    Int
+  producto      Producto  @relation(fields: [productoId], references: [id], onDelete: Cascade)
   @@unique([usuarioId, productoId])
   @@map("carrito")
 }
 
 model HistorialPuntos {
-  id          Int         @id @default(autoincrement())
-  puntos      Int
-  tipo        TipoPunto
-  descripcion String?
-  origenId    Int?
-  fecha       DateTime    @default(now())
-  usuario     Usuario     @relation(fields: [usuarioId], references: [id], onDelete: NoAction)
-  usuarioId   Int
+  id             Int         @id @default(autoincrement())
+  puntos         Int
+  tipo           TipoPunto
+  descripcion    String?
+  origenId       Int?
+  fecha          DateTime    @default(now())
+  beneficiarioId Int
+  beneficiario   Usuario     @relation("Beneficiario", fields: [beneficiarioId], references: [id], onDelete: NoAction)
+  adminCreadorId Int?
+  adminCreador   Usuario?    @relation("AdminCreador", fields: [adminCreadorId], references: [id], onDelete: SetNull)
   @@map("historial_puntos")
 }
 
@@ -184,16 +180,9 @@ model PedidoDetalle {
   id             Int      @id @default(autoincrement())
   cantidad       Int
   puntosUnitarios Int
-  pedido         Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
   pedidoId       Int
-  producto       Producto @relation(fields: [productoId], references: [id], onDelete: Restrict)
+  pedido         Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
   productoId     Int
+  producto       Producto @relation(fields: [productoId], references: [id], onDelete: Restrict)
   @@map("pedido_detalle")
-}
-
-model CentroDeCostos {
-  id      Int       @id @default(autoincrement())
-  nombre  String    @unique
-  usuarios Usuario[]
-  @@map("centros_de_costos")
 }
