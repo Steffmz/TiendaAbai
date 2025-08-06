@@ -30,7 +30,6 @@ enum TipoPunto {
   EXPIRACION
 }
 
-// ✅ MODIFICADO: Añadidos estados para el flujo de aprobación
 enum EstadoPedido {
   Pendiente         // El usuario acaba de hacer el pedido
   RequiereAprobacion // El pedido está esperando por un admin
@@ -43,7 +42,6 @@ enum EstadoPedido {
 
 //----------- MODELS -----------//
 
-// ✅ NUEVO: Modelo para Cargos
 model Cargo {
   id      Int       @id @default(autoincrement())
   nombre  String    @unique
@@ -56,7 +54,7 @@ model Usuario {
   id              Int               @id @default(autoincrement())
   cedula          String            @unique @db.VarChar(15)
   nombreCompleto  String
-  // ✅ MODIFICADO: 'cargo' ahora es una relación
+  
   cargoId         Int
   cargo           Cargo             @relation(fields: [cargoId], references: [id])
   sede            String
@@ -72,7 +70,7 @@ model Usuario {
 
   historialPuntos HistorialPuntos[]
   pedidos         Pedido[]
-  // ✅ NUEVO: Relación para saber qué pedidos ha aprobado un admin
+
   pedidosAprobados  Pedido[] @relation("AprobadoPor")
   carrito         Carrito[]
   notificaciones  Notificacion[]
@@ -89,7 +87,6 @@ model Pedido {
   usuario      Usuario         @relation(fields: [usuarioId], references: [id], onDelete: NoAction)
   usuarioId    Int
 
-  // ✅ NUEVO: Campos para el flujo de aprobación
   aprobadoPorAdminId Int?            // Opcional: ID del admin que aprobó/rechazó
   aprobadoPorAdmin   Usuario?        @relation("AprobadoPor", fields: [aprobadoPorAdminId], references: [id], onDelete: SetNull)
   fechaAprobacion    DateTime?       // Opcional: Fecha de la decisión
@@ -111,7 +108,6 @@ model Notificacion {
   usuario     Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
   usuarioId   Int
 
-  // ✅ NUEVO: Relación opcional con Pedido
   pedido      Pedido?  @relation(fields: [pedidoId], references: [id], onDelete: SetNull)
   pedidoId    Int?
 
