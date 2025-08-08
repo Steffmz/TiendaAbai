@@ -18,6 +18,7 @@
           <td>{{ usuario.id }}</td>
           <td>{{ usuario.nombreCompleto }}</td>
           <td>{{ usuario.cedula }}</td>
+          <td>{{ usuario.cargo.nombre }}</td>
           <td>{{ usuario.email }}</td>
           <td>{{ usuario.rol }}</td>
           <td>{{ usuario.puntosTotales }}</td>

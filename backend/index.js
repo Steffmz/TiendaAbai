@@ -22,50 +22,58 @@ app.use(express.json()); // Para que Express entienda JSON en el body
  * Endpoint para CREAR un nuevo usuario (Registro)
  * Incluye la lógica para crear el centro de costos si no existe.
  */
+// backend/index.js
+
+/**
+ * Endpoint para CREAR un nuevo usuario (Registro)
+ * Incluye la lógica para crear el centro de costos y el cargo si no existen.
+ */
 app.post('/usuarios', async (req, res) => {
-  // Extraemos todos los datos necesarios del cuerpo de la petición
-  const { cedula, nombreCompleto, cargo, sede, email, contrasena, rol, centroDeCostosNombre } = req.body;
+  // 1. Extraemos los datos del cuerpo de la petición
+  const { cedula, nombreCompleto, cargoNombre, sede, email, contrasena, rol, centroDeCostosNombre } = req.body;
 
   try {
-    // Validar que los datos necesarios están presentes
-    if (!email || !contrasena || !cedula || !nombreCompleto || !cargo || !sede || !centroDeCostosNombre) {
-      return res.status(400).json({ message: "Todos los campos, incluido el centro de costos, son requeridos." });
+    // 2. Validar que los datos necesarios están presentes
+    if (!email || !contrasena || !cedula || !nombreCompleto || !cargoNombre || !sede || !centroDeCostosNombre) {
+      return res.status(400).json({ message: "Todos los campos, incluido el centro de costos y el cargo, son requeridos." });
     }
     
-    // Encriptar la contraseña antes de guardarla
+    // 3. Encriptar la contraseña
     const hashedPassword = await bcrypt.hash(contrasena, 10);
 
-    // Lógica para encontrar o crear el centro de costos
+    // 4. Lógica para encontrar o crear el centro de costos
     const centroDeCostos = await prisma.centroDeCostos.upsert({
       where: { nombre: centroDeCostosNombre },
-      update: {}, // Si ya existe, no hacemos nada
-      create: { nombre: centroDeCostosNombre }, // Si no existe, lo creamos
+      update: {},
+      create: { nombre: centroDeCostosNombre },
     });
 
-    // Crear el nuevo usuario en la base de datos
+    // 5. LÓGICA PARA ENCONTRAR O CREAR EL CARGO
+    const cargo = await prisma.cargo.upsert({
+      where: { nombre: cargoNombre },
+      update: {},
+      create: { nombre: cargoNombre },
+    });
+
+    // 6. Crear el nuevo usuario en la base de datos (USANDO el 'cargo' que acabamos de definir)
     const nuevoUsuario = await prisma.usuario.create({
       data: {
         cedula,
         nombreCompleto,
-        cargo,
         sede,
         email,
         contrasena: hashedPassword,
         rol,
-            centroDeCostos: {
-      connect: {
-        id: centroDeCostos.id, // Conéctate a un centro de costos con este ID
+        centroDeCostos: { connect: { id: centroDeCostos.id } },
+        cargo: { connect: { id: cargo.id } }, // Conectamos usando el ID del cargo
       },
-    },
-  },
     });
 
-    // Devolvemos el usuario creado (excluyendo la contraseña por seguridad)
+    // 7. Devolvemos el usuario creado (sin la contraseña)
     const { contrasena: _, ...usuarioSinContrasena } = nuevoUsuario;
     res.status(201).json(usuarioSinContrasena);
 
   } catch (error) {
-    // Manejar error de campos únicos (email o cédula duplicados)
     if (error.code === 'P2002') {
       return res.status(409).json({ message: `El campo '${error.meta.target[0]}' ya está en uso.` });
     }
@@ -90,8 +98,16 @@ app.post('/auth/login', async (req, res) => {
     }
 
     // Buscar al usuario en la base de datos por su cédula
-    const usuario = await prisma.usuario.findUnique({
-      where: { cedula },
+const usuario = await prisma.usuario.findUnique({
+      where: { id: req.usuario.userId },
+      // ✅ MODIFICADO: Usamos 'include' para traer el nombre del cargo
+      include: {
+        cargo: {
+          select: {
+            nombre: true
+          }
+        }
+      }
     });
 
     // Si el usuario no existe O la contraseña es incorrecta, enviar un error

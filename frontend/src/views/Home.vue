@@ -14,7 +14,7 @@
       </div>
       <div class="card info-card">
         <h2>Tu Información</h2>
-        <p><strong>Cargo:</strong> {{ usuario.cargo }}</p>
+        <p><strong>Cargo:</strong> {{ usuario.cargo.nombre }}</p>
         <p><strong>Sede:</strong> {{ usuario.sede }}</p>
         <p><strong>Email:</strong> {{ usuario.email }}</p>
       </div>
