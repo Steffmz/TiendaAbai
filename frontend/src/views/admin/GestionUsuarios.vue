@@ -15,17 +15,17 @@
       </thead>
       <tbody>
         <tr v-for="usuario in usuarios" :key="usuario.id">
-          <td>{{ usuario.id }}</td>
-          <td>{{ usuario.nombreCompleto }}</td>
-          <td>{{ usuario.cedula }}</td>
-          <td>{{ usuario.cargo.nombre }}</td>
-          <td>{{ usuario.email }}</td>
-          <td>{{ usuario.rol }}</td>
-          <td>{{ usuario.puntosTotales }}</td>
-          <td>
-            <button class="btn-edit">Editar</button>
-          </td>
-        </tr>
+  <td>{{ usuario.id }}</td>
+  <td>{{ usuario.nombreCompleto }}</td>
+  <td>{{ usuario.cedula }}</td>
+  <td>{{ usuario.email }}</td>
+  <td>{{ usuario.rol }}</td>
+  <td>{{ usuario.puntosTotales }}</td>
+  <td>{{ usuario.centroDeCostos?.nombre || 'No asignado' }}</td>
+  <td>
+    <button class="btn-edit">Editar</button>
+  </td>
+</tr>
       </tbody>
     </table>
     <p v-else>Cargando usuarios...</p>

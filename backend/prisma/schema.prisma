@@ -75,9 +75,8 @@ model Usuario {
 
 model CentroDeCostos {
   id       Int      @id @default(autoincrement())
-  // ✅ MEJORA: Añadido un código legible y único
   codigo   String?  @unique @db.VarChar(20)
-  nombre   String
+  nombre   String   @unique // ✅ Corregido para que el 'upsert' funcione
   usuarios Usuario[]
   @@map("centros_de_costos")
 }

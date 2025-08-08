@@ -88,46 +88,43 @@ app.post('/usuarios', async (req, res) => {
  * Endpoint para INICIAR SESIÓN (Login)
  * Devuelve un token JWT si las credenciales son correctas.
  */
+/**
+ * Endpoint para INICIAR SESIÓN (Login)
+ * Devuelve un token JWT si las credenciales son correctas.
+ */
 app.post('/auth/login', async (req, res) => {
   const { cedula, contrasena } = req.body;
 
   try {
-    // Validar que envíen los datos
+    // 1. Validar que envíen los datos
     if (!cedula || !contrasena) {
       return res.status(400).json({ message: 'La cédula y la contraseña son requeridas.' });
     }
 
-    // Buscar al usuario en la base de datos por su cédula
-const usuario = await prisma.usuario.findUnique({
-      where: { id: req.usuario.userId },
-      // ✅ MODIFICADO: Usamos 'include' para traer el nombre del cargo
-      include: {
-        cargo: {
-          select: {
-            nombre: true
-          }
-        }
-      }
+    // 2. Buscar al usuario en la base de datos por su cédula
+    const usuario = await prisma.usuario.findUnique({
+      where: { cedula },
     });
 
-    // Si el usuario no existe O la contraseña es incorrecta, enviar un error
+    // 3. Si el usuario no existe O la contraseña es incorrecta, enviar un error
     if (!usuario || !(await bcrypt.compare(contrasena, usuario.contrasena))) {
       return res.status(401).json({ message: 'Credenciales inválidas.' });
     }
 
-    // Si las credenciales son correctas, crear el payload para el Token
+    // 4. Si las credenciales son correctas, crear el payload para el Token
+    //    Este payload es el que se decodifica en el middleware
     const payload = {
         userId: usuario.id,
         rol: usuario.rol,
         nombre: usuario.nombreCompleto
     };
 
-    // Firmar el token con el secreto y definir una expiración
+    // 5. Firmar el token con el secreto y definir una expiración
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
-        expiresIn: '8h', // El token expirará en 8 horas
+        expiresIn: '8h',
     });
 
-    // Enviar el token al cliente
+    // 6. Enviar el token al cliente
     res.json({ 
         message: 'Inicio de sesión exitoso',
         token: token 
@@ -138,23 +135,27 @@ const usuario = await prisma.usuario.findUnique({
     res.status(500).json({ message: 'Error interno del servidor.' });
   }
 });
-
 // backend/index.js
 
 // --- Middleware de Autenticación (Protector de Rutas) ---
+// backend/index.js
+
 const authMiddleware = (req, res, next) => {
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Formato: "Bearer TOKEN"
+  const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
     return res.status(401).json({ message: 'No se proveyó un token.' });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, usuario) => {
+  // 👇 EL CAMBIO ESTÁ AQUÍ 👇
+  jwt.verify(token, process.env.JWT_SECRET, (err, decodedPayload) => {
     if (err) {
       return res.status(403).json({ message: 'Token no válido.' });
     }
-    req.usuario = usuario;
+    
+    // Guardamos el payload decodificado en req.usuario
+    req.usuario = decodedPayload;
     next();
   });
 };
