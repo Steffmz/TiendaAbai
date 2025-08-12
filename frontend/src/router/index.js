@@ -11,6 +11,7 @@ import Productos from "../components/productos/Productos.vue";
 import Campana from "../components/campanas/Campana.vue";
 import ProductForm from "../views/admin/ProductForm.vue";
 import GestionProductos from "../views/admin/GestionProductos.vue";
+import UserForm from '../views/admin/UserForm.vue';
 
 const routes = [
   { path: "/login", name: "Login", component: Login },
@@ -67,6 +68,13 @@ const routes = [
         name: "EditarProducto",
         component: ProductForm,
         props: true, // Esto pasa el ':id' como una prop al componente
+      },
+
+      {
+        path: "usuarios/editar/:id",
+        name: "EditarUsuario",
+        component: UserForm,
+        props: true, // Pasa el 'id' de la URL como prop al componente
       },
     ],
   },

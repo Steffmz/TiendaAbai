@@ -60,11 +60,9 @@ const adminMiddleware = (req, res, next) => {
     }
 
     if (decodedPayload.rol !== "Administrador") {
-      return res
-        .status(403)
-        .json({
-          message: "Acceso denegado. Se requiere rol de administrador.",
-        });
+      return res.status(403).json({
+        message: "Acceso denegado. Se requiere rol de administrador.",
+      });
     }
 
     req.usuario = decodedPayload;
@@ -99,12 +97,10 @@ app.post("/usuarios", async (req, res) => {
       !sede ||
       !centroDeCostosNombre
     ) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "Todos los campos, incluido el cargo y el centro de costos, son requeridos.",
-        });
+      return res.status(400).json({
+        message:
+          "Todos los campos, incluido el cargo y el centro de costos, son requeridos.",
+      });
     }
 
     const hashedPassword = await bcrypt.hash(contrasena, 10);
@@ -138,11 +134,9 @@ app.post("/usuarios", async (req, res) => {
     res.status(201).json(usuarioSinContrasena);
   } catch (error) {
     if (error.code === "P2002") {
-      return res
-        .status(409)
-        .json({
-          message: `El campo '${error.meta.target[0]}' ya está en uso.`,
-        });
+      return res.status(409).json({
+        message: `El campo '${error.meta.target[0]}' ya está en uso.`,
+      });
     }
 
     console.error("Error al crear usuario:", error);
@@ -206,11 +200,9 @@ app.post(
 
     // 1. Validar la entrada
     if (typeof puntos !== "number" || !descripcion) {
-      return res
-        .status(400)
-        .json({
-          message: "Se requiere un número de puntos y una descripción.",
-        });
+      return res.status(400).json({
+        message: "Se requiere un número de puntos y una descripción.",
+      });
     }
 
     try {
@@ -306,9 +298,89 @@ app.get("/api/admin/usuarios", adminMiddleware, async (req, res) => {
 // backend/index.js
 
 /**
- * Endpoint PÚBLICO para obtener la lista de todas las categorías
- * (Útil para formularios en el frontend)
+ * Endpoint de ADMIN para OBTENER un solo usuario por su ID.
+ * Esencial para el formulario de edición.
  */
+app.get("/api/admin/usuarios/:id", adminMiddleware, async (req, res) => {
+  // 1. Obtenemos el ID del usuario desde los parámetros de la URL
+  const usuarioId = parseInt(req.params.id);
+
+  // Verificamos que el ID sea un número válido
+  if (isNaN(usuarioId)) {
+    return res
+      .status(400)
+      .json({ message: "El ID del usuario debe ser un número." });
+  }
+
+  try {
+    // 2. Buscamos al usuario en la base de datos
+    const usuario = await prisma.usuario.findUnique({
+      where: {
+        id: usuarioId,
+      },
+      // 3. Incluimos los nombres de las tablas relacionadas
+      include: {
+        cargo: {
+          select: { nombre: true },
+        },
+        centroDeCostos: {
+          select: { nombre: true },
+        },
+      },
+    });
+
+    // 4. Si no se encuentra el usuario, devolvemos un error 404
+    if (!usuario) {
+      return res.status(404).json({ message: "Usuario no encontrado." });
+    }
+
+    // 5. Excluimos la contraseña antes de enviar la respuesta
+    const { contrasena, ...usuarioSeguro } = usuario;
+    res.json(usuarioSeguro);
+  } catch (error) {
+    console.error(`Error al obtener el usuario con ID ${usuarioId}:`, error);
+    res.status(500).json({ message: "Error interno del servidor." });
+  }
+});
+
+/**
+ * Endpoint de ADMIN para ACTUALIZAR un usuario existente
+ */
+app.put("/api/admin/usuarios/:id", adminMiddleware, async (req, res) => {
+  const usuarioId = parseInt(req.params.id);
+  // Obtenemos los datos que se pueden modificar desde el body
+  const { nombreCompleto, cedula, email, rol, activo } = req.body;
+
+  try {
+    const usuarioActualizado = await prisma.usuario.update({
+      where: { id: usuarioId },
+      data: {
+        nombreCompleto,
+        cedula,
+        email,
+        rol,
+        activo,
+        // No actualizamos contraseña, cargo o sede en este endpoint
+        // para mantener la lógica simple por ahora.
+      },
+    });
+
+    // Excluimos la contraseña antes de devolver la respuesta
+    const { contrasena, ...usuarioSeguro } = usuarioActualizado;
+    res.json(usuarioSeguro);
+  } catch (error) {
+    // Manejar error si la cédula o email ya existen en otro usuario
+    if (error.code === "P2002") {
+      return res
+        .status(409)
+        .json({
+          message: `El campo '${error.meta.target[0]}' ya está en uso.`,
+        });
+    }
+    console.error(`Error al actualizar el usuario con ID ${usuarioId}:`, error);
+    res.status(500).json({ message: "Error interno del servidor." });
+  }
+});
 app.get("/api/categorias", async (req, res) => {
   try {
     const categorias = await prisma.categoria.findMany({
@@ -397,11 +469,9 @@ app.post("/api/admin/productos", adminMiddleware, async (req, res) => {
       isNaN(parseInt(stock)) ||
       isNaN(parseInt(categoriaId))
     ) {
-      return res
-        .status(400)
-        .json({
-          message: "Precio, stock y categoría deben ser números válidos.",
-        });
+      return res.status(400).json({
+        message: "Precio, stock y categoría deben ser números válidos.",
+      });
     }
 
     const nuevoProducto = await prisma.producto.create({
