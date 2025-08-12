@@ -1,50 +1,71 @@
-  <template>
-    <div class="topbar">
-      <!-- Botón del menú -->
-      <div class="menu-icon" @click="$emit('toggle')">
-        <Icon icon="mdi:menu" />
-      </div>
-
-      <!-- Logo -->
-      <div class="logo">
-        <img src="../../assets/img/abai-logo.png" alt="ABAI Logo" />
-      </div>
-      
-      <div class="centro1">
-        
-      </div>
-
-      <!-- Acciones -->
-      <div class="actions">
-        <Icon icon="mdi:weather-night" title="Modo Noche" @click="toggleDarkMode" />
-        <Icon icon="mdi:account-circle" title="Perfil" @click="showProfile" />
-        <Icon icon="mdi:bell-outline" title="Notificaciones" @click="showNotifications" />
-        <Icon icon="mdi:help-circle-outline" title="Ayuda" @click="showHelp" />
-        <Icon icon="mdi:logout" title="Cerrar Sesión" @click="logout" />
-      </div>
+<template>
+  <div class="topbar">
+    <div class="logo">
+      ABAI S.A.S
     </div>
-  </template>
 
-  <script setup>
-  import { Icon } from '@iconify/vue';
+    <div class="actions">
+      <button class="action-btn" title="Perfil">
+        <Icon icon="mdi:account-circle" />
+      </button>
+      <button class="action-btn" title="Notificaciones">
+        <Icon icon="mdi:bell-outline" />
+      </button>
+      <button @click="logout" class="action-btn" title="Cerrar Sesión">
+        <Icon icon="mdi:logout" />
+      </button>
+    </div>
+  </div>
+</template>
 
-  function showHelp() {
-    console.log('Mostrar ayuda');
+<script setup>
+import { Icon } from '@iconify/vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+const logout = () => {
+  if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+    localStorage.removeItem('authToken');
+    router.push('/login');
   }
+};
+</script>
 
-  function showProfile() {
-    console.log('Mostrar perfil');
-  }
+<style scoped>
+/* Puedes añadir o importar los estilos de Topbar.css aquí si lo prefieres */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: white;
+  padding: 0 2rem;
+  height: 80px;
+  border-bottom: 1px solid #e2e8f0;
+}
 
-  function showNotifications() {
-    console.log('Mostrar notificaciones');
-  }
+.logo {
+  font-weight: bold;
+  font-size: 1.5rem;
+  color: #334155;
+}
 
-  function logout() {
-    if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
-      console.log('Cerrar sesión');
-    }
-  }
-  </script>
+.actions {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
 
-  <style src="./Topbar.css"></style>
+.action-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.action-btn .iconify {
+  font-size: 1.6rem;
+  color: #334155;
+}
+</style>
