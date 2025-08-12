@@ -13,172 +13,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Usuario {
-  id                                                         Int               @id @default(autoincrement())
-  cedula                                                     String            @unique @db.VarChar(15)
-  nombreCompleto                                             String
-  sede                                                       String
-  email                                                      String            @unique
-  contrasena                                                 String
-  rol                                                        Role              @default(Empleado)
-  puntosTotales                                              Int               @default(0)
-  activo                                                     Boolean           @default(true)
-  fechaRegistro                                              DateTime          @default(now())
-  centroDeCostosId                                           Int
-  cargoId                                                    Int
-  carrito                                                    Carrito[]
-  historial_puntos_historial_puntos_adminCreadorIdTousuarios HistorialPuntos[] @relation("historial_puntos_adminCreadorIdTousuarios")
-  historial_puntos_historial_puntos_beneficiarioIdTousuarios HistorialPuntos[] @relation("historial_puntos_beneficiarioIdTousuarios")
-  notificaciones                                             Notificacion[]
-  pedido_pedido_aprobadoPorAdminIdTousuarios                 Pedido[]          @relation("pedido_aprobadoPorAdminIdTousuarios")
-  pedidos                                                    Pedido[]
-  cargos                                                     cargos            @relation(fields: [cargoId], references: [id])
-  centroDeCostos                                             CentroDeCostos    @relation("UsuarioToCentroDeCostos", fields: [centroDeCostosId], references: [id])
-
-  @@index([cargoId], map: "usuarios_cargoId_fkey")
-  @@index([centroDeCostosId], map: "usuarios_centroDeCostosId_fkey")
-  @@map("usuarios")
-}
-
-model Categoria {
-  id            Int        @id @default(autoincrement())
-  nombre        String     @unique
-  descripcion   String?    @db.Text
-  activo        Boolean    @default(true)
-  fechaCreacion DateTime   @default(now())
-  imagenUrl     String?    
-  productos     Producto[]
-
-  @@map("categorias")
-}
-
-model Producto {
-  id             Int             @id @default(autoincrement())
-  nombre         String
-  descripcion    String?         @db.Text
-  precioPuntos   Int
-  stock          Int             @default(0)
-  imagenUrl      String?
-  estado         Boolean         @default(true)
-  fechaCreacion  DateTime        @default(now())
-  categoriaId    Int
-  carrito        Carrito[]
-  pedidoDetalles PedidoDetalle[]
-  categoria      Categoria       @relation(fields: [categoriaId], references: [id])
-  campanas       Campana[]       @relation("campanatoproducto")
-
-  @@index([categoriaId], map: "productos_categoriaId_fkey")
-  @@map("productos")
-}
-
-model Campana {
-  id            Int        @id @default(autoincrement())
-  titulo        String
-  descripcion   String?    @db.Text
-  fechaInicio   DateTime   @db.Date
-  fechaFin      DateTime   @db.Date
-  aprobada      Boolean    @default(false)
-  fechaCreacion DateTime   @default(now())
-  productos     Producto[] @relation("campanatoproducto")
-
-  @@map("campanas")
-}
-
-model Carrito {
-  id            Int      @id @default(autoincrement())
-  cantidad      Int
-  fechaAgregado DateTime @default(now())
-  usuarioId     Int
-  productoId    Int
-  producto      Producto @relation(fields: [productoId], references: [id], onDelete: Cascade)
-  usuario       Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
-
-  @@unique([usuarioId, productoId])
-  @@index([productoId], map: "carrito_productoId_fkey")
-  @@map("carrito")
-}
-
-model HistorialPuntos {
-  id                                                 Int       @id @default(autoincrement())
-  puntos                                             Int
-  tipo                                               TipoPunto
-  descripcion                                        String?
-  origenId                                           Int?
-  fecha                                              DateTime  @default(now())
-  adminCreadorId                                     Int?
-  beneficiarioId                                     Int
-  usuarios_historial_puntos_adminCreadorIdTousuarios Usuario?  @relation("historial_puntos_adminCreadorIdTousuarios", fields: [adminCreadorId], references: [id])
-  usuarios_historial_puntos_beneficiarioIdTousuarios Usuario   @relation("historial_puntos_beneficiarioIdTousuarios", fields: [beneficiarioId], references: [id], onDelete: NoAction)
-
-  @@index([adminCreadorId], map: "historial_puntos_adminCreadorId_fkey")
-  @@index([beneficiarioId], map: "historial_puntos_beneficiarioId_fkey")
-  @@map("historial_puntos")
-}
-
-model Pedido {
-  id                                           Int             @id @default(autoincrement())
-  fecha                                        DateTime        @default(now())
-  estado                                       pedido_estado   @default(Pendiente)
-  totalPuntos                                  Int
-  usuarioId                                    Int
-  aprobadoPorAdminId                           Int?
-  comentarioAdmin                              String?         @db.Text
-  fechaAprobacion                              DateTime?
-  notificaciones                               Notificacion[]
-  usuarios_pedido_aprobadoPorAdminIdTousuarios Usuario?        @relation("pedido_aprobadoPorAdminIdTousuarios", fields: [aprobadoPorAdminId], references: [id])
-  usuario                                      Usuario         @relation(fields: [usuarioId], references: [id], onDelete: NoAction)
-  detalles                                     PedidoDetalle[]
-
-  @@index([aprobadoPorAdminId], map: "pedido_aprobadoPorAdminId_fkey")
-  @@index([usuarioId], map: "pedido_usuarioId_fkey")
-  @@map("pedido")
-}
-
-model PedidoDetalle {
-  id              Int      @id @default(autoincrement())
-  cantidad        Int
-  puntosUnitarios Int
-  pedidoId        Int
-  productoId      Int
-  pedido          Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
-  producto        Producto @relation(fields: [productoId], references: [id])
-
-  @@index([pedidoId], map: "pedido_detalle_pedidoId_fkey")
-  @@index([productoId], map: "pedido_detalle_productoId_fkey")
-  @@map("pedido_detalle")
-}
-
-model Notificacion {
-  id         Int      @id @default(autoincrement())
-  titulo     String
-  mensaje    String   @db.Text
-  leido      Boolean  @default(false)
-  fechaEnvio DateTime @default(now())
-  usuarioId  Int
-  pedidoId   Int?
-  pedido     Pedido?  @relation(fields: [pedidoId], references: [id])
-  usuario    Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
-
-  @@index([pedidoId], map: "notificaciones_pedidoId_fkey")
-  @@index([usuarioId], map: "notificaciones_usuarioId_fkey")
-  @@map("notificaciones")
-}
-
-model CentroDeCostos {
-  id       Int       @id @default(autoincrement())
-  nombre   String    @unique
-  codigo   String?   @unique @db.VarChar(20)
-  usuarios Usuario[] @relation("UsuarioToCentroDeCostos")
-
-  @@map("centros_de_costos")
-}
-
-model cargos {
-  id       Int       @id @default(autoincrement())
-  nombre   String    @unique
-  usuarios Usuario[]
-}
-
+//----------- ENUMS -----------//
 enum Role {
   Empleado
   Administrador
@@ -192,7 +27,7 @@ enum TipoPunto {
   EXPIRACION
 }
 
-enum pedido_estado {
+enum EstadoPedido {
   Pendiente
   RequiereAprobacion
   Aprobado
@@ -200,4 +35,150 @@ enum pedido_estado {
   Entregado
   Cancelado
   Rechazado
+}
+
+//----------- MODELS -----------//
+
+model Cargo {
+  id       Int       @id @default(autoincrement())
+  nombre   String    @unique
+  usuarios Usuario[]
+  @@map("cargos")
+}
+
+model Usuario {
+  id                 Int               @id @default(autoincrement())
+  cedula             String            @unique @db.VarChar(15)
+  nombreCompleto     String
+  cargoId            Int
+  cargo              Cargo             @relation(fields: [cargoId], references: [id])
+  sede               String
+  email              String            @unique
+  contrasena         String
+  rol                Role              @default(Empleado)
+  puntosTotales      Int               @default(0)
+  activo             Boolean           @default(true)
+  fechaRegistro      DateTime          @default(now())
+  centroDeCostosId   Int
+  centroDeCostos     CentroDeCostos    @relation(fields: [centroDeCostosId], references: [id])
+  historialPuntosRecibidos HistorialPuntos[] @relation("Beneficiario")
+  historialPuntosCreados   HistorialPuntos[] @relation("AdminCreador")
+  pedidos            Pedido[]
+  pedidosAprobados   Pedido[]          @relation("AprobadoPor")
+  carrito            Carrito[]
+  notificaciones     Notificacion[]
+  @@map("usuarios")
+}
+
+model CentroDeCostos {
+  id       Int      @id @default(autoincrement())
+  codigo   String?  @unique @db.VarChar(20)
+  nombre   String   @unique
+  usuarios Usuario[]
+  @@map("centros_de_costos")
+}
+
+model Pedido {
+  id                 Int             @id @default(autoincrement())
+  fecha              DateTime        @default(now())
+  estado             EstadoPedido    @default(Pendiente)
+  totalPuntos        Int
+  usuarioId          Int
+  usuario            Usuario         @relation(fields: [usuarioId], references: [id], onDelete: NoAction)
+  aprobadoPorAdminId Int?
+  aprobadoPorAdmin   Usuario?        @relation("AprobadoPor", fields: [aprobadoPorAdminId], references: [id], onDelete: SetNull)
+  fechaAprobacion    DateTime?
+  comentarioAdmin    String?         @db.Text
+  detalles           PedidoDetalle[]
+  notificaciones     Notificacion[]
+  @@map("pedido")
+}
+
+model Notificacion {
+  id          Int      @id @default(autoincrement())
+  titulo      String
+  mensaje     String   @db.Text
+  leido       Boolean  @default(false)
+  fechaEnvio  DateTime @default(now())
+  usuarioId   Int
+  usuario     Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  pedidoId    Int?
+  pedido      Pedido?  @relation(fields: [pedidoId], references: [id], onDelete: SetNull)
+  @@map("notificaciones")
+}
+
+model Categoria {
+  id            Int         @id @default(autoincrement())
+  nombre        String      @unique
+  descripcion   String?     @db.Text
+  activo        Boolean     @default(true)
+  fechaCreacion DateTime    @default(now())
+  productos     Producto[]
+  @@map("categorias")
+}
+
+model Producto {
+  id              Int               @id @default(autoincrement())
+  nombre          String
+  descripcion     String?           @db.Text
+  precioPuntos    Int
+  stock           Int               @default(0)
+  imagenUrl       String?
+  estado          Boolean           @default(true)
+  fechaCreacion   DateTime          @default(now())
+  categoriaId     Int
+  categoria       Categoria         @relation(fields: [categoriaId], references: [id])
+  campanas        Campana[]
+  carrito         Carrito[]
+  pedidoDetalles  PedidoDetalle[]
+  @@map("productos")
+}
+
+model Campana {
+  id            Int         @id @default(autoincrement())
+  titulo        String
+  descripcion   String?     @db.Text
+  fechaInicio   DateTime    @db.Date
+  fechaFin      DateTime    @db.Date
+  aprobada      Boolean     @default(false)
+  fechaCreacion DateTime    @default(now())
+  productos     Producto[]
+  @@map("campanas")
+}
+
+model Carrito {
+  id            Int       @id @default(autoincrement())
+  cantidad      Int
+  fechaAgregado DateTime  @default(now())
+  usuarioId     Int
+  usuario       Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  productoId    Int
+  producto      Producto  @relation(fields: [productoId], references: [id], onDelete: Cascade)
+  @@unique([usuarioId, productoId])
+  @@map("carrito")
+}
+
+model HistorialPuntos {
+  id             Int         @id @default(autoincrement())
+  puntos         Int
+  tipo           TipoPunto
+  descripcion    String?
+  origenId       Int?
+  fecha          DateTime    @default(now())
+  beneficiarioId Int
+  beneficiario   Usuario     @relation("Beneficiario", fields: [beneficiarioId], references: [id], onDelete: NoAction)
+  adminCreadorId Int?
+  adminCreador   Usuario?    @relation("AdminCreador", fields: [adminCreadorId], references: [id], onDelete: SetNull)
+  @@map("historial_puntos")
+}
+
+model PedidoDetalle {
+  id             Int      @id @default(autoincrement())
+  cantidad       Int
+  puntosUnitarios Int
+  pedidoId       Int
+  pedido         Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  productoId     Int
+  producto       Producto @relation(fields: [productoId], references: [id], onDelete: Restrict)
+  @@map("pedido_detalle")
 }

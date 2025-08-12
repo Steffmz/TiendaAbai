@@ -59,27 +59,26 @@ const routes = [
     routes
   });
 
-  // Middleware de protección
-  router.beforeEach((to, from, next) => {
-    const token = localStorage.getItem('authToken');
+  // frontend/src/router/index.js
 
-    if (to.meta.requiresAuth) {
-      if (!token) return next('/login');
+router.beforeEach((to, from, next) => {
+  const token = localStorage.getItem('authToken');
 
-      try {
-        const decodedToken = jwtDecode(token);
+  // CASO 1: La ruta necesita autenticación Y el usuario NO tiene token
+  if (to.meta.requiresAuth && !token) {
+    // Lo mandamos al login
+    return next('/login');
+  }
 
-        if (to.meta.requiresAdmin && decodedToken.rol !== 'Administrador') {
-          return next('/');
-        }
-      } catch (error) {
-        console.error('Token inválido:', error);
-        localStorage.removeItem('authToken');
-        return next('/login');
-      }
-    }
+  // CASO 2: El usuario YA está logueado Y está intentando ir a la página de login
+  if (to.path === '/login' && token) {
+    // Lo mandamos a la página de inicio para que no vea el login de nuevo
+    return next('/');
+  }
 
-    next();
-  });
+  // En todos los demás casos, permite que la navegación continúe
+  next();
+});
+
 
   export default router;

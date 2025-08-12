@@ -4,78 +4,116 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
-const ProductosRoutes = require("./routes/ProductosRouter");
-const CategoriasRoutes = require('./routes/CategoriasRouter');
-const adminMiddleware = require('./middleware/adminMiddleware');
 const path = require('path');
 
+// --- INICIALIZACIONES ---
 const prisma = new PrismaClient();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // --- MIDDLEWARES ---
 app.use(cors());
-app.use(express.json()); // Para JSON
-app.use(express.urlencoded({ extended: true })); // Por si mandas formularios
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Servir archivos estáticos (para las imágenes)
+// Servir archivos estáticos (para las imágenes de productos en el futuro)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// --- Rutas ---
-app.use("/api/productos", ProductosRoutes);
-app.use("/api/categorias", CategoriasRoutes);
 
-
-// --- RUTAS DE LA APLICACIÓN ---
+// --- MIDDLEWARES DE AUTENTICACIÓN ---
 
 /**
- * Endpoint para CREAR un nuevo usuario (Registro)
- * Incluye la lógica para crear el centro de costos si no existe.
+ * Middleware para verificar el token JWT.
+ * Protege rutas que requieren que el usuario esté logueado.
+ */
+const authMiddleware = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Formato: "Bearer TOKEN"
+
+  if (!token) {
+    return res.status(401).json({ message: 'No se proveyó un token.' });
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, decodedPayload) => {
+    if (err) {
+      return res.status(403).json({ message: 'Token no válido.' });
+    }
+    req.usuario = decodedPayload; // Guarda el payload del token (userId, rol, etc.)
+    next();
+  });
+};
+
+/**
+ * Middleware para verificar el rol de Administrador.
+ * Protege rutas que solo pueden ser accedidas por administradores.
+ */
+const adminMiddleware = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ message: 'No se proveyó un token.' });
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, decodedPayload) => {
+    if (err) {
+      return res.status(403).json({ message: 'Token no válido.' });
+    }
+
+    if (decodedPayload.rol !== 'Administrador') {
+      return res.status(403).json({ message: 'Acceso denegado. Se requiere rol de administrador.' });
+    }
+
+    req.usuario = decodedPayload;
+    next();
+  });
+};
+
+
+// --- RUTAS DE AUTENTICACIÓN Y REGISTRO ---
+
+/**
+ * Endpoint para CREAR un nuevo usuario (Registro).
  */
 app.post('/usuarios', async (req, res) => {
-  // Extraemos todos los datos necesarios del cuerpo de la petición
-  const { cedula, nombreCompleto, cargo, sede, email, contrasena, rol, centroDeCostosNombre } = req.body;
+  const { cedula, nombreCompleto, cargoNombre, sede, email, contrasena, rol, centroDeCostosNombre } = req.body;
 
   try {
-    // Validar que los datos necesarios están presentes
-    if (!email || !contrasena || !cedula || !nombreCompleto || !cargo || !sede || !centroDeCostosNombre) {
-      return res.status(400).json({ message: "Todos los campos, incluido el centro de costos, son requeridos." });
+    if (!email || !contrasena || !cedula || !nombreCompleto || !cargoNombre || !sede || !centroDeCostosNombre) {
+      return res.status(400).json({ message: "Todos los campos, incluido el cargo y el centro de costos, son requeridos." });
     }
     
-    // Encriptar la contraseña antes de guardarla
     const hashedPassword = await bcrypt.hash(contrasena, 10);
 
-    // Lógica para encontrar o crear el centro de costos
     const centroDeCostos = await prisma.centroDeCostos.upsert({
       where: { nombre: centroDeCostosNombre },
-      update: {}, // Si ya existe, no hacemos nada
-      create: { nombre: centroDeCostosNombre }, // Si no existe, lo creamos
+      update: {},
+      create: { nombre: centroDeCostosNombre },
     });
 
-    // Crear el nuevo usuario en la base de datos
+    const cargo = await prisma.cargo.upsert({
+      where: { nombre: cargoNombre },
+      update: {},
+      create: { nombre: cargoNombre },
+    });
+
     const nuevoUsuario = await prisma.usuario.create({
       data: {
         cedula,
         nombreCompleto,
-        cargo,
         sede,
         email,
         contrasena: hashedPassword,
         rol,
-            centroDeCostos: {
-      connect: {
-        id: centroDeCostos.id, // Conéctate a un centro de costos con este ID
+        centroDeCostos: { connect: { id: centroDeCostos.id } },
+        cargo: { connect: { id: cargo.id } },
       },
-    },
-  },
     });
 
-    // Devolvemos el usuario creado (excluyendo la contraseña por seguridad)
     const { contrasena: _, ...usuarioSinContrasena } = nuevoUsuario;
     res.status(201).json(usuarioSinContrasena);
 
   } catch (error) {
-    // Manejar error de campos únicos (email o cédula duplicados)
     if (error.code === 'P2002') {
       return res.status(409).json({ message: `El campo '${error.meta.target[0]}' ya está en uso.` });
     }
@@ -85,43 +123,31 @@ app.post('/usuarios', async (req, res) => {
   }
 });
 
-
 /**
- * Endpoint para INICIAR SESIÓN (Login)
- * Devuelve un token JWT si las credenciales son correctas.
+ * Endpoint para INICIAR SESIÓN (Login).
  */
 app.post('/auth/login', async (req, res) => {
   const { cedula, contrasena } = req.body;
 
   try {
-    // Validar que envíen los datos
     if (!cedula || !contrasena) {
       return res.status(400).json({ message: 'La cédula y la contraseña son requeridas.' });
     }
 
-    // Buscar al usuario en la base de datos por su cédula
-    const usuario = await prisma.usuario.findUnique({
-      where: { cedula },
-    });
+    const usuario = await prisma.usuario.findUnique({ where: { cedula } });
 
-    // Si el usuario no existe O la contraseña es incorrecta, enviar un error
     if (!usuario || !(await bcrypt.compare(contrasena, usuario.contrasena))) {
       return res.status(401).json({ message: 'Credenciales inválidas.' });
     }
 
-    // Si las credenciales son correctas, crear el payload para el Token
     const payload = {
         userId: usuario.id,
         rol: usuario.rol,
         nombre: usuario.nombreCompleto
     };
 
-    // Firmar el token con el secreto y definir una expiración
-    const token = jwt.sign(payload, process.env.JWT_SECRET, {
-        expiresIn: '8h', // El token expirará en 8 horas
-    });
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '8h' });
 
-    // Enviar el token al cliente
     res.json({ 
         message: 'Inicio de sesión exitoso',
         token: token 
@@ -133,48 +159,28 @@ app.post('/auth/login', async (req, res) => {
   }
 });
 
-// backend/index.js
 
-// --- Middleware de Autenticación (Protector de Rutas) ---
-const authMiddleware = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Formato: "Bearer TOKEN"
+// --- RUTAS PROTEGIDAS ---
 
-  if (!token) {
-    return res.status(401).json({ message: 'No se proveyó un token.' });
-  }
-
-  jwt.verify(token, process.env.JWT_SECRET, (err, usuario) => {
-    if (err) {
-      return res.status(403).json({ message: 'Token no válido.' });
-    }
-    req.usuario = usuario;
-    next();
-  });
-};
-
-/*
-* Endpoint PROTEGIDO para obtener el perfil del usuario logueado
-*/
+/**
+ * Endpoint para obtener el perfil del usuario logueado actualmente.
+ */
 app.get('/api/perfil', authMiddleware, async (req, res) => {
   try {
     const usuario = await prisma.usuario.findUnique({
       where: { id: req.usuario.userId },
-      select: { // Seleccionamos qué campos devolver para no enviar la contraseña
-        id: true,
-        nombreCompleto: true,
-        email: true,
-        puntosTotales: true,
-        rol: true,
-        sede: true,
-        cargo: true,
+      include: {
+        cargo: { select: { nombre: true } },
+        centroDeCostos: { select: { nombre: true } },
       }
     });
 
     if (!usuario) {
       return res.status(404).json({ message: 'Usuario no encontrado.' });
     }
-    res.json(usuario);
+
+    const { contrasena, ...perfilSeguro } = usuario;
+    res.json(perfilSeguro);
     
   } catch (error) {
     console.error("Error al obtener perfil:", error);
@@ -183,31 +189,12 @@ app.get('/api/perfil', authMiddleware, async (req, res) => {
 });
 
 /**
- * Endpoint para OBTENER todos los usuarios (para pruebas)
+ * Endpoint para que un admin obtenga la lista de todos los usuarios.
  */
-app.get('/usuarios', async (req, res) => {
-  try {
-    const usuarios = await prisma.usuario.findMany({
-      // Opcional: Incluir el nombre del centro de costos en la respuesta
-      include: {
-        centroDeCostos: {
-          select: {
-            nombre: true
-          }
-        }
-      }
-    });
-    res.json(usuarios);
-  } catch (error) {
-    console.error("Error al obtener usuarios:", error);
-    res.status(500).json({ message: 'Error interno del servidor al obtener los usuarios.' });
-  }
-});
-
 app.get('/api/admin/usuarios', adminMiddleware, async (req, res) => {
   try {
     const usuarios = await prisma.usuario.findMany({
-      select: { // Seleccionamos qué campos devolver
+      select: {
         id: true,
         cedula: true,
         nombreCompleto: true,
@@ -215,17 +202,38 @@ app.get('/api/admin/usuarios', adminMiddleware, async (req, res) => {
         rol: true,
         puntosTotales: true,
         activo: true,
-        centroDeCostos: {
-          select: {
-            nombre: true,
-          }
-        }
+        cargo: { select: { nombre: true } },
+        centroDeCostos: { select: { nombre: true } },
       }
     });
     res.json(usuarios);
   } catch (error) {
     console.error("Error al obtener usuarios para admin:", error);
     res.status(500).json({ message: 'Error al obtener la lista de usuarios.' });
+  }
+});
+
+
+// --- RUTAS PÚBLICAS ---
+
+/**
+ * Endpoint para obtener todos los productos del catálogo.
+ */
+app.get('/api/productos', async (req, res) => {
+  try {
+    const productos = await prisma.producto.findMany({
+      where: {
+        estado: true,
+        stock: { gt: 0 },
+      },
+      include: {
+        categoria: { select: { nombre: true } },
+      },
+    });
+    res.json(productos);
+  } catch (error) {
+    console.error("Error al obtener productos:", error);
+    res.status(500).json({ message: 'Error al obtener los productos.' });
   }
 });
 

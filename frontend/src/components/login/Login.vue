@@ -63,7 +63,7 @@ const register = async () => {
     
     alert('¡Registro exitoso! Ahora puedes iniciar sesión.');
     closeModal();
-    registro.value = { nombreCompleto: "", cargo: "", sede: "", centroDeCostosNombre: "", email: "", cedula: "", contrasena: "", rol: 'Empleado' };
+    registro.value = { nombreCompleto: "", cargoNombre: "", sede: "", centroDeCostosNombre: "", email: "", cedula: "", contrasena: "", rol: 'Empleado' };
   
   } catch (error) {
      if (error.response) {
@@ -222,7 +222,7 @@ onMounted(() => {
           
           <div class="input-group">
             <label for="cargo-reg">Cargo</label>
-            <input type="text" id="cargo-reg" v-model="registro.cargo" placeholder="Ingresa tu cargo" required />
+            <input type="text" id="cargo-reg" v-model="registro.cargoNombre" placeholder="Ingresa tu cargo" required />
           </div>
           <div class="input-group">
             <label for="sede-reg">Sede</label>
