@@ -4,17 +4,27 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
-// backend/index.js
-
+const ProductosRoutes = require("./routes/ProductosRouter");
+const CategoriasRoutes = require('./routes/CategoriasRouter');
 const adminMiddleware = require('./middleware/adminMiddleware');
-// --- INICIALIZACIONES ---
+const path = require('path');
+
 const prisma = new PrismaClient();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // --- MIDDLEWARES ---
 app.use(cors());
-app.use(express.json()); // Para que Express entienda JSON en el body
+app.use(express.json()); // Para JSON
+app.use(express.urlencoded({ extended: true })); // Por si mandas formularios
+
+// Servir archivos estáticos (para las imágenes)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// --- Rutas ---
+app.use("/api/productos", ProductosRoutes);
+app.use("/api/categorias", CategoriasRoutes);
+
 
 // --- RUTAS DE LA APLICACIÓN ---
 

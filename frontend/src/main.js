@@ -2,6 +2,8 @@
 
 import { createApp } from 'vue'
 import App from './App.vue'
+import 'virtual:windi.css'  
+import './style.css'
 import router from './router' // 1. Importa el router
 import './components/login/Login.css' // Importa tus estilos
 

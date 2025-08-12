@@ -1,41 +1,66 @@
 .topbar {
   display: flex;
-  align-items: center; /* Centra los items verticalmente */
-  background: white; /* Cambiado a blanco para que coincida con el diseño de referencia */
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #74B9E7 0%, #2B7FFF 100%);
   padding: 1rem 2rem;
   height: 80px;
-  border-bottom: 1px solid #e2e8f0; /* Un borde más sutil */
+  border-bottom: 4px solid #fac801;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
-.logo img {
-  height: 40px; /* Ajuste de tamaño del logo */
-}
-
-.actions {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  margin-left: auto; /* ✅ ¡Esta es la línea clave que lo arregla! */
-}
-
-/* Estilos para los botones de acción */
-.action-btn {
-  background: transparent;
-  border: none;
-  padding: 0;
-  margin: 0;
+.menu-icon {
+  display: none;
+  font-size: 1.8rem;
+  color: #000; 
   cursor: pointer;
+}
+
+.logo {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.action-btn .iconify {
-  font-size: 1.6rem;
-  color: #334155;
-  transition: color 0.2s;
+.logo img {
+  height: 50px;
+  max-width: 100%;
+  object-fit: contain;
 }
 
-.action-btn:hover .iconify {
-  color: #2B7FFF;
+.actions {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.actions svg {
+  width: 26px;
+  height: 26px;
+  color: #000; 
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.actions svg:hover {
+  color: white; 
+}
+
+@media (max-width: 768px) {
+  .menu-icon {
+    display: block;
+  }
+  .logo {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo {
+    font-size: 1.3rem;
+  }
+  .actions svg {
+    width: 22px;
+    height: 22px;
+  }
 }
