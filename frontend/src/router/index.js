@@ -6,6 +6,8 @@ import Login from '../components/login/Login.vue';
 import Dashboard from '../components/layouts/Dashboard.vue';
 import Categorias from '../components/categorias/Categorias.vue';
 import Productos from '../components/productos/Productos.vue';
+import Campana from '../components/campanas/Campana.vue';
+
 
 const routes = [
   { path: '/login', name: 'Login', component: Login },
@@ -27,6 +29,11 @@ const routes = [
         name: 'Productos',
         component: Productos,
         props: true
+      },
+       {
+        path: 'campanas',
+        name: 'Campana',
+        component: Campana
       }
     ]
   }

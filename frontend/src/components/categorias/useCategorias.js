@@ -1,4 +1,5 @@
 import { ref, computed, onMounted } from 'vue';
+import Swal from 'sweetalert2'
 
 export default function useCategorias() {
   // Estados reactivos
@@ -151,9 +152,9 @@ export default function useCategorias() {
     }
   };
 
-  const guardarCategoria = async () => {
+    const guardarCategoria = async () => {
     if (!form.value.nombre.trim()) {
-      alert('El nombre de la categoría es obligatorio');
+      Swal.fire('Error', 'El nombre de la categoría es obligatorio', 'warning');
       return;
     }
 
@@ -161,20 +162,12 @@ export default function useCategorias() {
     error.value = null;
 
     try {
-      console.log('💾 Guardando categoría:', form.value);
-      
       const formData = new FormData();
       formData.append('nombre', form.value.nombre.trim());
       formData.append('descripcion', form.value.descripcion.trim() || '');
       
       if (form.value.imagen) {
         formData.append('imagen', form.value.imagen);
-        console.log('📷 Imagen incluida:', form.value.imagen.name, form.value.imagen.type);
-      }
-
-      // Log FormData contents
-      for (let pair of formData.entries()) {
-        console.log('FormData:', pair[0], typeof pair[1] === 'string' ? pair[1] : `File: ${pair[1].name}`);
       }
 
       const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -183,55 +176,44 @@ export default function useCategorias() {
         : `${baseUrl}/api/categorias`;
       
       const method = editando.value ? 'PUT' : 'POST';
-      
-      console.log(`📤 Enviando ${method} a ${url}`);
 
       const response = await fetch(url, {
         method: method,
         body: formData
-        // NO incluir Content-Type header cuando usamos FormData
       });
 
-      console.log('📡 Respuesta del servidor:', response.status, response.statusText);
-      console.log('📡 Response headers:', [...response.headers.entries()]);
-      
-      const data = await handleResponse(response);
-      console.log('✅ Categoría guardada:', data);
+      await handleResponse(response);
 
-      // Actualizar la lista de categorías
       await obtenerCategorias();
-      
-      // Cerrar modal y limpiar formulario
       cerrarModal();
       
-      alert(editando.value ? 'Categoría actualizada exitosamente' : 'Categoría creada exitosamente');
+      Swal.fire('Éxito', editando.value ? 'Categoría actualizada exitosamente' : 'Categoría creada exitosamente', 'success');
       
     } catch (err) {
       error.value = err.message;
-      console.error('❌ Error al guardar categoría:', err);
-      
-      // Log más detallado del error
-      if (err.response) {
-        console.error('Error response:', err.response);
-      }
-      
-      alert(`Error: ${err.message}`);
+      Swal.fire('Error', err.message, 'error');
     } finally {
       loading.value = false;
     }
   };
+const eliminarCategoria = async (categoria) => {
+    const result = await Swal.fire({
+      title: '¿Estás seguro?',
+      text: `Se eliminará la categoría "${categoria.nombre}"`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    });
 
-  const eliminarCategoria = async (categoria) => {
-    if (!confirm(`¿Estás seguro de que quieres eliminar la categoría "${categoria.nombre}"?`)) {
-      return;
-    }
+    if (!result.isConfirmed) return;
 
     loading.value = true;
     error.value = null;
 
     try {
-      console.log('🗑️ Eliminando categoría:', categoria.id);
-      
       const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
       const response = await fetch(`${baseUrl}/api/categorias/${categoria.id}`, {
         method: 'DELETE',
@@ -241,18 +223,14 @@ export default function useCategorias() {
         }
       });
 
-      console.log('📡 Respuesta del servidor:', response.status);
-      
-      const data = await handleResponse(response);
+      await handleResponse(response);
 
-      console.log('✅ Categoría eliminada:', data);
-      alert(data.message || 'Categoría eliminada correctamente');
+      Swal.fire('Eliminado', 'La categoría fue eliminada correctamente', 'success');
       await obtenerCategorias();
       
     } catch (err) {
       error.value = err.message;
-      console.error('❌ Error al eliminar categoría:', err);
-      alert(`Error: ${err.message}`);
+      Swal.fire('Error', err.message, 'error');
     } finally {
       loading.value = false;
     }

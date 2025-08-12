@@ -130,17 +130,16 @@ router.post('/', upload.single('imagen'), async (req, res) => {
 
     const imagenUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
-    // Convertir estado a boolean (Prisma se encarga de la conversión a 0/1 en BD)
-    const estadoBoolean = convertirABoolean(activo !== undefined ? activo : true);
+   const estadoBoolean = convertirABoolean(activo !== undefined ? activo : true);
 
-    const nuevaCategoria = await prisma.categoria.create({
-      data: {
-        nombre: nombreBuscado,
-        descripcion: descripcion ? descripcion.trim() : '',
-        imagenUrl,
-        activo: estadoNumerico === 1 // esto devuelve true o false
-      }
-    });
+const nuevaCategoria = await prisma.categoria.create({
+  data: {
+    nombre: nombreBuscado,
+    descripcion: descripcion ? descripcion.trim() : '',
+    imagenUrl,
+    activo: estadoBoolean
+  }
+});
 
     res.status(201).json(nuevaCategoria);
 
