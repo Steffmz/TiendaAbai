@@ -16,7 +16,20 @@
                 <label for="email">Email</label>
                 <input type="email" id="email" v-model="usuario.email" required />
             </div>
-
+            
+            <div class="form-group">
+                <label for="sede">Sede</label>
+                <input type="text" id="sede" v-model="usuario.sede" required />
+            </div>
+            <div class="form-group">
+                <label for="cargoNombre">Cargo</label>
+                <input type="text" id="cargoNombre" v-model="usuario.cargoNombre" required />
+            </div>
+            <div class="form-group">
+                <label for="centroDeCostosNombre">Centro de Costos</label>
+                <input type="text" id="centroDeCostosNombre" v-model="usuario.centroDeCostosNombre" required />
+            </div>
+            
             <div class="form-group">
                 <label for="rol">Rol</label>
                 <select id="rol" v-model="usuario.rol" required>
@@ -33,6 +46,11 @@
                 </select>
             </div>
 
+             <div v-if="!isEditing" class="form-group">
+                <label for="contrasena">Contraseña</label>
+                <input type="password" id="contrasena" v-model="usuario.contrasena" :required="!isEditing" />
+            </div>
+
             <button type="submit" class="btn-submit">{{ isEditing ? 'Actualizar Usuario' : 'Guardar Usuario' }}</button>
         </form>
         <p v-else>Cargando información del usuario...</p>
@@ -47,12 +65,17 @@ import { useRouter, useRoute } from 'vue-router';
 const router = useRouter();
 const route = useRoute();
 
+// ✅ Objeto 'usuario' actualizado con todos los campos necesarios
 const usuario = ref({
     nombreCompleto: '',
     cedula: '',
     email: '',
+    sede: '',
+    cargoNombre: '',
+    centroDeCostosNombre: '',
     rol: 'Empleado',
-    activo: true
+    activo: true,
+    contrasena: ''
 });
 
 const isEditing = computed(() => !!route.params.id);
@@ -64,7 +87,13 @@ onMounted(async () => {
             const response = await axios.get(`http://localhost:3000/api/admin/usuarios/${route.params.id}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            usuario.value = response.data;
+            // Asignamos los datos, incluyendo los de las relaciones
+            const userData = response.data;
+            usuario.value = {
+                ...userData,
+                cargoNombre: userData.cargo?.nombre || '',
+                centroDeCostosNombre: userData.centroDeCostos?.nombre || ''
+            };
         } catch (error) {
             console.error("Error al cargar el usuario:", error);
             alert("No se pudo cargar la información del usuario.");
@@ -74,31 +103,33 @@ onMounted(async () => {
 
 const guardarUsuario = async () => {
     const token = localStorage.getItem('authToken');
-    if (!token) return; // Salir si no hay token
+    const datosParaEnviar = { ...usuario.value };
 
     try {
         if (isEditing.value) {
-            // Si estamos editando, usamos el método PUT a la ruta con el ID
+            // Lógica de Actualización
             await axios.put(
                 `http://localhost:3000/api/admin/usuarios/${route.params.id}`,
-                usuario.value, // Enviamos el objeto completo del usuario
-                {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                }
+                datosParaEnviar,
+                { headers: { 'Authorization': `Bearer ${token}` } }
             );
             alert('¡Usuario actualizado con éxito!');
         } else {
-            // Lógica para CREAR un nuevo usuario (requeriría más campos)
-            // Por ahora, nos enfocamos en editar.
-            alert('La creación de usuarios se hace desde el formulario de registro principal.');
+            // Lógica para CREAR un nuevo usuario
+            if (!datosParaEnviar.contrasena) {
+                alert('Para crear un usuario, se necesita una contraseña.');
+                return;
+            }
+            await axios.post(
+                'http://localhost:3000/usuarios', // Usamos la ruta de registro pública
+                datosParaEnviar
+            );
+            alert('¡Usuario creado con éxito!');
         }
-
-        // Al terminar, volvemos a la lista de usuarios
         router.push('/dashboard/usuarios');
-
     } catch (error) {
         console.error("Error al guardar el usuario:", error);
-        alert('Hubo un error al guardar los cambios.');
+        alert(error.response?.data?.message || 'Hubo un error al guardar los cambios.');
     }
 };
 </script>
@@ -109,25 +140,21 @@ const guardarUsuario = async () => {
     max-width: 800px;
     margin: auto;
 }
-
 .user-form {
     background: white;
     padding: 2rem;
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
-
 .form-group {
     margin-bottom: 1.5rem;
 }
-
 label {
     display: block;
     font-weight: 600;
     margin-bottom: 0.5rem;
     color: #334155;
 }
-
 input,
 select {
     width: 100%;
@@ -136,7 +163,6 @@ select {
     border-radius: 6px;
     font-size: 1rem;
 }
-
 .btn-submit {
     background-color: #16a34a;
     color: white;

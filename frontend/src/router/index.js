@@ -11,7 +11,7 @@ import Productos from "../components/productos/Productos.vue";
 import Campana from "../components/campanas/Campana.vue";
 import ProductForm from "../views/admin/ProductForm.vue";
 import GestionProductos from "../views/admin/GestionProductos.vue";
-import UserForm from '../views/admin/UserForm.vue';
+import UserForm from "../views/admin/UserForm.vue";
 
 const routes = [
   { path: "/login", name: "Login", component: Login },
@@ -33,6 +33,12 @@ const routes = [
         path: "usuarios",
         name: "GestionUsuarios",
         component: GestionUsuarios,
+      },
+
+      {
+        path: "usuarios/nuevo",
+        name: "CrearUsuario",
+        component: UserForm,
       },
       {
         path: "categorias",

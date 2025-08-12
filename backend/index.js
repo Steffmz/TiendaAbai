@@ -371,16 +371,42 @@ app.put("/api/admin/usuarios/:id", adminMiddleware, async (req, res) => {
   } catch (error) {
     // Manejar error si la cédula o email ya existen en otro usuario
     if (error.code === "P2002") {
-      return res
-        .status(409)
-        .json({
-          message: `El campo '${error.meta.target[0]}' ya está en uso.`,
-        });
+      return res.status(409).json({
+        message: `El campo '${error.meta.target[0]}' ya está en uso.`,
+      });
     }
     console.error(`Error al actualizar el usuario con ID ${usuarioId}:`, error);
     res.status(500).json({ message: "Error interno del servidor." });
   }
 });
+
+/**
+ * Endpoint de ADMIN para ELIMINAR un usuario
+ */
+app.delete("/api/admin/usuarios/:id", adminMiddleware, async (req, res) => {
+  const usuarioId = parseInt(req.params.id);
+
+  try {
+    // Opcional: Verificar que no se esté intentando eliminar a sí mismo
+    if (usuarioId === req.usuario.userId) {
+      return res
+        .status(400)
+        .json({
+          message: "No puedes eliminar tu propia cuenta de administrador.",
+        });
+    }
+
+    await prisma.usuario.delete({
+      where: { id: usuarioId },
+    });
+
+    res.status(204).send(); // Éxito, sin contenido que devolver
+  } catch (error) {
+    console.error(`Error al eliminar el usuario con ID ${usuarioId}:`, error);
+    res.status(500).json({ message: "Error al eliminar el usuario." });
+  }
+});
+
 app.get("/api/categorias", async (req, res) => {
   try {
     const categorias = await prisma.categoria.findMany({
