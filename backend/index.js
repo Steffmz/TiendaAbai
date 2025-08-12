@@ -159,6 +159,54 @@ app.post('/auth/login', async (req, res) => {
   }
 });
 
+// backend/index.js
+
+/**
+ * Endpoint de ADMIN para asignar/restar puntos a un usuario.
+ */
+app.post('/api/admin/usuarios/:id/puntos', adminMiddleware, async (req, res) => {
+  const beneficiarioId = parseInt(req.params.id);
+  const { puntos, descripcion } = req.body;
+  const adminId = req.usuario.userId; // Obtenemos el ID del admin desde el token
+
+  // 1. Validar la entrada
+  if (typeof puntos !== 'number' || !descripcion) {
+    return res.status(400).json({ message: 'Se requiere un número de puntos y una descripción.' });
+  }
+
+  try {
+    // 2. Ejecutar ambas operaciones como una transacción
+    const [_, updatedUsuario] = await prisma.$transaction([
+      // a. Crear el registro en el historial
+      prisma.historialPuntos.create({
+        data: {
+          puntos: puntos,
+          tipo: 'ASIGNACION_MANUAL',
+          descripcion: descripcion,
+          beneficiarioId: beneficiarioId,
+          adminCreadorId: adminId, // Guardamos qué admin hizo la acción
+        }
+      }),
+      // b. Actualizar el total de puntos del usuario
+      prisma.usuario.update({
+        where: { id: beneficiarioId },
+        data: {
+          puntosTotales: {
+            increment: puntos // 'increment' maneja sumas y restas (si 'puntos' es negativo)
+          }
+        }
+      })
+    ]);
+
+    // 3. Devolver el usuario actualizado
+    res.json({ message: 'Puntos asignados correctamente.', usuario: updatedUsuario });
+
+  } catch (error) {
+    console.error("Error al asignar puntos:", error);
+    res.status(500).json({ message: 'Error interno al asignar puntos.' });
+  }
+});
+
 
 // --- RUTAS PROTEGIDAS ---
 
@@ -188,12 +236,14 @@ app.get('/api/perfil', authMiddleware, async (req, res) => {
   }
 });
 
-/**
- * Endpoint para que un admin obtenga la lista de todos los usuarios.
- */
+//...
 app.get('/api/admin/usuarios', adminMiddleware, async (req, res) => {
   try {
     const usuarios = await prisma.usuario.findMany({
+      // ✅ AÑADE ESTE FILTRO 'WHERE'
+      where: {
+        rol: 'Empleado' // Solo trae los usuarios cuyo rol sea 'Empleado'
+      },
       select: {
         id: true,
         cedula: true,

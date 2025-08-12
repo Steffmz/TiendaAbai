@@ -88,8 +88,8 @@ onMounted(() => {
   let height = (canvas.height = window.innerHeight);
 
   const particles = [];
-  const particleCount = 150;
-  const maxDistance = 200;
+  const particleCount = 75;
+  const maxDistance = 140;
   const speed = 1;
 
   class Particle {
@@ -106,8 +106,6 @@ onMounted(() => {
       ctx.beginPath();
       ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
       ctx.fillStyle = this.color;
-      ctx.shadowColor = this.color;
-      ctx.shadowBlur = 12;
       ctx.fill();
     }
 
