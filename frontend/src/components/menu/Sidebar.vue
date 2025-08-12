@@ -35,7 +35,14 @@
         </li>
       </router-link>
 
-      </ul>
+      <router-link to="/dashboard/productos" custom v-slot="{ navigate, isActive }">
+        <li :class="{ active: isActive }" @click="navigate" title="Productos">
+          <Icon icon="mdi:package-variant-closed" />
+          <span v-if="!isCollapsed">Productos</span>
+        </li>
+      </router-link>
+
+    </ul>
   </aside>
 </template>
 
