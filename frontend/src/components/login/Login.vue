@@ -17,7 +17,7 @@ const errorMessage = ref("");
 // Objeto de registro con el campo "centroDeCostosNombre"
 const registro = ref({
   nombreCompleto: "",
-  cargo: "",
+  cargoNombre: "",
   sede: "",
   centroDeCostosNombre: "",
   email: "",
@@ -221,9 +221,9 @@ onMounted(() => {
           </div>
           
           <div class="input-group">
-            <label for="cargo-reg">Cargo</label>
-            <input type="text" id="cargo-reg" v-model="registro.cargo" placeholder="Ingresa tu cargo" required />
-          </div>
+  <label for="cargo-reg">Cargo</label>
+  <input type="text" id="cargo-reg" v-model="registro.cargoNombre" placeholder="Ingresa tu cargo" required />
+</div>
           <div class="input-group">
             <label for="sede-reg">Sede</label>
             <input type="text" id="sede-reg" v-model="registro.sede" placeholder="Ingresa tu sede" required />
