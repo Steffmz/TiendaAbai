@@ -58,7 +58,7 @@ const producto = ref({
 // Variable para saber si estamos en modo "Edición"
 const isEditing = computed(() => !!route.params.id);
 
-// Cargar las categorías para el dropdown (sin cambios)
+// Cargar las categorías
 onMounted(async () => {
   try {
     const response = await axios.get('http://localhost:3000/api/categorias');

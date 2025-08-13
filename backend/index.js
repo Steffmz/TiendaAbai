@@ -19,8 +19,6 @@ app.use(express.urlencoded({ extended: true }));
 // Servir archivos estáticos (para las imágenes de productos en el futuro)
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// --- MIDDLEWARES DE AUTENTICACIÓN ---
-
 /**
  * Middleware para verificar el token JWT.
  * Protege rutas que requieren que el usuario esté logueado.
@@ -37,7 +35,7 @@ const authMiddleware = (req, res, next) => {
     if (err) {
       return res.status(403).json({ message: "Token no válido." });
     }
-    req.usuario = decodedPayload; // Guarda el payload del token (userId, rol, etc.)
+    req.usuario = decodedPayload;
     next();
   });
 };
@@ -185,8 +183,6 @@ app.post("/auth/login", async (req, res) => {
   }
 });
 
-// backend/index.js
-
 /**
  * Endpoint de ADMIN para asignar/restar puntos a un usuario.
  */
@@ -272,7 +268,6 @@ app.get("/api/perfil", authMiddleware, async (req, res) => {
 app.get("/api/admin/usuarios", adminMiddleware, async (req, res) => {
   try {
     const usuarios = await prisma.usuario.findMany({
-      // ✅ AÑADE ESTE FILTRO 'WHERE'
       where: {
         rol: "Empleado", // Solo trae los usuarios cuyo rol sea 'Empleado'
       },
@@ -295,11 +290,9 @@ app.get("/api/admin/usuarios", adminMiddleware, async (req, res) => {
   }
 });
 
-// backend/index.js
 
 /**
  * Endpoint de ADMIN para OBTENER un solo usuario por su ID.
- * Esencial para el formulario de edición.
  */
 app.get("/api/admin/usuarios/:id", adminMiddleware, async (req, res) => {
   // 1. Obtenemos el ID del usuario desde los parámetros de la URL
@@ -360,8 +353,6 @@ app.put("/api/admin/usuarios/:id", adminMiddleware, async (req, res) => {
         email,
         rol,
         activo,
-        // No actualizamos contraseña, cargo o sede en este endpoint
-        // para mantener la lógica simple por ahora.
       },
     });
 
@@ -387,7 +378,6 @@ app.delete("/api/admin/usuarios/:id", adminMiddleware, async (req, res) => {
   const usuarioId = parseInt(req.params.id);
 
   try {
-    // Opcional: Verificar que no se esté intentando eliminar a sí mismo
     if (usuarioId === req.usuario.userId) {
       return res
         .status(400)
@@ -418,9 +408,6 @@ app.get("/api/categorias", async (req, res) => {
     res.status(500).json({ message: "Error al obtener las categorías." });
   }
 });
-
-// backend/index.js
-
 /**
  * Endpoint de ADMIN para ACTUALIZAR un producto existente
  */
@@ -456,7 +443,7 @@ app.delete("/api/admin/productos/:id", adminMiddleware, async (req, res) => {
     await prisma.producto.delete({
       where: { id: productId },
     });
-    res.status(204).send(); // 204 No Content: Éxito, sin nada que devolver
+    res.status(204).send();
   } catch (error) {
     console.error("Error al eliminar el producto:", error);
     res.status(500).json({ message: "Error al eliminar el producto." });
@@ -507,7 +494,6 @@ app.post("/api/admin/productos", adminMiddleware, async (req, res) => {
         precioPuntos: parseInt(precioPuntos),
         stock: parseInt(stock),
         categoriaId: parseInt(categoriaId),
-        // imagenUrl se manejará por separado cuando implementemos la subida de archivos
       },
     });
     res.status(201).json(nuevoProducto);
@@ -516,8 +502,6 @@ app.post("/api/admin/productos", adminMiddleware, async (req, res) => {
     res.status(500).json({ message: "Error al crear el producto." });
   }
 });
-
-// --- RUTAS PÚBLICAS ---
 
 /**
  * Endpoint para obtener todos los productos del catálogo.
@@ -540,7 +524,6 @@ app.get("/api/productos", async (req, res) => {
   }
 });
 
-// --- INICIO DEL SERVIDOR ---
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en el puerto ${PORT}`);
 });

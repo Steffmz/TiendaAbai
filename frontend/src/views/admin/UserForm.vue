@@ -65,7 +65,6 @@ import { useRouter, useRoute } from 'vue-router';
 const router = useRouter();
 const route = useRoute();
 
-// ✅ Objeto 'usuario' actualizado con todos los campos necesarios
 const usuario = ref({
     nombreCompleto: '',
     cedula: '',
@@ -87,7 +86,7 @@ onMounted(async () => {
             const response = await axios.get(`http://localhost:3000/api/admin/usuarios/${route.params.id}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            // Asignamos los datos, incluyendo los de las relaciones
+            // Asignamos los datos
             const userData = response.data;
             usuario.value = {
                 ...userData,
@@ -121,7 +120,7 @@ const guardarUsuario = async () => {
                 return;
             }
             await axios.post(
-                'http://localhost:3000/usuarios', // Usamos la ruta de registro pública
+                'http://localhost:3000/usuarios',
                 datosParaEnviar
             );
             alert('¡Usuario creado con éxito!');

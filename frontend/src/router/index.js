@@ -4,8 +4,8 @@ import { jwtDecode } from "jwt-decode";
 // Vistas y layouts
 import Login from "../components/login/Login.vue";
 import Dashboard from "../components/layouts/Dashboard.vue";
-import DashboardIndex from "../views/admin/DashboardIndex.vue"; // <-- Importa el index
-import GestionUsuarios from "../views/admin/GestionUsuarios.vue"; // <-- Importa la gestión de usuarios
+import DashboardIndex from "../views/admin/DashboardIndex.vue";
+import GestionUsuarios from "../views/admin/GestionUsuarios.vue"; 
 import Categorias from "../components/categorias/Categorias.vue";
 import Productos from "../components/productos/Productos.vue";
 import Campana from "../components/campanas/Campana.vue";
@@ -16,7 +16,6 @@ import UserForm from "../views/admin/UserForm.vue";
 const routes = [
   { path: "/login", name: "Login", component: Login },
 
-  // Redirige la ruta raíz a la página principal del dashboard
   { path: "/", redirect: "/dashboard", meta: { requiresAuth: true } },
 
   {
@@ -70,17 +69,17 @@ const routes = [
       },
 
       {
-        path: "productos/editar/:id", // Usamos un parámetro dinámico ':id'
+        path: "productos/editar/:id",
         name: "EditarProducto",
         component: ProductForm,
-        props: true, // Esto pasa el ':id' como una prop al componente
+        props: true,
       },
 
       {
         path: "usuarios/editar/:id",
         name: "EditarUsuario",
         component: UserForm,
-        props: true, // Pasa el 'id' de la URL como prop al componente
+        props: true,
       },
     ],
   },
@@ -90,8 +89,6 @@ const router = createRouter({
   history: createWebHistory(),
   routes,
 });
-
-// frontend/src/router/index.js
 
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem("authToken");
