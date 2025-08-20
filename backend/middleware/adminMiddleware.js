@@ -1,4 +1,4 @@
-// backend/middleware/adminMiddleware.js
+// middleware/adminMiddleware.js
 const jwt = require('jsonwebtoken');
 
 const adminMiddleware = (req, res, next) => {
@@ -9,17 +9,18 @@ const adminMiddleware = (req, res, next) => {
     return res.status(401).json({ message: 'No se proveyó un token.' });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, usuario) => {
+  jwt.verify(token, process.env.JWT_SECRET, (err, decodedPayload) => {
     if (err) {
       return res.status(403).json({ message: 'Token no válido.' });
     }
 
-    // ✅ ¡La verificación clave!
-    if (usuario.rol !== 'Administrador') {
-      return res.status(403).json({ message: 'Acceso denegado. Se requiere rol de administrador.' });
+    if (decodedPayload.rol !== 'Administrador') {
+      return res.status(403).json({
+        message: 'Acceso denegado. Se requiere rol de administrador.',
+      });
     }
 
-    req.usuario = usuario;
+    req.usuario = decodedPayload;
     next();
   });
 };

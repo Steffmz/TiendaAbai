@@ -52,33 +52,6 @@ const authMiddleware = (req, res, next) => {
   });
 };
 
-/**
- * Middleware para verificar el rol de Administrador.
- * Protege rutas que solo pueden ser accedidas por administradores.
- */
-const adminMiddleware = (req, res, next) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-
-  if (!token) {
-    return res.status(401).json({ message: "No se proveyó un token." });
-  }
-
-  jwt.verify(token, process.env.JWT_SECRET, (err, decodedPayload) => {
-    if (err) {
-      return res.status(403).json({ message: "Token no válido." });
-    }
-
-    if (decodedPayload.rol !== "Administrador") {
-      return res.status(403).json({
-        message: "Acceso denegado. Se requiere rol de administrador.",
-      });
-    }
-
-    req.usuario = decodedPayload;
-    next();
-  });
-};
 
 // --- RUTAS DE AUTENTICACIÓN Y REGISTRO ---
 
