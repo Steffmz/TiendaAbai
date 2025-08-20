@@ -56,7 +56,10 @@ CREATE TABLE `campanas` (
     `descripcion` TEXT NULL,
     `fechaInicio` DATE NOT NULL,
     `fechaFin` DATE NOT NULL,
+    `imagenUrl` VARCHAR(191) NULL,
     `aprobada` BOOLEAN NOT NULL DEFAULT false,
+    `puntos` INTEGER NULL,
+    `descuento` INTEGER NULL,
     `fechaCreacion` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     PRIMARY KEY (`id`)

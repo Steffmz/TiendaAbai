@@ -6,8 +6,6 @@ const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 const router = express.Router();
-
-// Ruta absoluta de la carpeta uploads
 const uploadDir = path.join(__dirname, '..', 'uploads');
 
 // Crear carpeta uploads si no existe
@@ -30,7 +28,7 @@ const storage = multer.diskStorage({
 const upload = multer({ 
   storage,
   limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB límite
+    fileSize: 5 * 1024 * 1024 
   },
   fileFilter: (req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png|gif|webp/;
@@ -45,7 +43,7 @@ const upload = multer({
   }
 });
 
-// Función helper para convertir diferentes tipos de entrada a boolean
+// Función para convertir diferentes tipos de entrada a boolean
 const convertirABoolean = (valor) => {
   if (typeof valor === 'boolean') {
     return valor;
@@ -58,7 +56,7 @@ const convertirABoolean = (valor) => {
   if (typeof valor === 'number') {
     return valor === 1;
   }
-  return true; // Por defecto activo
+  return true; 
 };
 
 // Obtener todas las categorías
@@ -118,8 +116,6 @@ router.post('/', upload.single('imagen'), async (req, res) => {
     }
 
     const nombreBuscado = nombre.trim().toLowerCase();
-
-    // Verificar que no existe una categoría con el mismo nombre (case insensitive)
     const categoriaExistente = await prisma.categoria.findFirst({
       where: { nombre: nombreBuscado }
     });
@@ -189,8 +185,9 @@ router.put('/:id', upload.single('imagen'), async (req, res) => {
     // Manejar tanto "estado" como "activo" para compatibilidad
     const estadoValor = estado !== undefined ? estado : activo;
     if (estadoValor !== undefined) {
-  dataToUpdate.activo = convertirEstadoANumero(estadoValor) === 1;
-}
+      dataToUpdate.activo = convertirABoolean(estadoValor);
+    }
+
     
     if (req.file) dataToUpdate.imagenUrl = `/uploads/${req.file.filename}`;
 
@@ -228,7 +225,6 @@ router.delete('/:id', async (req, res) => {
 
     // Verificar si tiene productos asociados
     if (categoria._count.productos > 0) {
-      // Soft delete: cambiar activo a false (se guarda como 0 en BD)
       const categoriaDesactivada = await prisma.categoria.update({
         where: { id: parseInt(id) },
         data: { activo: false }
@@ -241,7 +237,6 @@ router.delete('/:id', async (req, res) => {
         categoria: categoriaDesactivada
       });
     } else {
-      // Eliminar permanentemente si no tiene productos
       await prisma.categoria.delete({
         where: { id: parseInt(id) }
       });
@@ -269,7 +264,6 @@ router.patch('/:id/estado', async (req, res) => {
       return res.status(404).json({ error: "Categoría no encontrada" });
     }
 
-    // Alternar el estado boolean (Prisma convierte automáticamente a 0/1 en BD)
     const nuevoEstado = !categoria.activo;
 
     const categoriaActualizada = await prisma.categoria.update({

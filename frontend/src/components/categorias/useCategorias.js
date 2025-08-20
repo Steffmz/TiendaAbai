@@ -2,7 +2,7 @@ import { ref, computed, onMounted } from 'vue';
 import Swal from 'sweetalert2'
 
 export default function useCategorias() {
-  // Estados reactivos
+
   const categorias = ref([]);
   const loading = ref(false);
   const error = ref(null);
@@ -10,7 +10,7 @@ export default function useCategorias() {
   const editando = ref(false);
   const filtro = ref('');
   const paginaActual = ref(1);
-  const categoriasPorPagina = 8;
+  const categoriasPorPagina = 5;
   const previewImage = ref(null);
   
   // Formulario
@@ -22,7 +22,7 @@ export default function useCategorias() {
   });
 
   // Placeholder para imágenes
-  const placeholder = '/uploads/categoria-default.png';
+  const placeholder = '/uploads/Categorias/categoria-default.png';
 
   const categoriasFiltradas = computed(() => {
     if (!filtro.value) return categorias.value;
@@ -196,45 +196,47 @@ export default function useCategorias() {
       loading.value = false;
     }
   };
-const eliminarCategoria = async (categoria) => {
-    const result = await Swal.fire({
-      title: '¿Estás seguro?',
-      text: `Se eliminará la categoría "${categoria.nombre}"`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
-    });
 
-    if (!result.isConfirmed) return;
+  //Eliminar Categorias
+      const eliminarCategoria = async (categoria) => {
+          const result = await Swal.fire({
+            title: '¿Estás seguro?',
+            text: `Se eliminará la categoría "${categoria.nombre}"`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+          });
 
-    loading.value = true;
-    error.value = null;
+          if (!result.isConfirmed) return;
 
-    try {
-      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-      const response = await fetch(`${baseUrl}/api/categorias/${categoria.id}`, {
-        method: 'DELETE',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        }
-      });
+          loading.value = true;
+          error.value = null;
 
-      await handleResponse(response);
+          try {
+            const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+            const response = await fetch(`${baseUrl}/api/categorias/${categoria.id}`, {
+              method: 'DELETE',
+              headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+              }
+            });
 
-      Swal.fire('Eliminado', 'La categoría fue eliminada correctamente', 'success');
-      await obtenerCategorias();
-      
-    } catch (err) {
-      error.value = err.message;
-      Swal.fire('Error', err.message, 'error');
-    } finally {
-      loading.value = false;
-    }
-  };
+            await handleResponse(response);
+
+            Swal.fire('Eliminado', 'La categoría fue eliminada correctamente', 'success');
+            await obtenerCategorias();
+            
+          } catch (err) {
+            error.value = err.message;
+            Swal.fire('Error', err.message, 'error');
+          } finally {
+            loading.value = false;
+          }
+        };
 
   const cambiarEstado = async (categoria) => {
   loading.value = true;
@@ -252,7 +254,7 @@ const eliminarCategoria = async (categoria) => {
 
     const data = await handleResponse(response);
 
-    // Actualizar localmente con la respuesta real
+    // Actualizar localmente 
     const index = categorias.value.findIndex(c => c.id === categoria.id);
     if (index !== -1) {
       categorias.value[index].activo = data.categoria.activo;
@@ -283,7 +285,7 @@ const eliminarCategoria = async (categoria) => {
       imagen: null
     };
     
-    // Mostrar imagen actual si existe
+    
     if (categoria.imagen) {
       previewImage.value = categoria.imagen;
     }
@@ -309,7 +311,6 @@ const eliminarCategoria = async (categoria) => {
     error.value = null;
   };
 
-  // Manejo de archivos
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
     if (!file) {
@@ -321,7 +322,6 @@ const eliminarCategoria = async (categoria) => {
 
     console.log('📷 Archivo seleccionado:', file.name, file.type, `${(file.size/1024/1024).toFixed(2)}MB`);
 
-    // Validar tipo de archivo
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
       alert('Solo se permiten archivos de imagen (JPEG, PNG, GIF, WebP)');
@@ -331,7 +331,6 @@ const eliminarCategoria = async (categoria) => {
       return;
     }
 
-    // Validar tamaño (5MB máximo)
     if (file.size > 5 * 1024 * 1024) {
       alert('El archivo no puede ser mayor a 5MB');
       event.target.value = '';
@@ -342,7 +341,6 @@ const eliminarCategoria = async (categoria) => {
 
     form.value.imagen = file;
 
-    // Crear preview
     const reader = new FileReader();
     reader.onload = (e) => {
       previewImage.value = e.target.result;
@@ -355,7 +353,6 @@ const eliminarCategoria = async (categoria) => {
     reader.readAsDataURL(file);
   };
 
-  // Métodos de paginación
   const irAPagina = (pagina) => {
     if (pagina >= 1 && pagina <= totalPaginas.value) {
       paginaActual.value = pagina;
@@ -374,7 +371,6 @@ const eliminarCategoria = async (categoria) => {
     }
   };
 
-  // Métodos de conveniencia
   const confirmarEliminar = (categoria) => {
     eliminarCategoria(categoria);
   };
@@ -383,14 +379,12 @@ const eliminarCategoria = async (categoria) => {
     cambiarEstado(categoria);
   };
 
-  // Cargar datos al montar
   onMounted(() => {
     console.log('🚀 Componente montado, cargando categorías...');
     obtenerCategorias();
   });
 
   return {
-    // Estados
     categorias,
     loading,
     error,
@@ -400,8 +394,6 @@ const eliminarCategoria = async (categoria) => {
     form,
     previewImage,
     placeholder,
-    
-    // Computadas
     categoriasFiltradas,
     totalCategorias,
     totalPaginas,
@@ -409,8 +401,6 @@ const eliminarCategoria = async (categoria) => {
     filasVacias,
     paginaActual,
     paginasVisibles,
-    
-    // Métodos
     obtenerCategorias,
     guardarCategoria,
     eliminarCategoria,

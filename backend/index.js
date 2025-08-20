@@ -1,10 +1,14 @@
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const { PrismaClient } = require("@prisma/client");
-const path = require("path");
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { PrismaClient } = require('@prisma/client');
+const ProductosRoutes = require('./routes/ProductosRouter');
+const CategoriasRoutes = require('./routes/CategoriasRouter');
+const CampanaRouter = require('./routes/CampanaRouter');
+const adminMiddleware = require('./middleware/adminMiddleware');
+const path = require('path');
 
 // --- INICIALIZACIONES ---
 const prisma = new PrismaClient();
@@ -16,8 +20,16 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Servir archivos estáticos (para las imágenes de productos en el futuro)
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// Servir archivos estáticos (para las imágenes)
+app.use('/uploads/', express.static(path.join(__dirname, 'uploads')));
+
+// --- Rutas ---
+app.use('/api/productos', ProductosRoutes);
+app.use("/api/categorias", CategoriasRoutes);
+app.use('/api/campanas', CampanaRouter);
+
+
+// --- RUTAS DE LA APLICACIÓN ---
 
 /**
  * Middleware para verificar el token JWT.

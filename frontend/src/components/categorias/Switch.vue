@@ -6,15 +6,12 @@
     @click="toggle"
     :disabled="disabled"
   >
-    <!-- Texto -->
     <span
       class="absolute inset-0 flex items-center font-medium text-[0.8rem] tracking-wide px-2"
-      :class="isChecked ? 'justify-start text-black' : 'justify-end text-black'"
+      :class="isChecked ? 'justify-start text-white' : 'justify-end text-white'"
     >
       {{ isChecked ? 'Activo' : 'Inactivo' }}
     </span>
-
-    <!-- Bolita -->
     <span :class="thumbClasses" />
   </button>
 </template>

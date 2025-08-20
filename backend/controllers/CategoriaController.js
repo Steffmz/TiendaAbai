@@ -47,7 +47,7 @@ export const getCategoriaById = async (req, res) => {
   }
 };
 
-// Crear categoría sin usar 'mode' y validando insensible a mayúsculas
+// Crear categoría
 export const createCategoria = async (req, res) => {
   const { nombre, descripcion } = req.body;
 
@@ -86,41 +86,49 @@ export const createCategoria = async (req, res) => {
   }
 };
 
-// Actualizar categoría sin 'mode'
-export const updateCategoria = async (req, res) => {
-  const { id } = req.params;
-  const { nombre, descripcion, estado } = req.body;
-
+// Actualizar categoría 
+router.put('/:id', upload.single('imagen'), async (req, res) => {
   try {
-    const categoriaExistente = await prisma.categoria.findUnique({
-      where: { id: parseInt(id) }
-    });
+    const { id } = req.params;
+    const { nombre, descripcion, estado, activo } = req.body;
+
+    const categoriaExistente = await prisma.categoria.findUnique({ where: { id: parseInt(id) } });
 
     if (!categoriaExistente) {
       return res.status(404).json({ error: "Categoría no encontrada" });
     }
 
-    if (nombre !== undefined && (!nombre || nombre.trim() === "")) {
+    if (nombre !== undefined && (!nombre || nombre.trim() === '')) {
       return res.status(400).json({ error: "El nombre de la categoría es obligatorio" });
     }
 
-    if (nombre && nombre.trim().toLowerCase() !== categoriaExistente.nombre.toLowerCase()) {
-      const otraCategoria = await prisma.categoria.findFirst({
-        where: {
-          nombre: nombre.trim().toLowerCase(),
-          id: { not: parseInt(id) }
-        }
-      });
+    if (nombre) {
+      const nombreBuscado = nombre.trim().toLowerCase();
 
-      if (otraCategoria) {
-        return res.status(400).json({ error: "Ya existe otra categoría con ese nombre" });
+      if (nombreBuscado !== categoriaExistente.nombre.toLowerCase()) {
+        const otraCategoria = await prisma.categoria.findFirst({
+          where: { 
+            nombre: nombreBuscado,
+            id: { not: parseInt(id) }
+          }
+        });
+
+        if (otraCategoria) {
+          return res.status(400).json({ error: "Ya existe otra categoría con ese nombre" });
+        }
       }
     }
 
     const dataToUpdate = {};
     if (nombre !== undefined) dataToUpdate.nombre = nombre.trim().toLowerCase();
     if (descripcion !== undefined) dataToUpdate.descripcion = descripcion.trim();
-    if (estado !== undefined) dataToUpdate.activo = Boolean(estado);
+    
+    // ✅ Corrección aquí
+    const estadoValor = estado !== undefined ? estado : activo;
+    if (estadoValor !== undefined) {
+      dataToUpdate.activo = convertirABoolean(estadoValor);
+    }
+
     if (req.file) dataToUpdate.imagenUrl = `/uploads/${req.file.filename}`;
 
     const categoriaActualizada = await prisma.categoria.update({
@@ -129,11 +137,12 @@ export const updateCategoria = async (req, res) => {
     });
 
     res.json(categoriaActualizada);
+
   } catch (error) {
-    console.error("Error al actualizar categoría:", error);
+    console.error("❌ Error al actualizar categoría:", error);
     res.status(500).json({ error: "Error al actualizar la categoría" });
   }
-};
+});
 
 // Eliminar categoría 
 export const deleteCategoria = async (req, res) => {
@@ -150,7 +159,6 @@ export const deleteCategoria = async (req, res) => {
     }
 
     if (categoria._count.productos > 0) {
-      // Soft delete: desactivar categoría
       const categoriaDesactivada = await prisma.categoria.update({
         where: { id: parseInt(id) },
         data: { activo: false }
@@ -161,7 +169,6 @@ export const deleteCategoria = async (req, res) => {
         categoria: categoriaDesactivada
       });
     } else {
-      // Eliminar físicamente
       await prisma.categoria.delete({
         where: { id: parseInt(id) }
       });
