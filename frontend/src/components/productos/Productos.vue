@@ -275,7 +275,7 @@ export default {
         <div class="pb-2 px-6 mb-4 shadow-sm">
           <div class="text-center mb-4">
             <h1 class="text-4xl font-bold text-gray-800 mb-1">
-              Productos de {{ categoriaNombre || 'Categoría' }}
+              Catalogo de  {{ categoriaNombre || 'Categoría' }}
             </h1>
             <p class="text-gray-500 text-lg"> 
               <span v-if="productos.length > 0" class="font-medium">

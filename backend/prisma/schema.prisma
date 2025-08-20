@@ -46,7 +46,7 @@ model Categoria {
   descripcion   String?    @db.Text
   activo        Boolean    @default(true)
   fechaCreacion DateTime   @default(now())
-  imagenUrl     String?    
+  imagenUrl     String?
   productos     Producto[]
 
   @@map("categorias")
@@ -77,7 +77,10 @@ model Campana {
   descripcion   String?    @db.Text
   fechaInicio   DateTime   @db.Date
   fechaFin      DateTime   @db.Date
+  imagenUrl     String?
   aprobada      Boolean    @default(false)
+  puntos        Int?
+  descuento     Int?
   fechaCreacion DateTime   @default(now())
   productos     Producto[] @relation("campanatoproducto")
 

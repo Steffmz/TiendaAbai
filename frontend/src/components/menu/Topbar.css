@@ -16,12 +16,6 @@
   cursor: pointer;
 }
 
-.logo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .logo img {
   height: 50px;
   max-width: 100%;

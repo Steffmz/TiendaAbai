@@ -38,7 +38,7 @@
 
   function showNotifications() {
     console.log('Mostrar notificaciones');
-  }
+  } 
 
   function logout() {
     if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {

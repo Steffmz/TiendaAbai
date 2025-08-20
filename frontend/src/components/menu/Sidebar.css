@@ -18,6 +18,7 @@
   width: 100px;
 }
 
+
 .logo-container2 {
   display: flex;
   flex-direction: column;
@@ -137,7 +138,7 @@
 @media (max-width: 768px) {
   .sidebar {
     transform: translateX(-100%);
-    width: 280px;
+    width: 260px;
   }
   
   .sidebar.open {
@@ -145,7 +146,7 @@
   }
   
   .sidebar.collapsed {
-    width: 280px;
+    width: 260px;
   }
 }
 
