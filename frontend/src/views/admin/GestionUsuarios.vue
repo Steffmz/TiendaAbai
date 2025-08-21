@@ -58,12 +58,11 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import api from '../../api/client';
 import { useRouter } from 'vue-router';
 
 const usuarios = ref([]);
 const router = useRouter();
-const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 // Lógica del modal para asignar puntos
 const showModal = ref(false);
@@ -84,16 +83,12 @@ const closeModal = () => {
 
 const submitPoints = async () => {
   if (!selectedUser.value) return;
-  const token = localStorage.getItem('authToken');
   try {
-    const response = await axios.post(
-      `${baseUrl}/api/admin/usuarios/${selectedUser.value.id}/puntos`,
+    const response = await api.post(
+      `/api/admin/usuarios/${selectedUser.value.id}/puntos`,
       {
         puntos: pointsToAdd.value,
         descripcion: description.value,
-      },
-      {
-        headers: { 'Authorization': `Bearer ${token}` }
       }
     );
     const userIndex = usuarios.value.findIndex(u => u.id === selectedUser.value.id);
@@ -116,11 +111,8 @@ async function eliminarUsuario(id) {
   if (!confirm('¿Estás seguro de que quieres eliminar este usuario? Esta acción es irreversible.')) {
     return;
   }
-  const token = localStorage.getItem('authToken');
   try {
-    await axios.delete(`${baseUrl}/api/admin/usuarios/${id}`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    await api.delete(`/api/admin/usuarios/${id}`);
     usuarios.value = usuarios.value.filter(u => u.id !== id);
     alert('Usuario eliminado con éxito.');
   } catch (error) {
@@ -131,11 +123,8 @@ async function eliminarUsuario(id) {
 
 // Cargar los usuarios cuando el componente se monta
 onMounted(async () => {
-  const token = localStorage.getItem('authToken');
   try {
-    const response = await axios.get(`${baseUrl}/api/admin/usuarios`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    const response = await api.get(`/api/admin/usuarios`);
     usuarios.value = response.data;
   } catch (error) {
     console.error("No tienes permiso o hubo un error:", error);

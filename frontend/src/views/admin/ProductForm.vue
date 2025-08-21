@@ -40,12 +40,11 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import axios from 'axios';
+import api from '../../api/client';
 import { useRouter, useRoute } from 'vue-router';
 
 const router = useRouter();
 const route = useRoute(); // Para acceder a los parámetros de la ruta, como el ID
-const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 const categorias = ref([]);
 const producto = ref({
@@ -62,7 +61,7 @@ const isEditing = computed(() => !!route.params.id);
 // Cargar las categorías
 onMounted(async () => {
   try {
-    const response = await axios.get(`${baseUrl}/api/categorias`);
+    const response = await api.get(`/api/categorias`);
     categorias.value = response.data;
   } catch (error) {
     console.error("Error al cargar categorías:", error);
@@ -71,7 +70,7 @@ onMounted(async () => {
   // Si estamos en modo edición, cargar los datos del producto
   if (isEditing.value) {
     try {
-      const response = await axios.get(`${baseUrl}/api/productos/${route.params.id}`);
+      const response = await api.get(`/api/productos/${route.params.id}`);
       producto.value = response.data;
     } catch (error) {
       console.error("Error al cargar el producto para editar:", error);
@@ -81,19 +80,14 @@ onMounted(async () => {
 });
 
 const guardarProducto = async () => {
-  const token = localStorage.getItem('authToken');
   try {
     if (isEditing.value) {
       // Si estamos editando, usamos el método PUT
-      await axios.put(`${baseUrl}/api/productos/${route.params.id}`, producto.value, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      await api.put(`/api/productos/${route.params.id}`, producto.value);
       alert('¡Producto actualizado con éxito!');
     } else {
       // Si no, usamos el método POST para crear
-      await axios.post(`${baseUrl}/api/productos`, producto.value, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      await api.post(`/api/productos`, producto.value);
       alert('¡Producto creado con éxito!');
     }
     router.push('/dashboard/productos'); // Redirige a la lista de productos

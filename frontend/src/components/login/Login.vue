@@ -2,11 +2,10 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from "vue";
-import axios from 'axios';
+import api from '../../api/client';
 import { useRouter } from 'vue-router';
 import { jwtDecode } from 'jwt-decode';
 
-const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 const router = useRouter(); // Y esta
 
@@ -32,7 +31,7 @@ const registro = ref({
 const login = async () => {
   errorMessage.value = '';
   try {
-    const response = await axios.post(`${baseUrl}/auth/login`, {
+    const response = await api.post(`/auth/login`, {
       cedula: cedula.value,
       contrasena: password.value,
     });
@@ -61,7 +60,7 @@ const login = async () => {
 const register = async () => {
   errorMessage.value = '';
   try {
-    await axios.post(`${baseUrl}/usuarios`, registro.value);
+    await api.post(`/usuarios`, registro.value);
     
     alert('¡Registro exitoso! Ahora puedes iniciar sesión.');
     closeModal();

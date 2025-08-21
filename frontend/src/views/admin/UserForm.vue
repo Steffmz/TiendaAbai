@@ -59,12 +59,11 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import axios from 'axios';
+import api from '../../api/client';
 import { useRouter, useRoute } from 'vue-router';
 
 const router = useRouter();
 const route = useRoute();
-const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 const usuario = ref({
     nombreCompleto: '',
@@ -82,11 +81,8 @@ const isEditing = computed(() => !!route.params.id);
 
 onMounted(async () => {
     if (isEditing.value) {
-        const token = localStorage.getItem('authToken');
         try {
-            const response = await axios.get(`${baseUrl}/api/admin/usuarios/${route.params.id}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+            const response = await api.get(`/api/admin/usuarios/${route.params.id}`);
             // Asignamos los datos
             const userData = response.data;
             usuario.value = {
@@ -102,16 +98,14 @@ onMounted(async () => {
 });
 
 const guardarUsuario = async () => {
-    const token = localStorage.getItem('authToken');
     const datosParaEnviar = { ...usuario.value };
 
     try {
         if (isEditing.value) {
             // Lógica de Actualización
-            await axios.put(
-                `${baseUrl}/api/admin/usuarios/${route.params.id}`,
-                datosParaEnviar,
-                { headers: { 'Authorization': `Bearer ${token}` } }
+            await api.put(
+                `/api/admin/usuarios/${route.params.id}`,
+                datosParaEnviar
             );
             alert('¡Usuario actualizado con éxito!');
         } else {
@@ -120,8 +114,8 @@ const guardarUsuario = async () => {
                 alert('Para crear un usuario, se necesita una contraseña.');
                 return;
             }
-            await axios.post(
-                `${baseUrl}/usuarios`,
+            await api.post(
+                `/usuarios`,
                 datosParaEnviar
             );
             alert('¡Usuario creado con éxito!');
