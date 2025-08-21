@@ -1,7 +1,6 @@
-// middleware/adminMiddleware.js
 const jwt = require('jsonwebtoken');
 
-const adminMiddleware = (req, res, next) => {
+const authMiddleware = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
@@ -13,16 +12,9 @@ const adminMiddleware = (req, res, next) => {
     if (err) {
       return res.status(403).json({ message: 'Token no válido.' });
     }
-
-    if (decodedPayload.rol !== 'Administrador') {
-      return res.status(403).json({
-        message: 'Acceso denegado. Se requiere rol de administrador.',
-      });
-    }
-
     req.usuario = decodedPayload;
     next();
   });
 };
 
-module.exports = adminMiddleware;
+module.exports = authMiddleware;

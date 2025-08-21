@@ -10,6 +10,7 @@ const {
   asignarProducto,
   quitarProducto
 } = require('../controllers/CampanaController');
+const adminMiddleware = require('../middleware/adminMiddleware');
 
 const router = express.Router();
 
@@ -73,10 +74,10 @@ const handleMulterError = (err, req, res, next) => {
 
 //  Rutas
 router.get('/', getCampanas);
-router.post('/', upload.single('imagen'), handleMulterError, createCampana);
-router.put('/:id', upload.single('imagen'), handleMulterError, updateCampana);
-router.delete('/:id', deleteCampana);
-router.post('/asignar-producto', asignarProducto);
-router.post('/quitar-producto', quitarProducto);
+router.post('/', adminMiddleware, upload.single('imagen'), handleMulterError, createCampana);
+router.put('/:id', adminMiddleware, upload.single('imagen'), handleMulterError, updateCampana);
+router.delete('/:id', adminMiddleware, deleteCampana);
+router.post('/asignar-producto', adminMiddleware, asignarProducto);
+router.post('/quitar-producto', adminMiddleware, quitarProducto);
 
 module.exports = router;
