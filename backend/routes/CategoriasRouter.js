@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const { PrismaClient } = require('@prisma/client');
 const { updateCategoria } = require('../controllers/CategoriaController');
+const { convertirABoolean } = require('../utils/boolean');
 
 const prisma = new PrismaClient();
 const router = express.Router();
@@ -43,23 +44,6 @@ const upload = multer({
     }
   }
 });
-
-// Función para convertir diferentes tipos de entrada a boolean
-const convertirABoolean = (valor) => {
-  if (typeof valor === 'boolean') {
-    return valor;
-  }
-  if (typeof valor === 'string') {
-    const lower = valor.toLowerCase();
-    if (lower === 'true' || lower === '1' || lower === 'activo') return true;
-    if (lower === 'false' || lower === '0' || lower === 'inactivo') return false;
-  }
-  if (typeof valor === 'number') {
-    if (valor === 0) return false;
-    if (valor === 1) return true;
-  }
-  return true;
-};
 
 // Obtener todas las categorías
 router.get('/', async (req, res) => {
