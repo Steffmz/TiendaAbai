@@ -55,9 +55,10 @@ const convertirABoolean = (valor) => {
     if (lower === 'false' || lower === '0' || lower === 'inactivo') return false;
   }
   if (typeof valor === 'number') {
-    return valor === 1;
+    if (valor === 0) return false;
+    if (valor === 1) return true;
   }
-  return true; 
+  return true;
 };
 
 // Obtener todas las categorías

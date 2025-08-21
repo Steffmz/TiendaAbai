@@ -1,5 +1,10 @@
 const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
+let prisma;
+try {
+  prisma = new PrismaClient();
+} catch (e) {
+  prisma = null;
+}
 
 // Utilidad para convertir diferentes entradas a booleano
 const convertirABoolean = (valor) => {
@@ -9,7 +14,10 @@ const convertirABoolean = (valor) => {
     if (lower === "true" || lower === "1" || lower === "activo") return true;
     if (lower === "false" || lower === "0" || lower === "inactivo") return false;
   }
-  if (typeof valor === "number") return valor === 1;
+  if (typeof valor === "number") {
+    if (valor === 0) return false;
+    if (valor === 1) return true;
+  }
   return true;
 };
 
