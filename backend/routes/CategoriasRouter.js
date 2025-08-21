@@ -2,13 +2,15 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const prisma = require('../config/prisma');
 const {
   getCategorias,
   getCategoriaById,
   createCategoria,
-  updateCategoria
+  updateCategoria,
+  deleteCategoria,
+  toggleEstadoCategoria,
 } = require('../controllers/CategoriaController');
+const adminMiddleware = require('../middleware/adminMiddleware');
 const router = express.Router();
 const uploadDir = path.join(__dirname, '..', 'uploads');
 
@@ -54,89 +56,15 @@ router.get('/', getCategorias);
 router.get('/:id', getCategoriaById);
 
 // Crear nueva categoría
-router.post('/', upload.single('imagen'), createCategoria);
+router.post('/', adminMiddleware, upload.single('imagen'), createCategoria);
 
 // Actualizar categoría
-router.put('/:id', upload.single('imagen'), updateCategoria);
+router.put('/:id', adminMiddleware, upload.single('imagen'), updateCategoria);
 
 // Eliminar categoría
-router.delete('/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    // Verificar que la categoría existe
-    const categoria = await prisma.categoria.findUnique({
-      where: { id: parseInt(id) },
-      include: {
-        _count: {
-          select: { productos: true }
-        }
-      }
-    });
-
-    if (!categoria) {
-      return res.status(404).json({ error: "Categoría no encontrada" });
-    }
-
-    // Verificar si tiene productos asociados
-    if (categoria._count.productos > 0) {
-      const categoriaDesactivada = await prisma.categoria.update({
-        where: { id: parseInt(id) },
-        data: { activo: false }
-      });
-
-      console.log(`⚠️ Categoría desactivada (tiene productos): ${categoria.nombre}`);
-      
-      res.json({ 
-        message: "Categoría desactivada correctamente (tiene productos asociados)",
-        categoria: categoriaDesactivada
-      });
-    } else {
-      await prisma.categoria.delete({
-        where: { id: parseInt(id) }
-      });
-
-      console.log(`🗑️ Categoría eliminada: ${categoria.nombre}`);
-      res.json({ message: "Categoría eliminada correctamente" });
-    }
-
-  } catch (error) {
-    console.error("❌ Error al eliminar categoría:", error);
-    res.status(500).json({ error: "Error al eliminar la categoría" });
-  }
-});
+router.delete('/:id', adminMiddleware, deleteCategoria);
 
 // Activar/Desactivar categoría
-router.patch('/:id/estado', async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const categoria = await prisma.categoria.findUnique({
-      where: { id: parseInt(id) }
-    });
-
-    if (!categoria) {
-      return res.status(404).json({ error: "Categoría no encontrada" });
-    }
-
-    const nuevoEstado = !categoria.activo;
-
-    const categoriaActualizada = await prisma.categoria.update({
-      where: { id: parseInt(id) },
-      data: { activo: nuevoEstado }
-    });
-
-    console.log(`🔄 Categoría ${nuevoEstado ? 'activada' : 'desactivada'}: ${categoria.nombre}`);
-
-    res.json({
-      message: `Categoría ${nuevoEstado ? 'activada' : 'desactivada'} correctamente`,
-      categoria: categoriaActualizada
-    });
-
-  } catch (error) {
-    console.error("❌ Error al cambiar estado de categoría:", error);
-    res.status(500).json({ error: "Error al cambiar el estado de la categoría" });
-  }
-});
+router.patch('/:id/estado', adminMiddleware, toggleEstadoCategoria);
 
 module.exports = router;
