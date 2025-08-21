@@ -3,6 +3,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const { PrismaClient } = require('@prisma/client');
+const { updateCategoria } = require('../controllers/CategoriaController');
 
 const prisma = new PrismaClient();
 const router = express.Router();
@@ -146,63 +147,7 @@ const nuevaCategoria = await prisma.categoria.create({
 });
 
 // Actualizar categoría
-router.put('/:id', upload.single('imagen'), async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { nombre, descripcion, estado, activo } = req.body;
-
-    const categoriaExistente = await prisma.categoria.findUnique({ where: { id: parseInt(id) } });
-
-    if (!categoriaExistente) {
-      return res.status(404).json({ error: "Categoría no encontrada" });
-    }
-
-    if (nombre !== undefined && (!nombre || nombre.trim() === '')) {
-      return res.status(400).json({ error: "El nombre de la categoría es obligatorio" });
-    }
-
-    if (nombre) {
-      const nombreBuscado = nombre.trim().toLowerCase();
-
-      if (nombreBuscado !== categoriaExistente.nombre.toLowerCase()) {
-        const otraCategoria = await prisma.categoria.findFirst({
-          where: { 
-            nombre: nombreBuscado,
-            id: { not: parseInt(id) }
-          }
-        });
-
-        if (otraCategoria) {
-          return res.status(400).json({ error: "Ya existe otra categoría con ese nombre" });
-        }
-      }
-    }
-
-    const dataToUpdate = {};
-    if (nombre !== undefined) dataToUpdate.nombre = nombre.trim().toLowerCase();
-    if (descripcion !== undefined) dataToUpdate.descripcion = descripcion.trim();
-    
-    // Manejar tanto "estado" como "activo" para compatibilidad
-    const estadoValor = estado !== undefined ? estado : activo;
-    if (estadoValor !== undefined) {
-      dataToUpdate.activo = convertirABoolean(estadoValor);
-    }
-
-    
-    if (req.file) dataToUpdate.imagenUrl = `/uploads/${req.file.filename}`;
-
-    const categoriaActualizada = await prisma.categoria.update({
-      where: { id: parseInt(id) },
-      data: dataToUpdate
-    });
-
-    res.json(categoriaActualizada);
-
-  } catch (error) {
-    console.error("❌ Error al actualizar categoría:", error);
-    res.status(500).json({ error: "Error al actualizar la categoría" });
-  }
-});
+router.put('/:id', upload.single('imagen'), updateCategoria);
 
 // Eliminar categoría
 router.delete('/:id', async (req, res) => {
