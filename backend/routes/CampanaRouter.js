@@ -14,7 +14,7 @@ const {
 const router = express.Router();
 
 // Crear directorio uploads si no existe
-const uploadsDir = path.join(__dirname, '../../uploads');
+const uploadsDir = path.join(__dirname, '..', 'uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
   console.log('📁 Directorio uploads creado:', uploadsDir);
@@ -71,7 +71,7 @@ const handleMulterError = (err, req, res, next) => {
   next(err);
 };
 
-//  Rutas
+// Rutas
 router.get('/', getCampanas);
 router.post('/', upload.single('imagen'), handleMulterError, createCampana);
 router.put('/:id', upload.single('imagen'), handleMulterError, updateCampana);

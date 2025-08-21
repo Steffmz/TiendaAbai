@@ -1,31 +1,37 @@
-const { convertirABoolean } = require('../controllers/CategoriaController');
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const { convertirABoolean } = require('../utils/boolean');
 
-describe('convertirABoolean', () => {
-  test('returns same boolean for boolean inputs', () => {
-    expect(convertirABoolean(true)).toBe(true);
-    expect(convertirABoolean(false)).toBe(false);
-  });
-
-  test('converts string "1" and "0"', () => {
-    expect(convertirABoolean('1')).toBe(true);
-    expect(convertirABoolean('0')).toBe(false);
-  });
-
-  test('converts string "activo" and "inactivo"', () => {
-    expect(convertirABoolean('activo')).toBe(true);
-    expect(convertirABoolean('inactivo')).toBe(false);
-  });
-
-  test('converts numeric 1 and 0', () => {
-    expect(convertirABoolean(1)).toBe(true);
-    expect(convertirABoolean(0)).toBe(false);
-  });
-
-  test('returns true for unexpected values', () => {
-    expect(convertirABoolean('yes')).toBe(true);
-    expect(convertirABoolean(null)).toBe(true);
-    expect(convertirABoolean(undefined)).toBe(true);
-    expect(convertirABoolean(2)).toBe(true);
-    expect(convertirABoolean({})).toBe(true);
-  });
+test('returns same boolean for boolean inputs', () => {
+  assert.strictEqual(convertirABoolean(true), true);
+  assert.strictEqual(convertirABoolean(false), false);
 });
+
+test('converts string "1" and "0"', () => {
+  assert.strictEqual(convertirABoolean('1'), true);
+  assert.strictEqual(convertirABoolean('0'), false);
+});
+
+test('converts string "activo" and "inactivo"', () => {
+  assert.strictEqual(convertirABoolean('activo'), true);
+  assert.strictEqual(convertirABoolean('inactivo'), false);
+});
+
+test('converts numeric 1 and 0', () => {
+  assert.strictEqual(convertirABoolean(1), true);
+  assert.strictEqual(convertirABoolean(0), false);
+});
+
+test('is case-insensitive for strings', () => {
+  assert.strictEqual(convertirABoolean('TrUe'), true);
+  assert.strictEqual(convertirABoolean('InAcTiVo'), false);
+});
+
+test('returns false for unexpected values', () => {
+  assert.strictEqual(convertirABoolean('yes'), false);
+  assert.strictEqual(convertirABoolean(null), false);
+  assert.strictEqual(convertirABoolean(undefined), false);
+  assert.strictEqual(convertirABoolean(2), false);
+  assert.strictEqual(convertirABoolean({}), false);
+});
+
