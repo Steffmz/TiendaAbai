@@ -3,8 +3,12 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const { PrismaClient } = require('@prisma/client');
-const { updateCategoria } = require('../controllers/CategoriaController');
-const { convertirABoolean } = require('../utils/boolean');
+const {
+  getCategorias,
+  getCategoriaById,
+  createCategoria,
+  updateCategoria
+} = require('../controllers/CategoriaController');
 
 const prisma = new PrismaClient();
 const router = express.Router();
@@ -46,90 +50,13 @@ const upload = multer({
 });
 
 // Obtener todas las categorías
-router.get('/', async (req, res) => {
-  try {
-    const categorias = await prisma.categoria.findMany({
-      orderBy: { fechaCreacion: "desc" },
-      include: {
-        _count: {
-          select: { productos: true }
-        }
-      }
-    });
-
-    res.json(categorias);
-  } catch (error) {
-    console.error("❌ Error al obtener categorías:", error);
-    res.status(500).json({ error: "Error al obtener las categorías" });
-  }
-});
+router.get('/', getCategorias);
 
 // Obtener categoría por ID con sus productos
-router.get('/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    
-    const categoria = await prisma.categoria.findUnique({
-      where: { id: parseInt(id) },
-      include: {
-        productos: {
-          orderBy: { fechaCreacion: "desc" }
-        }
-      }
-    });
-
-    if (!categoria) {
-      return res.status(404).json({ error: "Categoría no encontrada" });
-    }
-
-    res.json({
-      categoria,
-      productos: categoria.productos
-    });
-  } catch (error) {
-    console.error("❌ Error al obtener categoría:", error);
-    res.status(500).json({ error: "Error al obtener la categoría" });
-  }
-});
+router.get('/:id', getCategoriaById);
 
 // Crear nueva categoría
-router.post('/', upload.single('imagen'), async (req, res) => {
-  try {
-    const { nombre, descripcion, activo } = req.body;
-
-    if (!nombre || nombre.trim() === '') {
-      return res.status(400).json({ error: "El nombre de la categoría es obligatorio" });
-    }
-
-    const nombreBuscado = nombre.trim().toLowerCase();
-    const categoriaExistente = await prisma.categoria.findFirst({
-      where: { nombre: nombreBuscado }
-    });
-
-    if (categoriaExistente) {
-      return res.status(400).json({ error: "Ya existe una categoría con ese nombre" });
-    }
-
-    const imagenUrl = req.file ? `/uploads/${req.file.filename}` : null;
-
-   const estadoBoolean = convertirABoolean(activo !== undefined ? activo : true);
-
-const nuevaCategoria = await prisma.categoria.create({
-  data: {
-    nombre: nombreBuscado,
-    descripcion: descripcion ? descripcion.trim() : '',
-    imagenUrl,
-    activo: estadoBoolean
-  }
-});
-
-    res.status(201).json(nuevaCategoria);
-
-  } catch (error) {
-    console.error("❌ Error al crear categoría:", error);
-    res.status(500).json({ error: "Error al crear la categoría" });
-  }
-});
+router.post('/', upload.single('imagen'), createCategoria);
 
 // Actualizar categoría
 router.put('/:id', upload.single('imagen'), updateCategoria);
