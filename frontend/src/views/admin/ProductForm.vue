@@ -84,13 +84,13 @@ const guardarProducto = async () => {
   try {
     if (isEditing.value) {
       // Si estamos editando, usamos el método PUT
-      await axios.put(`http://localhost:3000/api/admin/productos/${route.params.id}`, producto.value, {
+      await axios.put(`http://localhost:3000/api/productos/${route.params.id}`, producto.value, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       alert('¡Producto actualizado con éxito!');
     } else {
       // Si no, usamos el método POST para crear
-      await axios.post('http://localhost:3000/api/admin/productos', producto.value, {
+      await axios.post('http://localhost:3000/api/productos', producto.value, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       alert('¡Producto creado con éxito!');
