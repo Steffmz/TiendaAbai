@@ -1,17 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 
-let prisma;
+// Create a single PrismaClient instance and export it for reuse
+const prisma = new PrismaClient();
 
-function getPrismaClient() {
-  if (!prisma) {
-    try {
-      prisma = new PrismaClient();
-    } catch (error) {
-      console.error('Failed to initialize PrismaClient:', error);
-      prisma = null;
-    }
-  }
-  return prisma;
-}
-
-module.exports = getPrismaClient();
+module.exports = prisma;
