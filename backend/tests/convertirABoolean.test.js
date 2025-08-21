@@ -1,4 +1,4 @@
-const { convertirABoolean } = require('../controllers/CategoriaController');
+const { convertirABoolean } = require('../utils/boolean');
 
 describe('convertirABoolean', () => {
   test('returns same boolean for boolean inputs', () => {
