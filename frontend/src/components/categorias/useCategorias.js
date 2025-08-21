@@ -112,16 +112,23 @@ export default function useCategorias() {
             error.value = null;
             try {
       console.log('🔍 Obteniendo categorías...');
-      
+
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        window.location = '/login';
+        loading.value = false;
+        return;
+      }
+
       const url = `${baseUrl}/api/categorias`;
-      
+
       const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token
-              }
+          'Authorization': 'Bearer ' + token
+        }
       });
 
       console.log('📡 Respuesta recibida:', response.status, response.statusText);
