@@ -2,6 +2,7 @@ import { ref, computed, onMounted } from 'vue'
 import api from '../../api/client'
 import Swal from 'sweetalert2'
 
+const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 const API_URL = `/api/campanas`
 const API_PRODUCTOS = `/api/productos`
 
