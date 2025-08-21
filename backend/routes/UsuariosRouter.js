@@ -22,10 +22,10 @@ router.post('/auth/login', loginUsuario);
 router.get('/api/perfil', authMiddleware, getPerfil);
 
 // Acciones de administrador
-router.post('/api/admin/usuarios/:id/puntos', adminMiddleware, asignarPuntos);
-router.get('/api/admin/usuarios', adminMiddleware, getUsuarios);
-router.get('/api/admin/usuarios/:id', adminMiddleware, getUsuario);
-router.put('/api/admin/usuarios/:id', adminMiddleware, updateUsuario);
-router.delete('/api/admin/usuarios/:id', adminMiddleware, deleteUsuario);
+router.post('/api/admin/usuarios/:id/puntos', authMiddleware, adminMiddleware, asignarPuntos);
+router.get('/api/admin/usuarios', authMiddleware, adminMiddleware, getUsuarios);
+router.get('/api/admin/usuarios/:id', authMiddleware, adminMiddleware, getUsuario);
+router.put('/api/admin/usuarios/:id', authMiddleware, adminMiddleware, updateUsuario);
+router.delete('/api/admin/usuarios/:id', authMiddleware, adminMiddleware, deleteUsuario);
 
 module.exports = router;

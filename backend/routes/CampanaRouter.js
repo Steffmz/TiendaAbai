@@ -10,6 +10,7 @@ const {
   asignarProducto,
   quitarProducto
 } = require('../controllers/CampanaController');
+const authMiddleware = require('../middleware/authMiddleware');
 const adminMiddleware = require('../middleware/adminMiddleware');
 
 const router = express.Router();
@@ -21,10 +22,9 @@ if (!fs.existsSync(uploadsDir)) {
   console.log('📁 Directorio uploads creado:', uploadsDir);
 }
 
-
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/') 
+    cb(null, 'uploads/')
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -42,12 +42,12 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-const upload = multer({ 
+const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024, 
-    files: 1 
+    fileSize: 5 * 1024 * 1024,
+    files: 1
   }
 });
 
@@ -64,20 +64,20 @@ const handleMulterError = (err, req, res, next) => {
       return res.status(400).json({ error: 'Campo de archivo inesperado.' });
     }
   }
-  
+
   if (err.message === 'Solo se permiten archivos de imagen') {
     return res.status(400).json({ error: 'Solo se permiten archivos de imagen (JPG, PNG, GIF, etc.).' });
   }
-  
+
   next(err);
 };
 
 //  Rutas
 router.get('/', getCampanas);
-router.post('/', adminMiddleware, upload.single('imagen'), handleMulterError, createCampana);
-router.put('/:id', adminMiddleware, upload.single('imagen'), handleMulterError, updateCampana);
-router.delete('/:id', adminMiddleware, deleteCampana);
-router.post('/asignar-producto', adminMiddleware, asignarProducto);
-router.post('/quitar-producto', adminMiddleware, quitarProducto);
+router.post('/', authMiddleware, adminMiddleware, upload.single('imagen'), handleMulterError, createCampana);
+router.put('/:id', authMiddleware, adminMiddleware, upload.single('imagen'), handleMulterError, updateCampana);
+router.delete('/:id', authMiddleware, adminMiddleware, deleteCampana);
+router.post('/asignar-producto', authMiddleware, adminMiddleware, asignarProducto);
+router.post('/quitar-producto', authMiddleware, adminMiddleware, quitarProducto);
 
 module.exports = router;

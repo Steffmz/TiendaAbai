@@ -2,6 +2,8 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const authMiddleware = require('../middleware/authMiddleware');
+const adminMiddleware = require('../middleware/adminMiddleware');
 
 // IMPORTANTE: Importar el controlador de PRODUCTOS, no de Campañas
 const {
@@ -30,7 +32,7 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ 
+const upload = multer({
   storage,
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith('image/')) {
@@ -40,7 +42,7 @@ const upload = multer({
     }
   },
   limits: {
-    fileSize: 5 * 1024 * 1024 
+    fileSize: 5 * 1024 * 1024
   }
 });
 
@@ -48,7 +50,7 @@ const upload = multer({
 router.get('/', getAllProductos);
 router.get('/categoria/:categoriaId', getProductosByCategoria);
 router.get('/:id', getProductoById);
-router.post('/', upload.single('imagen'), createProducto);
-router.put('/:id', upload.single('imagen'), updateProducto);
-router.delete('/:id', deleteProducto);
+router.post('/', authMiddleware, adminMiddleware, upload.single('imagen'), createProducto);
+router.put('/:id', authMiddleware, adminMiddleware, upload.single('imagen'), updateProducto);
+router.delete('/:id', authMiddleware, adminMiddleware, deleteProducto);
 module.exports = router;
