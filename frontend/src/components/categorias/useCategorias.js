@@ -109,9 +109,8 @@ export default function useCategorias() {
 
   const obtenerCategorias = async () => {
     loading.value = true;
-    error.value = null;
-    
-    try {
+            error.value = null;
+            try {
       console.log('🔍 Obteniendo categorías...');
       
       const url = `${baseUrl}/api/categorias`;
@@ -120,8 +119,9 @@ export default function useCategorias() {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+              }
       });
 
       console.log('📡 Respuesta recibida:', response.status, response.statusText);
@@ -177,8 +177,12 @@ export default function useCategorias() {
       
       const method = editando.value ? 'PUT' : 'POST';
 
+            const token = localStorage.getItem('authToken');
       const response = await fetch(url, {
         method: method,
+        headers: {
+          'Authorization': 'Bearer ' + token 
+        },
         body: formData
       });
 
@@ -214,13 +218,14 @@ export default function useCategorias() {
 
           loading.value = true;
           error.value = null;
-
-          try {
+            try {
+            const token = localStorage.getItem('authToken');
             const response = await fetch(`${baseUrl}/api/categorias/${categoria.id}`, {
               method: 'DELETE',
               headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
               }
             });
 
@@ -242,11 +247,13 @@ export default function useCategorias() {
   error.value = null;
 
   try {
+    const token = localStorage.getItem('authToken');
     const response = await fetch(`${baseUrl}/api/categorias/${categoria.id}/estado`, {
       method: 'PATCH',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
       }
     });
 

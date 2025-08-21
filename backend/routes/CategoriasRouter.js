@@ -10,6 +10,7 @@ const {
   deleteCategoria,
   toggleEstadoCategoria,
 } = require('../controllers/CategoriaController');
+const authMiddleware = require('../middleware/authMiddleware');
 const adminMiddleware = require('../middleware/adminMiddleware');
 const router = express.Router();
 const uploadDir = path.join(__dirname, '..', 'uploads');
@@ -31,10 +32,10 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ 
+const upload = multer({
   storage,
   limits: {
-    fileSize: 5 * 1024 * 1024 
+    fileSize: 5 * 1024 * 1024
   },
   fileFilter: (req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png|gif|webp/;
@@ -56,15 +57,15 @@ router.get('/', getCategorias);
 router.get('/:id', getCategoriaById);
 
 // Crear nueva categoría
-router.post('/', adminMiddleware, upload.single('imagen'), createCategoria);
+router.post('/', authMiddleware, adminMiddleware, upload.single('imagen'), createCategoria);
 
 // Actualizar categoría
-router.put('/:id', adminMiddleware, upload.single('imagen'), updateCategoria);
+router.put('/:id', authMiddleware, adminMiddleware, upload.single('imagen'), updateCategoria);
 
 // Eliminar categoría
-router.delete('/:id', adminMiddleware, deleteCategoria);
+router.delete('/:id', authMiddleware, adminMiddleware, deleteCategoria);
 
 // Activar/Desactivar categoría
-router.patch('/:id/estado', adminMiddleware, toggleEstadoCategoria);
+router.patch('/:id/estado', authMiddleware, adminMiddleware, toggleEstadoCategoria);
 
 module.exports = router;

@@ -143,7 +143,12 @@ export default {
           : `${baseUrl}/api/productos`;
         const method = editando.value ? 'PUT' : 'POST';
 
-        const res = await fetch(url, { method, body: data });
+        const token = localStorage.getItem('authToken');
+        const res = await fetch(url, {
+          method,
+          headers: { 'Authorization': 'Bearer ' + token },
+          body: data
+        });
         const responseData = await res.json();
 
         if (res.ok) {
@@ -196,7 +201,8 @@ export default {
 
       try {
         loading.value = true;
-        const res = await fetch(`${baseUrl}/api/productos/${producto.id}`, { method: 'DELETE' });
+        const token = localStorage.getItem('authToken');
+        const res = await fetch(`${baseUrl}/api/productos/${producto.id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
         const responseData = await res.json();
 
         if (res.ok) {
