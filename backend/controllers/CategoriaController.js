@@ -224,6 +224,7 @@ const toggleEstadoCategoria = async (req, res) => {
 };
 
 module.exports = {
+  convertirABoolean,
   getCategorias,
   getCategoriaById,
   createCategoria,
