@@ -61,7 +61,7 @@ async function eliminarProducto(id) {
 
     const token = localStorage.getItem('authToken');
     try {
-        await axios.delete(`http://localhost:3000/api/productos/${id}`, {
+        await axios.delete(`http://localhost:3000/api/admin/productos/${id}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         // Recargar la lista de productos para reflejar el cambio

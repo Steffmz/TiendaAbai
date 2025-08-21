@@ -6,7 +6,6 @@ const fs = require('fs');
 // IMPORTANTE: Importar el controlador de PRODUCTOS, no de Campañas
 const {
   getAllProductos,
-  getProductoById,
   getProductosByCategoria,
   createProducto,
   updateProducto,
@@ -47,8 +46,8 @@ const upload = multer({
 // RUTAS DE PRODUCTOS
 router.get('/', getAllProductos);
 router.get('/categoria/:categoriaId', getProductosByCategoria);
-router.get('/:id', getProductoById);
 router.post('/', upload.single('imagen'), createProducto);
 router.put('/:id', upload.single('imagen'), updateProducto);
 router.delete('/:id', deleteProducto);
+
 module.exports = router;

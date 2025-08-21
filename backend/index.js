@@ -392,6 +392,121 @@ app.get("/api/categorias", async (req, res) => {
     res.status(500).json({ message: "Error al obtener las categorías." });
   }
 });
+/**
+ * Endpoint de ADMIN para ACTUALIZAR un producto existente
+ */
+app.put("/api/admin/productos/:id", adminMiddleware, async (req, res) => {
+  const productId = parseInt(req.params.id);
+  const { nombre, descripcion, precioPuntos, stock, categoriaId } = req.body;
+
+  try {
+    const productoActualizado = await prisma.producto.update({
+      where: { id: productId },
+      data: {
+        nombre,
+        descripcion,
+        precioPuntos: parseInt(precioPuntos),
+        stock: parseInt(stock),
+        categoriaId: parseInt(categoriaId),
+      },
+    });
+    res.json(productoActualizado);
+  } catch (error) {
+    console.error("Error al actualizar el producto:", error);
+    res.status(500).json({ message: "Error al actualizar el producto." });
+  }
+});
+
+/**
+ * Endpoint de ADMIN para ELIMINAR un producto
+ */
+app.delete("/api/admin/productos/:id", adminMiddleware, async (req, res) => {
+  const productId = parseInt(req.params.id);
+
+  try {
+    await prisma.producto.delete({
+      where: { id: productId },
+    });
+    res.status(204).send();
+  } catch (error) {
+    console.error("Error al eliminar el producto:", error);
+    res.status(500).json({ message: "Error al eliminar el producto." });
+  }
+});
+
+/**
+ * Endpoint PÚBLICO para OBTENER un solo producto por su ID
+ */
+app.get("/api/productos/:id", async (req, res) => {
+  const productId = parseInt(req.params.id);
+  try {
+    const producto = await prisma.producto.findUnique({
+      where: { id: productId },
+    });
+    if (!producto) {
+      return res.status(404).json({ message: "Producto no encontrado." });
+    }
+    res.json(producto);
+  } catch (error) {
+    console.error("Error al obtener el producto:", error);
+    res.status(500).json({ message: "Error al obtener el producto." });
+  }
+});
+
+/**
+ * Endpoint de ADMIN para CREAR un nuevo producto
+ */
+app.post("/api/admin/productos", adminMiddleware, async (req, res) => {
+  const { nombre, descripcion, precioPuntos, stock, categoriaId } = req.body;
+
+  try {
+    // Validamos que los datos numéricos sean correctos
+    if (
+      isNaN(parseInt(precioPuntos)) ||
+      isNaN(parseInt(stock)) ||
+      isNaN(parseInt(categoriaId))
+    ) {
+      return res.status(400).json({
+        message: "Precio, stock y categoría deben ser números válidos.",
+      });
+    }
+
+    const nuevoProducto = await prisma.producto.create({
+      data: {
+        nombre,
+        descripcion,
+        precioPuntos: parseInt(precioPuntos),
+        stock: parseInt(stock),
+        categoriaId: parseInt(categoriaId),
+      },
+    });
+    res.status(201).json(nuevoProducto);
+  } catch (error) {
+    console.error("Error al crear el producto:", error);
+    res.status(500).json({ message: "Error al crear el producto." });
+  }
+});
+
+/**
+ * Endpoint para obtener todos los productos del catálogo.
+ */
+app.get("/api/productos", async (req, res) => {
+  try {
+    const productos = await prisma.producto.findMany({
+      where: {
+        estado: true,
+        stock: { gt: 0 },
+      },
+      include: {
+        categoria: { select: { nombre: true } },
+      },
+    });
+    res.json(productos);
+  } catch (error) {
+    console.error("Error al obtener productos:", error);
+    res.status(500).json({ message: "Error al obtener los productos." });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en el puerto ${PORT}`);

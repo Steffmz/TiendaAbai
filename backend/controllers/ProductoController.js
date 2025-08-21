@@ -17,33 +17,6 @@ const getAllProductos = async (req, res) => {
   }
 };
 
-// Obtener un producto por ID
-const getProductoById = async (req, res) => {
-  try {
-    const { id } = req.params;
-    if (isNaN(id)) {
-      return res.status(400).json({ error: "ID de producto inválido" });
-    }
-
-    const producto = await prisma.producto.findUnique({
-      where: { id: parseInt(id) },
-      include: {
-        categoria: true,
-        campanas: true
-      }
-    });
-
-    if (!producto) {
-      return res.status(404).json({ error: "Producto no encontrado" });
-    }
-
-    res.json(producto);
-  } catch (error) {
-    console.error("Error al obtener producto:", error);
-    res.status(500).json({ error: "Error al obtener producto" });
-  }
-};
-
 // Obtener productos por categoría
 const getProductosByCategoria = async (req, res) => {
   try {
@@ -238,7 +211,6 @@ const deleteProducto = async (req, res) => {
 
 module.exports = {
   getAllProductos,
-  getProductoById,
   getProductosByCategoria,
   createProducto,
   updateProducto,
