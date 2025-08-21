@@ -1,3 +1,4 @@
+// Mock Prisma client to avoid database connections during tests
 jest.mock('../config/prisma', () => ({ $use: jest.fn() }));
 const { convertirABoolean } = require('../utils/boolean');
 
