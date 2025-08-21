@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.0",
+    "jest": "^30.0.5",
     "vite": "^7.0.4",
     "vite-plugin-windicss": "^1.9.4",
     "windicss": "^3.5.6"
