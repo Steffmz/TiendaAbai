@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { PrismaClient } = require('@prisma/client');
+const prisma = require('./config/prisma');
 const ProductosRoutes = require('./routes/ProductosRouter');
 const CategoriasRoutes = require('./routes/CategoriasRouter');
 const CampanaRouter = require('./routes/CampanaRouter');
@@ -11,7 +11,6 @@ const adminMiddleware = require('./middleware/adminMiddleware');
 const path = require('path');
 
 // --- INICIALIZACIONES ---
-const prisma = new PrismaClient();
 const app = express();
 const PORT = process.env.PORT || 3000;
 

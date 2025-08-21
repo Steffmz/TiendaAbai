@@ -1,11 +1,5 @@
-const { PrismaClient } = require("@prisma/client");
 const { convertirABoolean } = require("../utils/boolean");
-let prisma;
-try {
-  prisma = new PrismaClient();
-} catch (e) {
-  prisma = null;
-}
+const prisma = require('../config/prisma');
 
 // Obtener todas las categorías
 const getCategorias = async (req, res) => {
