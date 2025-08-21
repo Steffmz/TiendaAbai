@@ -1,10 +1,9 @@
 import { ref, computed, onMounted } from 'vue'
-import axios from 'axios'
+import api from '../../api/client'
 import Swal from 'sweetalert2'
 
-const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000'
-const API_URL = `${BASE}/api/campanas`
-const API_PRODUCTOS = `${BASE}/api/productos`
+const API_URL = `/api/campanas`
+const API_PRODUCTOS = `/api/productos`
 
 export default function useCampana() {
   const filtro = ref('')
@@ -85,7 +84,7 @@ export default function useCampana() {
   // Cargar campañas
   const cargarCampanas = async () => {
     try {
-      const { data } = await axios.get(API_URL)
+      const { data } = await api.get(API_URL)
       campanas.value = data
     } catch (err) {
       console.error('Error cargando campañas:', err)
@@ -95,7 +94,7 @@ export default function useCampana() {
   // Cargar productos
   const cargarProductos = async () => {
     try {
-      const { data } = await axios.get(API_PRODUCTOS)
+      const { data } = await api.get(API_PRODUCTOS)
       productos.value = data
     } catch (err) {
       console.error('Error cargando productos:', err)
@@ -143,9 +142,9 @@ export default function useCampana() {
       }
 
       if (editando.value) {
-        await axios.put(`${API_URL}/${formulario.value.id}`, formData)
+        await api.put(`${API_URL}/${formulario.value.id}`, formData)
       } else {
-        await axios.post(API_URL, formData)
+        await api.post(API_URL, formData)
       }
 
       await cargarCampanas()
@@ -176,7 +175,7 @@ export default function useCampana() {
     if (!result.isConfirmed) return
 
     try {
-      await axios.delete(`${API_URL}/${campana.id}`)
+      await api.delete(`${API_URL}/${campana.id}`)
       await cargarCampanas()
       Swal.fire('Eliminado', 'La campaña fue eliminada correctamente', 'success')
     } catch (err) {

@@ -37,16 +37,15 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import api from '../../api/client';
 import { useRouter } from 'vue-router';
 
 const productos = ref([]);
 const router = useRouter();
-const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 async function cargarProductos() {
     try {
-        const response = await axios.get(`${baseUrl}/api/productos`);
+        const response = await api.get(`/api/productos`);
         productos.value = response.data;
     } catch (error) {
         console.error("Error al cargar productos:", error);
@@ -60,11 +59,8 @@ function editarProducto(id) {
 async function eliminarProducto(id) {
     if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) return;
 
-    const token = localStorage.getItem('authToken');
     try {
-        await axios.delete(`${baseUrl}/api/productos/${id}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
+        await api.delete(`/api/productos/${id}`);
         // Recargar la lista de productos para reflejar el cambio
         await cargarProductos();
     } catch (error) {
