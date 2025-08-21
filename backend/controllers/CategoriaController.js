@@ -1,8 +1,20 @@
-import { PrismaClient } from "@prisma/client";
+const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
+// Utilidad para convertir diferentes entradas a booleano
+const convertirABoolean = (valor) => {
+  if (typeof valor === "boolean") return valor;
+  if (typeof valor === "string") {
+    const lower = valor.toLowerCase();
+    if (lower === "true" || lower === "1" || lower === "activo") return true;
+    if (lower === "false" || lower === "0" || lower === "inactivo") return false;
+  }
+  if (typeof valor === "number") return valor === 1;
+  return true;
+};
+
 // Obtener todas las categorías
-export const getCategorias = async (req, res) => {
+const getCategorias = async (req, res) => {
   try {
     const categorias = await prisma.categoria.findMany({
       orderBy: { fechaCreacion: "desc" },
@@ -20,7 +32,7 @@ export const getCategorias = async (req, res) => {
 };
 
 // Obtener categoría por ID con sus productos
-export const getCategoriaById = async (req, res) => {
+const getCategoriaById = async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -48,7 +60,7 @@ export const getCategoriaById = async (req, res) => {
 };
 
 // Crear categoría
-export const createCategoria = async (req, res) => {
+const createCategoria = async (req, res) => {
   const { nombre, descripcion } = req.body;
 
   try {
@@ -86,19 +98,21 @@ export const createCategoria = async (req, res) => {
   }
 };
 
-// Actualizar categoría 
-router.put('/:id', upload.single('imagen'), async (req, res) => {
+// Actualizar categoría
+const updateCategoria = async (req, res) => {
   try {
     const { id } = req.params;
     const { nombre, descripcion, estado, activo } = req.body;
 
-    const categoriaExistente = await prisma.categoria.findUnique({ where: { id: parseInt(id) } });
+    const categoriaExistente = await prisma.categoria.findUnique({
+      where: { id: parseInt(id) }
+    });
 
     if (!categoriaExistente) {
       return res.status(404).json({ error: "Categoría no encontrada" });
     }
 
-    if (nombre !== undefined && (!nombre || nombre.trim() === '')) {
+    if (nombre !== undefined && (!nombre || nombre.trim() === "")) {
       return res.status(400).json({ error: "El nombre de la categoría es obligatorio" });
     }
 
@@ -107,14 +121,16 @@ router.put('/:id', upload.single('imagen'), async (req, res) => {
 
       if (nombreBuscado !== categoriaExistente.nombre.toLowerCase()) {
         const otraCategoria = await prisma.categoria.findFirst({
-          where: { 
+          where: {
             nombre: nombreBuscado,
             id: { not: parseInt(id) }
           }
         });
 
         if (otraCategoria) {
-          return res.status(400).json({ error: "Ya existe otra categoría con ese nombre" });
+          return res
+            .status(400)
+            .json({ error: "Ya existe otra categoría con ese nombre" });
         }
       }
     }
@@ -122,8 +138,7 @@ router.put('/:id', upload.single('imagen'), async (req, res) => {
     const dataToUpdate = {};
     if (nombre !== undefined) dataToUpdate.nombre = nombre.trim().toLowerCase();
     if (descripcion !== undefined) dataToUpdate.descripcion = descripcion.trim();
-    
-    // ✅ Corrección aquí
+
     const estadoValor = estado !== undefined ? estado : activo;
     if (estadoValor !== undefined) {
       dataToUpdate.activo = convertirABoolean(estadoValor);
@@ -137,15 +152,14 @@ router.put('/:id', upload.single('imagen'), async (req, res) => {
     });
 
     res.json(categoriaActualizada);
-
   } catch (error) {
     console.error("❌ Error al actualizar categoría:", error);
     res.status(500).json({ error: "Error al actualizar la categoría" });
   }
-});
+};
 
-// Eliminar categoría 
-export const deleteCategoria = async (req, res) => {
+// Eliminar categoría
+const deleteCategoria = async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -182,7 +196,7 @@ export const deleteCategoria = async (req, res) => {
 };
 
 // Activar / Desactivar categoría
-export const toggleEstadoCategoria = async (req, res) => {
+const toggleEstadoCategoria = async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -207,4 +221,13 @@ export const toggleEstadoCategoria = async (req, res) => {
     console.error("Error al cambiar estado de categoría:", error);
     res.status(500).json({ error: "Error al cambiar el estado de la categoría" });
   }
+};
+
+module.exports = {
+  getCategorias,
+  getCategoriaById,
+  createCategoria,
+  updateCategoria,
+  deleteCategoria,
+  toggleEstadoCategoria
 };
