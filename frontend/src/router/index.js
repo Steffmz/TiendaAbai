@@ -4,6 +4,7 @@ import { jwtDecode } from "jwt-decode";
 // Vistas y layouts
 import Login from "../components/login/Login.vue";
 import Dashboard from "../components/layouts/Dashboard.vue";
+import UserLayout from "../components/layouts/UserLayout.vue";
 import DashboardIndex from "../views/admin/DashboardIndex.vue";
 import GestionUsuarios from "../views/admin/GestionUsuarios.vue";
 import Categorias from "../components/categorias/Categorias.vue";
@@ -17,11 +18,16 @@ import PedidosAdmin from "../views/admin/Pedidos.vue";
 
 const routes = [
   { path: "/login", name: "Login", component: Login },
-  { path: "/inicio", name: "Inicio", component: DashboardIndex, meta: { requiresAuth: true } },
-  { path: "/carrito", name: "Carrito", component: Carrito, meta: { requiresAuth: true } },
-
-  { path: "/", redirect: "/inicio", meta: { requiresAuth: true } },
-
+  {
+    path: "/",
+    component: UserLayout,
+    meta: { requiresAuth: true },
+    children: [
+      { path: "", redirect: "/inicio" },
+      { path: "inicio", name: "Inicio", component: DashboardIndex },
+      { path: "carrito", name: "Carrito", component: Carrito },
+    ],
+  },
   {
     path: "/dashboard",
     component: Dashboard,
@@ -37,7 +43,6 @@ const routes = [
         name: "GestionUsuarios",
         component: GestionUsuarios,
       },
-
       {
         path: "usuarios/nuevo",
         name: "CrearUsuario",
@@ -59,26 +64,22 @@ const routes = [
         name: "Campana",
         component: Campana,
       },
-
       {
         path: "productos/nuevo",
         name: "CrearProducto",
         component: ProductForm,
       },
-
       {
         path: "productos",
         name: "GestionProductos",
         component: GestionProductos,
       },
-
       {
         path: "productos/editar/:id",
         name: "EditarProducto",
         component: ProductForm,
         props: true,
       },
-
       {
         path: "usuarios/editar/:id",
         name: "EditarUsuario",
@@ -112,13 +113,10 @@ router.beforeEach((to, from, next) => {
     }
   }
 
-  // CASO 1: La ruta necesita autenticación Y el usuario NO tiene token
   if (to.meta.requiresAuth && !token) {
-    // Lo mandamos al login
     return next("/login");
   }
 
-  // CASO 2: El usuario YA está logueado Y está intentando ir a la página de login
   if (to.path === "/login" && token) {
     if (decodedToken && decodedToken.rol === "Administrador") {
       return next("/");
@@ -126,7 +124,6 @@ router.beforeEach((to, from, next) => {
     return next();
   }
 
-  // CASO 3: La ruta requiere rol de administrador y el usuario no lo tiene
   if (to.meta.requiresAdmin) {
     if (!decodedToken || decodedToken.rol !== "Administrador") {
       localStorage.removeItem("authToken");
@@ -134,7 +131,6 @@ router.beforeEach((to, from, next) => {
     }
   }
 
-  // En todos los demás casos, permite que la navegación continúe
   next();
 });
 
