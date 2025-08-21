@@ -2,15 +2,13 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const { PrismaClient } = require('@prisma/client');
+const prisma = require('../config/prisma');
 const {
   getCategorias,
   getCategoriaById,
   createCategoria,
   updateCategoria
 } = require('../controllers/CategoriaController');
-
-const prisma = new PrismaClient();
 const router = express.Router();
 const uploadDir = path.join(__dirname, '..', 'uploads');
 

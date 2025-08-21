@@ -1,3 +1,4 @@
+jest.mock('../config/prisma', () => ({ $use: jest.fn() }));
 const { convertirABoolean } = require('../utils/boolean');
 
 describe('convertirABoolean', () => {

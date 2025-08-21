@@ -1,7 +1,6 @@
-const { PrismaClient } = require('@prisma/client');
 const fs = require('fs');
 const path = require('path');
-const prisma = new PrismaClient();
+const prisma = require('../config/prisma');
 
 // Obtener campañas con productos
 const getCampanas = async (req, res) => {
