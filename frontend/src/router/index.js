@@ -4,6 +4,7 @@ import { jwtDecode } from "jwt-decode";
 // Vistas y layouts
 import Login from "../components/login/Login.vue";
 import Dashboard from "../components/layouts/Dashboard.vue";
+import UserLayout from "../components/layouts/UserLayout.vue";
 import DashboardIndex from "../views/admin/DashboardIndex.vue";
 import GestionUsuarios from "../views/admin/GestionUsuarios.vue";
 import Categorias from "../components/categorias/Categorias.vue";
@@ -17,10 +18,16 @@ import PedidosAdmin from "../views/admin/Pedidos.vue";
 
 const routes = [
   { path: "/login", name: "Login", component: Login },
-  { path: "/inicio", name: "Inicio", component: DashboardIndex, meta: { requiresAuth: true } },
-  { path: "/carrito", name: "Carrito", component: Carrito, meta: { requiresAuth: true } },
-
-  { path: "/", redirect: "/inicio", meta: { requiresAuth: true } },
+  {
+    path: "/",
+    component: UserLayout,
+    meta: { requiresAuth: true },
+    children: [
+      { path: "inicio", name: "Inicio", component: DashboardIndex },
+      { path: "carrito", name: "Carrito", component: Carrito },
+      { path: "", redirect: "/inicio" },
+    ],
+  },
 
   {
     path: "/dashboard",
