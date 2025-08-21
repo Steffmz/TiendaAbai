@@ -92,6 +92,16 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem("authToken");
+  let decodedToken = null;
+
+  if (token) {
+    try {
+      decodedToken = jwtDecode(token);
+    } catch (error) {
+      localStorage.removeItem("authToken");
+      return next("/login");
+    }
+  }
 
   // CASO 1: La ruta necesita autenticación Y el usuario NO tiene token
   if (to.meta.requiresAuth && !token) {
@@ -103,6 +113,14 @@ router.beforeEach((to, from, next) => {
   if (to.path === "/login" && token) {
     // Lo mandamos a la página de inicio para que no vea el login de nuevo
     return next("/");
+  }
+
+  // CASO 3: La ruta requiere rol de administrador y el usuario no lo tiene
+  if (to.meta.requiresAdmin) {
+    if (!decodedToken || decodedToken.rol !== "Administrador") {
+      alert("Acceso no autorizado");
+      return next("/login");
+    }
   }
 
   // En todos los demás casos, permite que la navegación continúe
