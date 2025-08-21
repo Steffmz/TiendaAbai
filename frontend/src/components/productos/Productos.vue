@@ -10,6 +10,7 @@ export default {
     const productos = ref([]);
     const categoriaNombre = ref('');
     const loading = ref(false);
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
     // Paginación
     const paginaActual = ref(1);
@@ -58,7 +59,7 @@ export default {
     const cargarProductos = async () => {
       try {
         const id = route.params.categoriaId;
-        const res = await fetch(`http://localhost:3000/api/productos/categoria/${id}`);
+        const res = await fetch(`${baseUrl}/api/productos/categoria/${id}`);
         if (res.ok) {
           const data = await res.json();
           productos.value = Array.isArray(data) ? data : data.productos || [];
@@ -93,7 +94,7 @@ export default {
         stock: producto.stock.toString(),
         imagen: null
       };
-      previewImage.value = producto.imagenUrl ? `http://localhost:3000${producto.imagenUrl}` : null;
+      previewImage.value = producto.imagenUrl ? `${baseUrl}${producto.imagenUrl}` : null;
       mostrarModal.value = true;
     };
 
@@ -138,8 +139,8 @@ export default {
         if (form.value.imagen) data.append('imagen', form.value.imagen);
 
         const url = editando.value
-          ? `http://localhost:3000/api/productos/${productoEditando.value.id}`
-          : 'http://localhost:3000/api/productos';
+          ? `${baseUrl}/api/productos/${productoEditando.value.id}`
+          : `${baseUrl}/api/productos`;
         const method = editando.value ? 'PUT' : 'POST';
 
         const res = await fetch(url, { method, body: data });
@@ -195,7 +196,7 @@ export default {
 
       try {
         loading.value = true;
-        const res = await fetch(`http://localhost:3000/api/productos/${producto.id}`, { method: 'DELETE' });
+        const res = await fetch(`${baseUrl}/api/productos/${producto.id}`, { method: 'DELETE' });
         const responseData = await res.json();
 
         if (res.ok) {
@@ -229,6 +230,7 @@ export default {
     };
 
     return {
+      baseUrl,
       productos,
       categoriaNombre,
       mostrarModal,
@@ -320,7 +322,7 @@ export default {
                 <td class="px-6 py-4 text-center">
                   <img 
                     v-if="producto.imagenUrl" 
-                    :src="`http://localhost:3000${producto.imagenUrl}`" 
+                    :src="`${baseUrl}${producto.imagenUrl}`"
                     class="w-16 h-16 object-cover rounded-lg mx-auto" 
                     @error="$event.target.style.display='none'"
                   />

@@ -2,8 +2,9 @@ import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 import Swal from 'sweetalert2'
 
-const API_URL = 'http://localhost:3000/api/campanas'
-const API_PRODUCTOS = 'http://localhost:3000/api/productos'
+const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+const API_URL = `${BASE}/api/campanas`
+const API_PRODUCTOS = `${BASE}/api/productos`
 
 export default function useCampana() {
   const filtro = ref('')
@@ -225,7 +226,7 @@ export default function useCampana() {
     editando.value = true
     formulario.value = { ...campana, imagen: null }
     previewImage.value = campana.imagenUrl
-      ? `http://localhost:3000${campana.imagenUrl}`
+      ? `${BASE}${campana.imagenUrl}`
       : null
     productosSeleccionados.value = campana.productos || []
     modalAbierto.value = true
@@ -243,6 +244,7 @@ export default function useCampana() {
   }
 
   return {
+    BASE,
     filtro,
     placeholder,
     modalAbierto,

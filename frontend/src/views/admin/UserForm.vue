@@ -64,6 +64,7 @@ import { useRouter, useRoute } from 'vue-router';
 
 const router = useRouter();
 const route = useRoute();
+const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 const usuario = ref({
     nombreCompleto: '',
@@ -83,7 +84,7 @@ onMounted(async () => {
     if (isEditing.value) {
         const token = localStorage.getItem('authToken');
         try {
-            const response = await axios.get(`http://localhost:3000/api/admin/usuarios/${route.params.id}`, {
+            const response = await axios.get(`${baseUrl}/api/admin/usuarios/${route.params.id}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             // Asignamos los datos
@@ -108,7 +109,7 @@ const guardarUsuario = async () => {
         if (isEditing.value) {
             // Lógica de Actualización
             await axios.put(
-                `http://localhost:3000/api/admin/usuarios/${route.params.id}`,
+                `${baseUrl}/api/admin/usuarios/${route.params.id}`,
                 datosParaEnviar,
                 { headers: { 'Authorization': `Bearer ${token}` } }
             );
@@ -120,7 +121,7 @@ const guardarUsuario = async () => {
                 return;
             }
             await axios.post(
-                'http://localhost:3000/usuarios',
+                `${baseUrl}/usuarios`,
                 datosParaEnviar
             );
             alert('¡Usuario creado con éxito!');

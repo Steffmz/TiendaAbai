@@ -63,6 +63,7 @@ import { useRouter } from 'vue-router';
 
 const usuarios = ref([]);
 const router = useRouter();
+const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 // Lógica del modal para asignar puntos
 const showModal = ref(false);
@@ -86,7 +87,7 @@ const submitPoints = async () => {
   const token = localStorage.getItem('authToken');
   try {
     const response = await axios.post(
-      `http://localhost:3000/api/admin/usuarios/${selectedUser.value.id}/puntos`,
+      `${baseUrl}/api/admin/usuarios/${selectedUser.value.id}/puntos`,
       {
         puntos: pointsToAdd.value,
         descripcion: description.value,
@@ -117,7 +118,7 @@ async function eliminarUsuario(id) {
   }
   const token = localStorage.getItem('authToken');
   try {
-    await axios.delete(`http://localhost:3000/api/admin/usuarios/${id}`, {
+    await axios.delete(`${baseUrl}/api/admin/usuarios/${id}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     usuarios.value = usuarios.value.filter(u => u.id !== id);
@@ -132,7 +133,7 @@ async function eliminarUsuario(id) {
 onMounted(async () => {
   const token = localStorage.getItem('authToken');
   try {
-    const response = await axios.get('http://localhost:3000/api/admin/usuarios', {
+    const response = await axios.get(`${baseUrl}/api/admin/usuarios`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     usuarios.value = response.data;

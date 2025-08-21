@@ -62,7 +62,7 @@
                 :src="campana.imagenUrl 
                   ? (campana.imagenUrl.startsWith('http') 
                       ? campana.imagenUrl 
-                      : `http://localhost:3000${campana.imagenUrl}`) 
+                      : `${BASE}${campana.imagenUrl}`)
                   : placeholder" 
                 alt="Imagen campaña" 
                 class="w-full h-full object-cover"

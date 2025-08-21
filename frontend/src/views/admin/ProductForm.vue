@@ -45,6 +45,7 @@ import { useRouter, useRoute } from 'vue-router';
 
 const router = useRouter();
 const route = useRoute(); // Para acceder a los parámetros de la ruta, como el ID
+const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 const categorias = ref([]);
 const producto = ref({
@@ -61,7 +62,7 @@ const isEditing = computed(() => !!route.params.id);
 // Cargar las categorías
 onMounted(async () => {
   try {
-    const response = await axios.get('http://localhost:3000/api/categorias');
+    const response = await axios.get(`${baseUrl}/api/categorias`);
     categorias.value = response.data;
   } catch (error) {
     console.error("Error al cargar categorías:", error);
@@ -70,7 +71,7 @@ onMounted(async () => {
   // Si estamos en modo edición, cargar los datos del producto
   if (isEditing.value) {
     try {
-      const response = await axios.get(`http://localhost:3000/api/productos/${route.params.id}`);
+      const response = await axios.get(`${baseUrl}/api/productos/${route.params.id}`);
       producto.value = response.data;
     } catch (error) {
       console.error("Error al cargar el producto para editar:", error);
@@ -84,13 +85,13 @@ const guardarProducto = async () => {
   try {
     if (isEditing.value) {
       // Si estamos editando, usamos el método PUT
-      await axios.put(`http://localhost:3000/api/productos/${route.params.id}`, producto.value, {
+      await axios.put(`${baseUrl}/api/productos/${route.params.id}`, producto.value, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       alert('¡Producto actualizado con éxito!');
     } else {
       // Si no, usamos el método POST para crear
-      await axios.post('http://localhost:3000/api/productos', producto.value, {
+      await axios.post(`${baseUrl}/api/productos`, producto.value, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       alert('¡Producto creado con éxito!');

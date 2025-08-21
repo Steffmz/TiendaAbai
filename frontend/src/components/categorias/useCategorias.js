@@ -12,6 +12,8 @@ export default function useCategorias() {
   const paginaActual = ref(1);
   const categoriasPorPagina = 5;
   const previewImage = ref(null);
+
+  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
   
   // Formulario
   const form = ref({
@@ -112,7 +114,6 @@ export default function useCategorias() {
     try {
       console.log('🔍 Obteniendo categorías...');
       
-      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
       const url = `${baseUrl}/api/categorias`;
       
       const response = await fetch(url, {
@@ -170,9 +171,8 @@ export default function useCategorias() {
         formData.append('imagen', form.value.imagen);
       }
 
-      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-      const url = editando.value 
-        ? `${baseUrl}/api/categorias/${form.value.id}` 
+      const url = editando.value
+        ? `${baseUrl}/api/categorias/${form.value.id}`
         : `${baseUrl}/api/categorias`;
       
       const method = editando.value ? 'PUT' : 'POST';
@@ -216,7 +216,6 @@ export default function useCategorias() {
           error.value = null;
 
           try {
-            const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
             const response = await fetch(`${baseUrl}/api/categorias/${categoria.id}`, {
               method: 'DELETE',
               headers: {
@@ -243,7 +242,6 @@ export default function useCategorias() {
   error.value = null;
 
   try {
-    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
     const response = await fetch(`${baseUrl}/api/categorias/${categoria.id}/estado`, {
       method: 'PATCH',
       headers: {
