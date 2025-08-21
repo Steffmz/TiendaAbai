@@ -40,10 +40,10 @@ const login = async () => {
 
     const decodedToken = jwtDecode(token);
 
-      if (decodedToken.rol === 'Administrador') {
+    if (decodedToken.rol === 'Administrador') {
       router.push('/dashboard');
     } else {
-      router.push('/'); 
+      router.push('/inicio');
     }
 
   } catch (error) {

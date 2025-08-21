@@ -15,8 +15,9 @@ import UserForm from "../views/admin/UserForm.vue";
 
 const routes = [
   { path: "/login", name: "Login", component: Login },
+  { path: "/inicio", name: "Inicio", component: DashboardIndex, meta: { requiresAuth: true } },
 
-  { path: "/", redirect: "/dashboard", meta: { requiresAuth: true } },
+  { path: "/", redirect: "/inicio", meta: { requiresAuth: true } },
 
   {
     path: "/dashboard",
@@ -111,8 +112,11 @@ router.beforeEach((to, from, next) => {
 
   // CASO 2: El usuario YA está logueado Y está intentando ir a la página de login
   if (to.path === "/login" && token) {
-    // Lo mandamos a la página de inicio para que no vea el login de nuevo
-    return next("/");
+    // Lo mandamos a la página correspondiente según su rol
+    if (decodedToken && decodedToken.rol === "Administrador") {
+      return next("/dashboard");
+    }
+    return next("/inicio");
   }
 
   // CASO 3: La ruta requiere rol de administrador y el usuario no lo tiene
