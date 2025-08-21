@@ -138,19 +138,19 @@ export default {
                     <div class="flex items-center justify-center gap-2">
                       <button 
                         @click="abrirModalEditar(categoria)" 
-                        class="bg-blue-100 text-black hover:bg-blue-200 px-3 py-1 rounded-md text-xm font-medium transition-colors duration-150"
+                        class="bg-blue-100 text-black hover:bg-blue-200 px-3 py-1 rounded-md text-sm font-medium transition-colors duration-150"
                       >
                         Editar
                       </button>
                       <button 
                         @click="irAProductos(categoria.id)" 
-                        class="bg-green-100 text-black hover:bg-green-200 px-3 py-1 rounded-md text-xm font-medium transition"
+                        class="bg-green-100 text-black hover:bg-green-200 px-3 py-1 rounded-md text-sm font-medium transition"
                       >
                         Catalogo
                       </button>
                       <button 
                         @click="confirmarEliminar(categoria)" 
-                        class="bg-red-100 text-black hover:bg-red-200 px-3 py-1 rounded-md text-xm font-medium transition-colors duration-150"
+                        class="bg-red-100 text-black hover:bg-red-200 px-3 py-1 rounded-md text-sm font-medium transition-colors duration-150"
                       >
                         Eliminar
                       </button>
