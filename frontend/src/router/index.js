@@ -112,17 +112,16 @@ router.beforeEach((to, from, next) => {
 
   // CASO 2: El usuario YA está logueado Y está intentando ir a la página de login
   if (to.path === "/login" && token) {
-    // Lo mandamos a la página correspondiente según su rol
     if (decodedToken && decodedToken.rol === "Administrador") {
-      return next("/dashboard");
+      return next("/");
     }
-    return next("/inicio");
+    return next();
   }
 
   // CASO 3: La ruta requiere rol de administrador y el usuario no lo tiene
   if (to.meta.requiresAdmin) {
     if (!decodedToken || decodedToken.rol !== "Administrador") {
-      alert("Acceso no autorizado");
+      localStorage.removeItem("authToken");
       return next("/login");
     }
   }
