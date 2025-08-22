@@ -43,7 +43,7 @@ const login = async () => {
       if (decodedToken.rol === 'Administrador') {
       router.push('/dashboard');
     } else {
-      router.push('/'); 
+      router.push('/inicio'); 
     }
 
   } catch (error) {
@@ -80,34 +80,37 @@ const closeModal = () => {
 };
 
 // --- Animación del Canvas (Optimizada) ---
+// Login.vue - CÓDIGO OPTIMIZADO
+
 onMounted(() => {
   const canvas = document.getElementById("magneticCanvas");
+  if (!canvas) return; // Salir si el canvas no existe
+
   const ctx = canvas.getContext("2d");
 
   let width = (canvas.width = window.innerWidth);
   let height = (canvas.height = window.innerHeight);
+  let animationFrameId; // Para poder cancelar la animación
 
   const particles = [];
-  const particleCount = 150;
-  const maxDistance = 200;
-  const speed = 1;
+  // --- OPTIMIZACIÓN 1: Reducir partículas y distancia ---
+  const particleCount = 70; // Reducido desde 150
+  const maxDistanceSquared = 120 * 120; // Compararemos cuadrados para evitar Math.sqrt
 
   class Particle {
     constructor() {
       this.x = Math.random() * width;
       this.y = Math.random() * height;
-      this.radius = 5;
-      this.color = "#1E3A8A";
-      this.vx = (Math.random() - 0.5) * speed;
-      this.vy = (Math.random() - 0.5) * speed;
+      this.radius = Math.random() * 2 + 1; // Radios más pequeños y variados
+      this.vx = (Math.random() - 0.5) * 0.5; // Velocidad reducida
+      this.vy = (Math.random() - 0.5) * 0.5;
     }
 
     draw() {
       ctx.beginPath();
       ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-      ctx.fillStyle = this.color;
-      ctx.shadowColor = this.color;
-      ctx.shadowBlur = 12;
+      ctx.fillStyle = "rgba(255, 255, 255, 0.7)"; // Usar un color más sutil
+      // --- OPTIMIZACIÓN 2: Eliminar sombras en partículas, son muy costosas ---
       ctx.fill();
     }
 
@@ -117,8 +120,6 @@ onMounted(() => {
 
       if (this.x < 0 || this.x > width) this.vx *= -1;
       if (this.y < 0 || this.y > height) this.vy *= -1;
-
-      this.draw();
     }
   }
 
@@ -128,28 +129,36 @@ onMounted(() => {
 
   function animate() {
     ctx.clearRect(0, 0, width, height);
-    particles.forEach((p, i) => {
+    
+    // Dibujar todas las partículas primero
+    for (const p of particles) {
       p.update();
+      p.draw();
+    }
 
-      for (let j = i + 1; j < particles.length; j++) {
-        const dx = p.x - particles[j].x;
-        const dy = p.y - particles[j].y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
+    // Luego, dibujar las líneas de conexión
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+    ctx.lineWidth = 1;
+    // --- OPTIMIZACIÓN 3: Eliminar sombra en las líneas ---
 
-        if (distance < maxDistance) {
+    for (let i = 0; i < particleCount; i++) {
+      for (let j = i + 1; j < particleCount; j++) {
+        const p1 = particles[i];
+        const p2 = particles[j];
+        const dx = p1.x - p2.x;
+        const dy = p1.y - p2.y;
+        const distanceSquared = dx * dx + dy * dy;
+
+        if (distanceSquared < maxDistanceSquared) {
           ctx.beginPath();
-          ctx.strokeStyle = `rgba(255,255,255, ${1 - distance / maxDistance})`;
-          ctx.lineWidth = 1;
-          ctx.shadowColor = "#FFFFFF";
-          ctx.shadowBlur = 6;
-          ctx.moveTo(p.x, p.y);
-          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
           ctx.stroke();
         }
       }
-    });
+    }
 
-    requestAnimationFrame(animate);
+    animationFrameId = requestAnimationFrame(animate);
   }
 
   animate();
@@ -161,6 +170,8 @@ onMounted(() => {
   window.addEventListener("resize", handleResize);
 
   onBeforeUnmount(() => {
+    // --- OPTIMIZACIÓN 4: Cancelar la animación al salir del componente ---
+    cancelAnimationFrame(animationFrameId);
     window.removeEventListener("resize", handleResize);
   });
 });

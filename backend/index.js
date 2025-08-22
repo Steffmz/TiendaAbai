@@ -187,22 +187,56 @@ app.get('/api/perfil', authMiddleware, async (req, res) => {
 /**
  * Endpoint para OBTENER todos los usuarios (para pruebas)
  */
-app.get('/usuarios', async (req, res) => {
+// backend/index.js -> app.post('/usuarios', ...) - CÓDIGO CORREGIDO
+
+app.post('/usuarios', async (req, res) => {
+  const { cedula, nombreCompleto, cargo, sede, email, contrasena, rol, centroDeCostosNombre } = req.body;
+
   try {
-    const usuarios = await prisma.usuario.findMany({
-      // Opcional: Incluir el nombre del centro de costos en la respuesta
-      include: {
-        centroDeCostos: {
-          select: {
-            nombre: true
-          }
-        }
-      }
+    if (!email || !contrasena || !cedula || !nombreCompleto || !cargo || !sede || !centroDeCostosNombre) {
+      return res.status(400).json({ message: "Todos los campos son requeridos." });
+    }
+    
+    const hashedPassword = await bcrypt.hash(contrasena, 10);
+
+    // --- LÓGICA CORREGIDA PARA CARGO Y CENTRO DE COSTOS ---
+    // Usamos una transacción de Prisma para asegurar que ambas operaciones (o ninguna) se completen.
+    const [cargoRecord, centroDeCostosRecord] = await prisma.$transaction([
+      prisma.cargos.upsert({
+        where: { nombre: cargo },
+        update: {},
+        create: { nombre: cargo },
+      }),
+      prisma.centroDeCostos.upsert({
+        where: { nombre: centroDeCostosNombre },
+        update: {},
+        create: { nombre: centroDeCostosNombre },
+      })
+    ]);
+    
+    const nuevoUsuario = await prisma.usuario.create({
+      data: {
+        cedula,
+        nombreCompleto,
+        sede,
+        email,
+        contrasena: hashedPassword,
+        rol,
+        // Conectar usando los IDs obtenidos del upsert
+        cargoId: cargoRecord.id,
+        centroDeCostosId: centroDeCostosRecord.id,
+      },
     });
-    res.json(usuarios);
+
+    const { contrasena: _, ...usuarioSinContrasena } = nuevoUsuario;
+    res.status(201).json(usuarioSinContrasena);
+
   } catch (error) {
-    console.error("Error al obtener usuarios:", error);
-    res.status(500).json({ message: 'Error interno del servidor al obtener los usuarios.' });
+    if (error.code === 'P2002') {
+      return res.status(409).json({ message: `El campo '${error.meta.target[0]}' ya está en uso.` });
+    }
+    console.error("Error al crear usuario:", error);
+    res.status(500).json({ message: 'Error interno del servidor al crear el usuario.' });
   }
 });
 
