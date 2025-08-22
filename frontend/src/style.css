@@ -274,9 +274,9 @@ html.dark h1, html.dark h2, html.dark h3, html.dark h4, html.dark h5, html.dark 
     color: var(--text) !important;
 }
 
-html.dark p, html.dark span, html.dark div {
+/*html.dark p, html.dark span, html.dark div {
     color: var(--text);
-}
+} */
 
 html.dark .text-muted,
 html.dark .muted {

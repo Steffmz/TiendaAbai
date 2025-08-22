@@ -8,6 +8,7 @@ const ProductosRoutes = require('./routes/ProductosRouter');
 const CategoriasRoutes = require('./routes/CategoriasRouter');
 const CampanaRouter = require('./routes/CampanaRouter');
 const adminMiddleware = require('./middleware/adminMiddleware');
+const UsuarioRouter = require('./routes/UsuarioRouter');
 const path = require('path');
 
 const prisma = new PrismaClient();
@@ -26,6 +27,7 @@ app.use('/uploads/', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/productos', ProductosRoutes);
 app.use("/api/categorias", CategoriasRoutes);
 app.use('/api/campanas', CampanaRouter);
+app.use('/api/usuarios', UsuarioRouter);
 
 
 // --- RUTAS DE LA APLICACIÓN ---

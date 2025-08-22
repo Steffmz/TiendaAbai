@@ -15,8 +15,13 @@
 .main-content {
   position: relative;
   height: 100%;
-  transition: padding-left var(--transition);
+  /* La transición en padding es aceptable, pero para movimientos,
+     prefiere transform. */
+  transition: padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Curva de aceleración más suave */
   padding-left: var(--sidebar-width);
+
+  /* Si en el futuro animaras su posición, añade esto para promoverlo a una capa de GPU */
+  will-change: padding-left;
 }
 
 .main-content.collapsed {

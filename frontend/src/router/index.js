@@ -8,6 +8,7 @@ import Categorias from '../components/categorias/Categorias.vue';
 import Productos from '../components/productos/Productos.vue';
 import Campana from '../components/campanas/Campana.vue';
 import Inicio from '../components/layouts/Inicio.vue';
+import GestionUsuarios from '../components/admin/GestionUsuarios.vue';
 
 
 const routes = [
@@ -34,6 +35,11 @@ const routes = [
         name: 'Categorias',
         component: Categorias
       },
+            { // <-- AÑADE ESTE OBJETO COMPLETO
+        path: 'usuarios',
+        name: 'GestionUsuarios',
+        component: GestionUsuarios
+      },
       {
         path: 'productos/:categoriaId',
         name: 'Productos',
@@ -46,7 +52,7 @@ const routes = [
         component: Campana
       }
     ]
-  }
+  },
 ];
 
 const router = createRouter({

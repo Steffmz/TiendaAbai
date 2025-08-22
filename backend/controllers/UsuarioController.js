@@ -1,0 +1,128 @@
+// backend/controllers/UsuarioController.js
+
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+const bcrypt = require('bcryptjs');
+
+// Obtener todos los usuarios (para el admin)
+exports.getAllUsuarios = async (req, res) => {
+  // El middleware de autenticación nos da el usuario logueado en req.usuario
+  const adminId = req.usuario.userId;
+
+  try {
+    const usuarios = await prisma.usuario.findMany({
+      // AÑADIMOS ESTE 'WHERE' PARA EXCLUIR AL ADMIN ACTUAL
+      where: {
+        id: {
+          not: adminId 
+        }
+      },
+      select: {
+        id: true,
+        cedula: true,
+        nombreCompleto: true,
+        email: true,
+        rol: true,
+        activo: true,
+        sede: true,
+        cargos: { select: { id: true, nombre: true } }, // Devolvemos también el ID
+        centroDeCostos: { select: { id: true, nombre: true } }, // Devolvemos también el ID
+      },
+      orderBy: {
+        nombreCompleto: 'asc'
+      }
+    });
+    res.json(usuarios);
+  } catch (error)
+ {
+    console.error("Error al obtener usuarios:", error);
+    res.status(500).json({ message: 'Error interno del servidor.' });
+  }
+};
+// Crear un nuevo usuario (desde el panel de admin)
+// backend/controllers/UsuarioController.js
+
+// ... (otras funciones) ...
+
+exports.createUsuario = async (req, res) => {
+    // ASEGÚRATE DE QUE 'sede' ESTÉ AQUÍ
+    const { cedula, nombreCompleto, email, contrasena, rol, sede, cargoId, centroDeCostosId } = req.body;
+
+    // Y AQUÍ EN LA VALIDACIÓN
+    if (!cedula || !nombreCompleto || !email || !contrasena || !rol || !sede || !cargoId || !centroDeCostosId) {
+        return res.status(400).json({ message: 'Todos los campos son requeridos.' });
+    }
+
+    try {
+        const hashedPassword = await bcrypt.hash(contrasena, 10);
+        const nuevoUsuario = await prisma.usuario.create({
+            data: {
+                cedula,
+                nombreCompleto,
+                email,
+                contrasena: hashedPassword,
+                rol,
+                sede, // <-- El campo ya está aquí, que es lo correcto
+                cargoId: parseInt(cargoId),
+                centroDeCostosId: parseInt(centroDeCostosId),
+                activo: true,
+            },
+        });
+        // Por seguridad, no devolvemos la contraseña
+        const { contrasena: _, ...usuarioSinContrasena } = nuevoUsuario;
+        res.status(201).json(usuarioSinContrasena);
+    } catch (error) {
+        if (error.code === 'P2002') {
+            return res.status(409).json({ message: `El campo '${error.meta.target[0]}' ya está en uso.` });
+        }
+        console.error("Error al crear usuario:", error);
+        res.status(500).json({ message: 'Error interno del servidor.' });
+    }
+};
+
+// ... (resto de funciones) ...
+
+// Actualizar un usuario existente
+exports.updateUsuario = async (req, res) => {
+  const { id } = req.params;
+  const { nombreCompleto, email, rol, sede, activo, cargoId, centroDeCostosId } = req.body;
+
+  try {
+    const usuarioActualizado = await prisma.usuario.update({
+      where: { id: parseInt(id) },
+      data: {
+        nombreCompleto,
+        email,
+        rol,
+        sede,
+        activo,
+        cargoId: cargoId ? parseInt(cargoId) : undefined,
+        centroDeCostosId: centroDeCostosId ? parseInt(centroDeCostosId) : undefined
+      },
+    });
+    res.json(usuarioActualizado);
+  } catch (error) {
+    console.error(`Error al actualizar usuario ${id}:`, error);
+    res.status(500).json({ message: 'Error al actualizar el usuario.' });
+  }
+};
+
+// Desactivar/Activar un usuario (Soft Delete)
+exports.toggleUsuarioStatus = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const usuario = await prisma.usuario.findUnique({ where: { id: parseInt(id) } });
+        if (!usuario) {
+            return res.status(404).json({ message: 'Usuario no encontrado.' });
+        }
+
+        const usuarioActualizado = await prisma.usuario.update({
+            where: { id: parseInt(id) },
+            data: { activo: !usuario.activo },
+        });
+        res.json({ message: 'Estado del usuario actualizado.', usuario: usuarioActualizado });
+    } catch (error) {
+        console.error(`Error al cambiar estado del usuario ${id}:`, error);
+        res.status(500).json({ message: 'Error al cambiar el estado del usuario.' });
+    }
+};
