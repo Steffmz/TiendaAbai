@@ -1,8 +1,9 @@
+
 .sidebar {
   width: 280px;
   height: 100vh;
-  background: linear-gradient(135deg, #74B9E7 0%, #2B7FFF 100%);
-  color: #1e293b;
+  background: var(--sidebar-bg);   
+  color: var(--text);              
   display: flex;
   flex-direction: column;
   position: fixed;
@@ -17,7 +18,6 @@
 .sidebar.collapsed {
   width: 100px;
 }
-
 
 .logo-container2 {
   display: flex;
@@ -34,7 +34,7 @@
 .toggle-btn {
   cursor: pointer;
   font-size: 1.5rem;
-  color: black;
+  color: var(--text); 
   display: flex;
   justify-content: center;
   align-items: center;
@@ -73,28 +73,28 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   justify-content: flex-start;
   margin: 0.5rem 1rem;
-  color: black;
+  color: var(--text); 
   font-weight: 500;
   position: relative;
   overflow: hidden;
 }
 
 .menu li:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--sidebar-hover); 
   transform: translateX(8px);
   border-radius: 16px;
 }
 
 .menu li.active {
-  background: rgba(255, 255, 255, 0.2);
-  border-left: 5px solid #ffcc00;
+  background: var(--sidebar-hover);
+  border-left: 5px solid var(--accent);
 }
 
 .menu li .iconify {
   font-size: 1.3rem;
   margin-right: 1rem;
   margin-left: 0;
-  color: black;
+  color: var(--text); 
   width: 20px;
   text-align: center;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -127,10 +127,6 @@
   transition: left 0.5s;
 }
 
-.menu svg:hover {
-  color: white; 
-}
-
 .menu li:hover::before {
   left: 100%;
 }
@@ -150,7 +146,7 @@
   }
 }
 
-/* Animaciones adicionales */
+/* Animación */
 .menu li {
   animation: slideInLeft 0.3s ease-out;
 }

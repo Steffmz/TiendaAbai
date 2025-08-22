@@ -95,7 +95,7 @@ export default {
                 <tr 
                   v-for="(categoria, index) in categoriasPaginadas" 
                   :key="categoria.id" 
-                  :class="index % 2 === 0 ? 'bg-gray-50' : 'bg-white'"
+                  :class="index % 2 === 0 ? 'bg-surface-2' : 'bg-surface'"
                   class="border-b border-gray-100 hover:bg-[#fac8012f] transition-colors duration-150"
                 >
                   <td class="px-6 py-4">
@@ -113,7 +113,7 @@ export default {
                   <td class="px-3 py-3 text-center">
                   <button 
                     @click="mostrarDescripcion = mostrarDescripcion === categoria.id ? null : categoria.id"
-                    class="bg-blue-100 hover:bg-blue-200 px-3 py-1 rounded-md text-sm text-black-100 font-medium transition-colors"
+                    class="bg-blue-100 hover:bg-blue-200 px-3 py-1 rounded-md text-sm text-blue-700 font-medium transition-colors"
                   >
                     Ver
                   </button>
@@ -157,7 +157,7 @@ export default {
                     </div>
                   </td>
                 </tr>
-                <tr class="bg-white">
+                <tr class="bg-surface">
                   <td colspan="6" class="h-2 rounded-b-xl"></td>
                 </tr>                        
               </tbody>
@@ -174,30 +174,36 @@ export default {
 
 
                 <!-- Modal de descripción -->
+           <div 
+            v-if="mostrarDescripcion"
+            class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4"
+            @click="mostrarDescripcion = null"
+          >
             <div 
-              v-if="mostrarDescripcion"
-              class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4"
-              @click="mostrarDescripcion = null"
+              class="relative bg-[var(--surface)] border border-[var(--border)] rounded-xl shadow-xl p-6 w-full max-w-md mx-auto"
+              @click.stop
             >
-              <div 
-                class="bg-white border border-gray-200 rounded-xl shadow-xl p-6 w-full max-w-md mx-auto"
-                @click.stop
-              >
-                <div class="bg-gray-50 rounded-lg p-4">
-                  <p class="text-base text-gray-800 leading-relaxed break-words whitespace-pre-wrap">
-                    {{ categorias.find(c => c.id === mostrarDescripcion)?.descripcion }}
-                  </p>
-                </div>
-                <div class="mt-4 text-center">
-                  <button 
-                    @click="mostrarDescripcion = null"
-                    class="px-4 py-2 bg-[#74B9E7] text-black rounded-lg hover:bg-[#FFB93B] transition-colors"
-                  >
-                    Cerrar
-                  </button>
-                </div>
+
+              <!-- Contenido -->
+              <div class="bg-[var(--surface-2)] rounded-lg p-4">
+                <p class="text-base text-[var(--text)] leading-relaxed break-words whitespace-pre-wrap">
+                  {{ categorias.find(c => c.id === mostrarDescripcion)?.descripcion }}
+                </p>
+              </div>
+
+              <!-- Botón abajo -->
+              <div class="mt-4 text-center">
+                <button 
+                  @click="mostrarDescripcion = null"
+                  class="px-4 py-2 bg-[#74B9E7] text-black rounded-lg hover:bg-[#FFB93B] transition-colors"
+                >
+                  Cerrar
+                </button>
               </div>
             </div>
+          </div>
+
+                        
 
                     <!-- Paginación -->
             <div class="flex flex-col items-center justify-center mt-1">
@@ -241,19 +247,19 @@ export default {
             </div>
 
           <!-- Modal -->
-          <div v-if="mostrarModal" class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div class="bg-white rounded-2xl max-w-md w-full p-8 shadow-xl border border-gray-200 transition-all duration-300 relative">
-              <button @click="cerrarModal" class="absolute top-3 right-4 text-gray-500 hover:text-red-500 text-xl font-bold">
-                ✕
-              </button>
+          <div v-if="mostrarModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
+          <div class="relative rounded-2xl max-w-md w-full p-8 shadow-xl border border-[var(--border)] bg-[var(--surface)] transition-all duration-300">
+          <button @click="cerrarModal" class="absolute top-3 right-4 text-gray-500 hover:text-red-500 text-xl font-bold">
+            ✕
+          </button>
 
-              <h2 class="text-2xl font-bold text-black mb-6 text-center">
+              <h2 class="text-2xl font-bold text-blue-400 mb-6 text-center">
                 {{ editando ? 'Editar Categoría' : 'Nueva Categoría' }}
               </h2>
 
               <form @submit.prevent="guardarCategoria" class="space-y-5">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2 text-center">Nombre</label>
+                  <label class="block text-sm font-medium text-blue-400 mb-2 text-center">Nombre</label>
                   <input
                     v-model="form.nombre"
                     type="text"
@@ -264,7 +270,7 @@ export default {
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2 text-center">Descripción</label>
+                  <label class="block text-sm font-medium text-blue-400 mb-2 text-center">Descripción</label>
                   <textarea
                     v-model="form.descripcion"
                     rows="3"
@@ -274,7 +280,7 @@ export default {
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2 text-center">Imagen</label>
+                  <label class="block text-sm font-medium text-blue-400 mb-2 text-center">Imagen</label>
                   <input
                     type="file"
                     @change="handleImageUpload"

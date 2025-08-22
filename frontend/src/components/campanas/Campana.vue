@@ -121,13 +121,14 @@
           <!-- Estado -->
           <td class="px-3 py-3 text-center">
             <span 
-              :class="campana.aprobada ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'" 
+              :class="campana.aprobada 
+                ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
+                : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'" 
               class="px-2 py-1 rounded-full text-xs font-medium"
             >
               {{ campana.aprobada ? 'Activa' : 'Finalizada' }}
             </span>
           </td>
-
           <!-- Acciones -->
           <td class="px-3 py-3">
             <div class="flex items-center justify-center gap-2">  
@@ -153,30 +154,35 @@
     </div>
 
     <!-- Modal de descripción (fuera de la tabla) -->
-    <div 
-      v-if="mostrarDescripcion"
-      class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4"
-      @click="mostrarDescripcion = null"
-    >
-      <div 
-        class="bg-white border border-gray-200 rounded-xl shadow-xl p-6 w-full max-w-md mx-auto"
-        @click.stop
-      >
-        <div class="bg-gray-50 rounded-lg p-4">
-          <p class="text-base text-gray-800 leading-relaxed break-words whitespace-pre-wrap">
-            {{ campanas.find(c => c.id === mostrarDescripcion)?.descripcion }}
-          </p>
-        </div>
-        <div class="mt-4 text-center">
-          <button 
-            @click="mostrarDescripcion = null"
-            class="px-4 py-2 bg-[#74B9E7] text-black rounded-lg hover:bg-[#FFB93B] transition-colors"
+            <div 
+          v-if="mostrarDescripcion"
+          class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4"
+          @click="mostrarDescripcion = null"
+        >
+          <div 
+            class="relative bg-[var(--surface)] border border-[var(--border)] rounded-xl shadow-xl p-6 w-full max-w-md mx-auto"
+            @click.stop
           >
-            Cerrar
-          </button>
+
+            <!-- Contenido -->
+            <div class="bg-[var(--surface-2)] rounded-lg p-4">
+              <p class="text-base text-[var(--text)] leading-relaxed break-words whitespace-pre-wrap">
+                {{ campanas.find(c => c.id === mostrarDescripcion)?.descripcion }}
+              </p>
+            </div>
+
+            <!-- Botón cerrar abajo -->
+            <div class="mt-4 text-center">
+              <button 
+                @click="mostrarDescripcion = null"
+                class="px-4 py-2 bg-[#74B9E7] text-black rounded-lg hover:bg-[#FFB93B] transition-colors"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+
 
     <!-- Modal Nueva/Editar Campaña -->
     <div v-if="modalAbierto" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-3">
@@ -184,7 +190,7 @@
         <!-- X -->
         <button @click="cerrarModal" class="absolute top-2 right-3 text-gray-500 hover:text-red-500 text-lg font-bold">✕</button>
 
-        <h2 class="text-lg font-bold text-black mb-3 text-center">
+        <h2 class="text-lg font-bold text-blue-400 mb-3 text-center">
           {{ editando ? 'Editar Campaña' : 'Nueva Campaña' }}
         </h2>
           
@@ -192,7 +198,7 @@
         <form @submit.prevent="guardarCampana" class="space-y-3">
           <!-- Nombre -->
           <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1 text-center">Nombre de la Campaña *</label>
+            <label class="block text-xs font-medium text-blue-400 mb-1 text-center">Nombre de la Campaña *</label>
             <input
               v-model="formulario.titulo"
               type="text"
@@ -204,7 +210,7 @@
 
           <!-- Descripción -->
           <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1 text-center">Descripción *</label>
+            <label class="block text-xs font-medium text-blue-400 mb-1 text-center">Descripción *</label>
             <textarea
               v-model="formulario.descripcion"
               required
@@ -216,7 +222,7 @@
 
           <!-- Estado -->
           <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1 text-center">Estado *</label>
+            <label class="block text-xs font-medium text-blue-400 mb-1 text-center">Estado *</label>
             <select
               v-model="formulario.aprobada"
               required
@@ -230,7 +236,7 @@
           <!-- Puntos y Descuento -->
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-medium text-gray-700 mb-1 text-center">Puntos *</label>
+              <label class="block text-xs font-medium text-blue-400 mb-1 text-center">Puntos *</label>
               <input
                 v-model.number="formulario.puntos"
                 type="number"
@@ -241,7 +247,7 @@
               />
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-700 mb-1 text-center">Descuento (%) *</label>
+              <label class="block text-xs font-medium text-blue-400 mb-1 text-center">Descuento (%) *</label>
               <input
                 v-model.number="formulario.descuento"
                 type="number"
@@ -257,14 +263,14 @@
           <!-- Fechas -->
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-medium text-gray-700 mb-1 text-center">Fecha Inicio *</label>
+              <label class="block text-xs font-medium text-blue-400 mb-1 text-center">Fecha Inicio *</label>
               <input
                 type="date" v-model="formulario.fechaInicio"
                 class="w-full px-3 py-2 rounded-lg border border-yellow-300 bg-yellow-50 text-center text-sm focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100"
               />
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-700 mb-1 text-center">Fecha Fin *</label>
+              <label class="block text-xs font-medium text-blue-400 mb-1 text-center">Fecha Fin *</label>
               <input
                 type="date" v-model="formulario.fechaFin"
                 class="w-full px-3 py-2 rounded-lg border border-yellow-300 bg-yellow-50 text-center text-sm focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100"
@@ -274,7 +280,7 @@
 
           <!-- Imagen -->
           <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1 text-center">Imagen</label>
+            <label class="block text-xs font-medium text-blue-400 mb-1 text-center">Imagen</label>
             <input
               type="file"
               @change="manejarSubidaImagen" accept="image/*"
@@ -287,7 +293,7 @@
 
           <!-- Productos -->
           <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1 text-center">Productos</label>
+            <label class="block text-xs font-medium text-blue-700 mb-1 text-center">Productos</label>
             <button 
               type="button"
               class="px-3 py-1 bg-blue-200 rounded-md text-sm font-semibold hover:bg-blue-300 transition"
@@ -295,7 +301,7 @@
             >
               Seleccionar Productos
             </button>
-            <ul class="list-disc list-inside text-gray-700 mt-2 text-sm">
+            <ul class="list-disc list-inside text-blue-700 mt-2 text-sm">
               <li v-for="p in productosSeleccionados" :key="p.id">{{ p.nombre }}</li>
               <li v-if="productosSeleccionados.length === 0" class="text-gray-400">Ninguno</li>
             </ul>

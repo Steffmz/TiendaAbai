@@ -255,228 +255,241 @@ export default {
 </script>
 
 
-  <template>
-    <div class="h-full bg-gray-50 flex flex-col">
-      <div class="max-w-[1100px] w-full mx-auto px-4">
-        <!-- Flecha para volver atrás -->
-        <div class="pt-4 px-6 mb-2">
-          <button 
-            @click="$router.go(-1)"
-            class="flex items-center text-gray-600 hover:text-gray-800 transition-colors"
+<template>
+  <div class="h-full flex flex-col" :style="{ background: 'var(--bg)', color: 'var(--text)' }">
+    <div class="max-w-[1100px] w-full mx-auto px-4">
+      <!-- Flecha para volver atrás -->
+      <div class="pt-4 px-6 mb-2" :style="{ background: 'var(--surface)' }">
+        <button 
+          @click="$router.go(-1)"
+          class="flex items-center transition-colors"
+          :style="{ color: 'var(--text-muted)' }"
+        >
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+          Volver
+        </button>
+      </div>
+
+      <!-- Título y botón -->
+      <div class="pb-2 px-6 mb-4 shadow-sm" :style="{ background: 'var(--surface)' }">
+        <div class="text-center mb-4">
+          <h1 class="text-4xl font-bold mb-1" :style="{ color: 'var(--text)' }">
+            Catalogo de  {{ categoriaNombre || 'Categoría' }}
+          </h1>
+          <p class="text-lg" :style="{ color: 'var(--text-muted)' }"> 
+            <span v-if="productos.length > 0" class="font-medium">
+              ({{ productos.length }} productos)
+            </span>
+          </p>
+        </div>
+        <div class="flex justify-end">
+          <button
+            @click="agregarProducto"
+             class="px-5 py-2 bg-[#FFB93B] text-black rounded-lg font-semibold shadow-md
+                   hover:bg-[#74B9E7] transition-all duration-200 hover:shadow-lg"
           >
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-            </svg>
-            Volver
+            + Agregar producto
           </button>
-        </div>
-
-        <!-- Título y botón -->
-        <div class="pb-2 px-6 mb-4 shadow-sm">
-          <div class="text-center mb-4">
-            <h1 class="text-4xl font-bold text-gray-800 mb-1">
-              Catalogo de  {{ categoriaNombre || 'Categoría' }}
-            </h1>
-            <p class="text-gray-500 text-lg"> 
-              <span v-if="productos.length > 0" class="font-medium">
-                ({{ productos.length }} productos)
-              </span>
-            </p>
-          </div>
-          <div class="flex justify-end">
-            <button
-              @click="agregarProducto"
-              class="px-8 py-2 bg-[#FFB93B] text-black rounded-lg font-medium shadow hover:bg-[#74B9E7] transition-all duration-200"
-              :disabled="loading"
-            >
-              + Agregar producto
-            </button>
-          </div>
-        </div>
-
-        <!-- Tabla de productos -->
-        <div class="rounded-xl border border-gray-200 shadow-sm mb-4 w-full max-w-5xl">
-          <table class="w-full border-separate border-spacing-0 overflow-hidden rounded-xl">
-            <thead class="bg-[#74B9E7] text-white">
-              <tr>
-                <th class="px-6 py-4 text-center font-semibold">Imagen</th>
-                <th class="px-6 py-4 text-center font-semibold">Nombre</th>
-                <th class="px-6 py-4 text-center font-semibold">Precio</th>
-                <th class="px-6 py-4 text-center font-semibold">Stock</th>
-                <th class="px-6 py-4 text-center font-semibold">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-if="productos.length === 0">
-                <td colspan="5" class="px-6 py-8 text-center text-gray-500">
-                  No hay productos en esta categoría
-                </td>
-              </tr>
-              <tr
-                v-for="producto in productosPaginados"
-                :key="producto.id"
-                class="border-b border-gray-100"
-              >
-                <td class="px-6 py-4 text-center">
-                  <img 
-                    v-if="producto.imagenUrl" 
-                    :src="`http://localhost:3000${producto.imagenUrl}`" 
-                    class="w-16 h-16 object-cover rounded-lg mx-auto" 
-                    @error="$event.target.style.display='none'"
-                  />
-                  <div v-else class="w-16 h-16 bg-gray-200 rounded-lg mx-auto flex items-center justify-center">
-                    <span class="text-gray-400 text-xs">Sin imagen</span>
-                  </div>
-                </td>
-                <td class="px-6 py-4 text-center">{{ producto.nombre }}</td>
-                <td class="px-6 py-4 text-center">{{ producto.precioPuntos }} puntos</td>
-                <td class="px-6 py-4 text-center">{{ producto.stock }}</td>
-                <td class="px-6 py-4 text-center space-x-2">
-                  <button 
-                    @click="editarProducto(producto)"
-                    class="bg-blue-100 hover:bg-blue-200 px-3 py-1 rounded-md text-blue-700 font-medium transition-colors"
-                    :disabled="loading"
-                  >
-                    Editar
-                  </button>
-                  <button 
-                    @click="eliminarProducto(producto)"
-                    class="bg-red-100 hover:bg-red-200 px-3 py-1 rounded-md text-red-700 font-medium transition-colors"
-                    :disabled="loading"
-                  >
-                    Eliminar
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Información de productos y controles de paginación -->
-        <div class="text-center mb-6">
-
-          <!-- Controles de paginación -->
-          <div 
-            v-if="totalPaginas > 1" 
-            class="flex justify-center items-center space-x-4"
-          >
-            <!-- Botón página anterior -->
-            <button
-              @click="paginaAnterior"
-              :disabled="paginaActual === 1"
-              class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-            >
-              ←
-            </button>
-
-            <!-- Página actual -->
-            <div class="px-3 py-1 bg-[#74B9E7] text-white text-sm rounded-md font-medium">
-              {{ paginaActual }}
-            </div>
-
-            <!-- Botón página siguiente -->
-            <button
-              @click="paginaSiguiente"
-              :disabled="paginaActual === totalPaginas"
-              class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-            >
-              →
-            </button>
-          </div>
         </div>
       </div>
 
-      <!-- Modal de producto -->
-      <div
-        v-if="mostrarModal"
-        class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4"
-      >
-        <div
-          class="bg-white rounded-2xl max-w-md w-full p-8 shadow-xl border border-gray-200 transition-all duration-300"
-        >
-          <h2 class="text-2xl font-bold text-black mb-6 text-center">
-            {{ editando ? 'Editar Producto' : 'Nuevo Producto' }}
-          </h2>
-
-          <form @submit.prevent="guardarProducto" class="space-y-5">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2 text-center">Nombre *</label>
-              <input
-                v-model="form.nombre"
-                type="text"
-                required
-                class="w-full px-4 py-3 rounded-lg border border-yellow-300 bg-yellow-50 placeholder-gray-500 text-center focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition"
-                placeholder="Nombre del producto"
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2 text-center">Descripción</label>
-              <textarea
-                v-model="form.descripcion"
-                rows="3"
-                class="w-full px-4 py-3 rounded-lg border border-yellow-300 bg-yellow-50 placeholder-gray-500 text-center focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition resize-none"
-                placeholder="Descripción del producto"
-              ></textarea>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2 text-center">Precio (puntos) *</label>
-              <input
-                v-model="form.precioPuntos"
-                type="number"
-                min="1"
-                required
-                class="w-full px-4 py-3 rounded-lg border border-yellow-300 bg-yellow-50 placeholder-gray-500 text-center focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition"
-                placeholder="Precio en puntos"
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2 text-center">Stock *</label>
-              <input
-                v-model="form.stock"
-                type="number"
-                min="0"
-                required
-                class="w-full px-4 py-3 rounded-lg border border-yellow-300 bg-yellow-50 placeholder-gray-500 text-center focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition"
-                placeholder="Cantidad en stock"
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2 text-center">
-                Imagen {{ editando ? '(dejar vacío para mantener actual)' : '' }}
-              </label>
-              <input
-                type="file"
-                @change="handleImageUpload"
-                accept="image/*"
-                class="w-full px-4 py-3 rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition"
-              />
-              <div v-if="previewImage" class="mt-4 flex justify-center">
-                <img
-                  :src="previewImage"
-                  class="w-24 h-24 rounded-lg object-cover border border-gray-300 shadow-sm"
-                  alt="Preview"
+      <!-- Tabla de productos -->
+      <div class="rounded-xl border border-gray-200 shadow-sm mb-2 w-full max-w-7xl mx-auto overflow-hidden">
+        <table class="w-full border-collapse">
+          <thead class="bg-[#74B9E7] text-black">
+            <tr>
+              <th class="px-6 py-4 text-center font-semibold">Imagen</th>
+              <th class="px-6 py-4 text-center font-semibold">Nombre</th>
+              <th class="px-6 py-4 text-center font-semibold">Precio</th>
+              <th class="px-6 py-4 text-center font-semibold">Stock</th>
+              <th class="px-6 py-4 text-center font-semibold">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="productos.length === 0">
+              <td colspan="5" class="px-6 py-8 text-center" :style="{ color: 'var(--text-muted)' }">
+                No hay productos en esta categoría
+              </td>
+            </tr>
+            <tr
+              v-for="producto in productosPaginados"
+              :key="producto.id"
+              :style="{ background: 'var(--surface-2)' }"
+              class="border-b"
+            >
+              <td class="px-6 py-4 text-center">
+                <img 
+                  v-if="producto.imagenUrl" 
+                  :src="`http://localhost:3000${producto.imagenUrl}`" 
+                  class="w-16 h-16 object-cover rounded-lg mx-auto" 
+                  @error="$event.target.style.display='none'"
+                  :style="{ background: 'var(--surface-2)' }"
                 />
-              </div>
-            </div>
-            <div class="flex gap-4 pt-2">
-              <button
-                type="button"
-                @click="cerrarModal"
-                class="flex-1 px-5 py-3 rounded-lg bg-yellow-200 text-gray-800 hover:bg-yellow-300 border border-yellow-300 transition"
-                :disabled="loading"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                class="flex-1 px-5 py-3 rounded-lg bg-blue-300 text-black hover:bg-blue-400 border border-blue-400 transition disabled:opacity-50"
-                :disabled="loading"
-              >
-                {{ loading ? 'Guardando...' : (editando ? 'Actualizar' : 'Crear') }}
-              </button>
-            </div>
-          </form>
+                <div v-else class="w-16 h-16 rounded-lg mx-auto flex items-center justify-center"
+                  :style="{ background: 'var(--surface-2)' }">
+                  <span :style="{ color: 'var(--text-muted)' }" class="text-xs">Sin imagen</span>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-center">{{ producto.nombre }}</td>
+              <td class="px-6 py-4 text-center">{{ producto.precioPuntos }} puntos</td>
+              <td class="px-6 py-4 text-center">{{ producto.stock }}</td>
+              <td class="px-6 py-4 text-center space-x-2">
+                <button 
+                  @click="editarProducto(producto)"
+                  class="bg-blue-100 text-black hover:bg-blue-200 px-3 py-1 rounded-md text-sm font-medium transition-colors duration-150"
+                >
+                  Editar
+                </button>
+                <button 
+                  @click="eliminarProducto(producto)"
+                  class="bg-red-100 text-black hover:bg-red-200 px-3 py-1 rounded-md text-sm font-medium transition-colors duration-150"
+                >
+                  Eliminar
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Información de productos y controles de paginación -->
+      <div class="text-center mb-6">
+        <!-- Controles de paginación -->
+        <div 
+          v-if="totalPaginas > 1" 
+          class="flex justify-center items-center space-x-4"
+        >
+          <!-- Botón página anterior -->
+          <button
+            @click="paginaAnterior"
+            :disabled="paginaActual === 1"
+            class="w-8 h-8 flex items-center justify-center rounded-md transition-colors"
+            :style="{ background: 'var(--surface-2)', color: 'var(--text-muted)' }"
+          >
+            ←
+          </button>
+
+          <!-- Página actual -->
+          <div class="px-3 py-1 text-sm rounded-md font-medium"
+            :style="{ background: 'var(--primary)', color: 'var(--primary-contrast)' }">
+            {{ paginaActual }}
+          </div>
+
+          <!-- Botón página siguiente -->
+          <button
+            @click="paginaSiguiente"
+            :disabled="paginaActual === totalPaginas"
+            class="w-8 h-8 flex items-center justify-center rounded-md transition-colors"
+            :style="{ background: 'var(--surface-2)', color: 'var(--text-muted)' }"
+          >
+            →
+          </button>
         </div>
       </div>
     </div>
-  </template>
+
+    <!-- Modal de producto -->
+    <div
+      v-if="mostrarModal"
+      class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4"
+    >
+      <div
+        class="rounded-2xl max-w-md w-full p-8 shadow-xl border transition-all duration-300"
+        :style="{ background: 'var(--surface)', borderColor: 'var(--border)', color: 'var(--text)' }"
+      >
+        <h2 class="text-2xl font-bold mb-6 text-center" :style="{ color: 'var(--text)' }">
+          {{ editando ? 'Editar Producto' : 'Nuevo Producto' }}
+        </h2>
+
+        <form @submit.prevent="guardarProducto" class="space-y-5">
+          <div>
+            <label class="block text-sm font-medium mb-2 text-center" :style="{ color: 'var(--text)' }">Nombre *</label>
+            <input
+              v-model="form.nombre"
+              type="text"
+              required
+              class="w-full px-4 py-3 rounded-lg border placeholder-gray-500 text-center focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition"
+              :style="{ background: 'var(--surface-2)', color: 'var(--text)', borderColor: 'var(--border)' }"
+              placeholder="Nombre del producto"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-2 text-center" :style="{ color: 'var(--text)' }">Descripción</label>
+            <textarea
+              v-model="form.descripcion"
+              rows="3"
+              class="w-full px-4 py-3 rounded-lg border placeholder-gray-500 text-center focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition resize-none"
+              :style="{ background: 'var(--surface-2)', color: 'var(--text)', borderColor: 'var(--border)' }"
+              placeholder="Descripción del producto"
+            ></textarea>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-2 text-center" :style="{ color: 'var(--text)' }">Precio (puntos) *</label>
+            <input
+              v-model="form.precioPuntos"
+              type="number"
+              min="1"
+              required
+              class="w-full px-4 py-3 rounded-lg border placeholder-gray-500 text-center focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition"
+              :style="{ background: 'var(--surface-2)', color: 'var(--text)', borderColor: 'var(--border)' }"
+              placeholder="Precio en puntos"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-2 text-center" :style="{ color: 'var(--text)' }">Stock *</label>
+            <input
+              v-model="form.stock"
+              type="number"
+              min="0"
+              required
+              class="w-full px-4 py-3 rounded-lg border placeholder-gray-500 text-center focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition"
+              :style="{ background: 'var(--surface-2)', color: 'var(--text)', borderColor: 'var(--border)' }"
+              placeholder="Cantidad en stock"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-2 text-center" :style="{ color: 'var(--text)' }">
+              Imagen {{ editando ? '(dejar vacío para mantener actual)' : '' }}
+            </label>
+            <input
+              type="file"
+              @change="handleImageUpload"
+              accept="image/*"
+              class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition"
+              :style="{ background: 'var(--surface-2)', color: 'var(--text)', borderColor: 'var(--border)' }"
+            />
+            <div v-if="previewImage" class="mt-4 flex justify-center">
+              <img
+                :src="previewImage"
+                class="w-24 h-24 rounded-lg object-cover border shadow-sm"
+                :style="{ borderColor: 'var(--border)' }"
+                alt="Preview"
+              />
+            </div>
+          </div>
+          <div class="flex gap-4 pt-2">
+            <button
+              type="button"
+              @click="cerrarModal"
+              class="flex-1 px-5 py-3 rounded-lg border transition"
+              :style="{ background: 'var(--warning)', color: 'var(--primary-contrast)', borderColor: 'var(--border)' }"
+              :disabled="loading"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              class="flex-1 px-5 py-3 rounded-lg border transition disabled:opacity-50"
+              :style="{ background: 'var(--primary)', color: 'var(--primary-contrast)', borderColor: 'var(--border)' }"
+              :disabled="loading"
+            >
+              {{ loading ? 'Guardando...' : (editando ? 'Actualizar' : 'Crear') }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</template>

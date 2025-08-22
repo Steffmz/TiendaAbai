@@ -6,6 +6,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
 
+    <!-- Evita el "flash" y respeta preferencia guardada/sistema -->
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem('theme');
+          var prefers = window.matchMedia &&
+                        window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if ((saved && saved === 'dark') || (!saved && prefers)) {
+            document.documentElement.classList.add('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
+
+    <link rel="stylesheet" href="/style.css" />
     <title>Vite + Vue</title>
   </head>
   <body>

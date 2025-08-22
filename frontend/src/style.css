@@ -1,10 +1,364 @@
-/* 1. Importa la fuente desde Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Arimo:ital,wght@0,400..700;1,400..700&family=Quicksand:wght@300&display=swap');
 
-/* 2. Aplica solo la fuente a todo */
-* {
-  font-family: "Quicksand", sans-serif;
-  font-optical-sizing: auto;
-  font-weight: 600;
-  font-style: normal;
+/* VARIABLES DE COLOR BASE*/
+
+:root {
+  /* superficies y texto */
+  --bg: #f5f7fb; 
+  --surface: #ffffff;
+  --surface-2: #eef2f7;
+  --border: #d9dee8;
+  --text: #0f172a;
+  --text-muted: #475569;
+
+  /* marca y estados */
+  --primary: #2b7fff;
+  --primary-contrast: #ffffff; 
+  --accent: #ffcc00;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+
+  /* componentes */
+  --sidebar-bg: linear-gradient(135deg, #74B9E7 0%, #2B7FFF 100%);
+  --sidebar-hover: rgba(255,255,255,.15);
+  --topbar-bg: linear-gradient(135deg, #74B9E7 0%, #2B7FFF 100%);
+  --table-header: #74a8cf;
+}
+
+/* VARIABLES MODO OSCURO */
+html.dark {
+  --bg: #334155;
+  --surface: #334155;
+  --surface-2: #242b3d;
+  --border: #374151;
+  --text: #f1f5f9;
+  --text-muted: #94a3b8;
+
+  --primary: #5aa1ff;
+  --primary-contrast: #0a0c12;
+  --accent: #ffd34d;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+
+  --sidebar-bg: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  --sidebar-hover: rgba(255,255,255,.08);
+  --topbar-bg: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  --table-header: #475569;
+}
+
+/* BASE Y CONTENEDORES */
+html.dark,
+html.dark body,
+html.dark #app,
+html.dark .app-container,
+html.dark main,
+html.dark .main-content,
+html.dark .content-wrapper,
+html.dark .page-content {
+    background-color: var(--bg) !important;
+    color: var(--text) !important;
+}
+
+html.dark .bg-white,
+html.dark .bg-gray-50,
+html.dark .bg-gray-100,
+html.dark .bg-slate-50,
+html.dark .bg-slate-100 {
+    background-color: var(--bg) !important;
+    color: var(--text) !important;
+}
+
+html.dark .card,
+html.dark .panel,
+html.dark .modal,
+html.dark .dropdown-menu {
+    background-color: var(--surface) !important;
+    color: var(--text) !important;
+    border-color: var(--border) !important;
+}
+
+/* FORMULARIOS  */
+html.dark input,
+html.dark select,
+html.dark textarea,
+html.dark .form-control,
+html.dark .form-input {
+    background-color: var(--surface-2) !important;
+    color: var(--text) !important;
+    border-color: var(--border) !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+    color: var(--text-muted) !important;
+}
+
+/* TABLAS */
+html.dark .table,
+html.dark table {
+    background-color: var(--surface) !important;
+    color: var(--text) !important;
+}
+
+html.dark .table thead th,
+html.dark .table thead td,
+html.dark th,
+html.dark .bg-\[\#74B9E7\] {
+    background-color: #51A2FF !important;
+    color: #ffffff !important;
+}
+
+html.dark .table tbody tr,
+html.dark tbody tr {
+    background-color: var(--surface) !important;
+    color: var(--text) !important;
+    border-bottom: 1px solid var(--border) !important;
+}
+
+html.dark .table tbody tr:nth-child(even),
+html.dark tbody tr:nth-child(even) {
+    background-color: var(--surface-2) !important;
+}
+
+html.dark .table tbody tr:hover,
+html.dark tbody tr:hover {
+    background-color: rgba(94, 161, 255, 0.1) !important;
+}
+
+html.dark .table td,
+html.dark td {
+    color: var(--text) !important;
+    border-color: var(--border) !important;
+}
+
+/* BADGES */
+html.dark .badge.success,
+html.dark .badge:contains("Activo"),
+html.dark .badge[data-status="active"] {
+    background-color: rgba(16, 185, 129, 0.2) !important;
+    color: #10b981 !important;
+}
+
+html.dark .badge.danger,
+html.dark .badge:contains("Inactivo"),
+html.dark .badge[data-status="inactive"] {
+    background-color: rgba(239, 68, 68, 0.2) !important;
+    color: #ef4444 !important;
+}
+
+/* BOTONES */
+html.dark .btn,
+html.dark button {
+    border-color: var(--border) !important;
+    font-weight: 500;
+    border-radius: 6px;
+}
+
+html.dark .btn-primary,
+html.dark .btn.primary {
+    background-color: var(--primary) !important;
+    color: #ffffff !important;
+    border-color: var(--primary) !important;
+}
+
+html.dark .btn-secondary,
+html.dark .btn.secondary {
+    background-color: var(--surface-2) !important;
+    color: #ffffff !important;
+    border-color: var(--border) !important;
+}
+
+html.dark .btn-warning,
+html.dark .btn.warning {
+    background-color: var(--warning) !important;
+    color: #000000 !important;
+    border-color: var(--warning) !important;
+}
+
+html.dark .btn-success,
+html.dark .btn.success {
+    background-color: var(--success) !important;
+    color: #ffffff !important;
+}
+
+html.dark .btn-danger,
+html.dark .btn.danger {
+    background-color: var(--danger) !important;
+    color: #ffffff !important;
+}
+
+html.dark .btn.outline,
+html.dark .btn-outline {
+    background-color: transparent !important;
+    color: var(--primary) !important;
+    border-color: var(--primary) !important;
+}
+
+html.dark button[class*="editar"],
+html.dark button[class*="edit"] {
+    background-color: var(--primary) !important;
+    color: #ffffff !important;
+}
+
+html.dark button[class*="eliminar"],
+html.dark button[class*="delete"] {
+    background-color: var(--danger) !important;
+    color: #ffffff !important;
+}
+
+html.dark button[class*="catalogo"],
+html.dark button[class*="catalog"] {
+    background-color: var(--surface-2) !important;
+    color: #ffffff !important;
+}
+
+/* NAVEGACIÓN */
+html.dark .sidebar,
+html.dark .nav-sidebar,
+html.dark .side-nav {
+    background: var(--sidebar-bg) !important;
+    color: var(--text) !important;
+}
+
+html.dark .topbar,
+html.dark .header,
+html.dark .navbar {
+    background: var(--topbar-bg) !important;
+    color: var(--text) !important;
+}
+
+html.dark .nav-link,
+html.dark .sidebar-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+html.dark .nav-link:hover,
+html.dark .sidebar-link:hover {
+    background-color: var(--sidebar-hover) !important;
+}
+
+/* PAGINACIÓN */
+html.dark .pagination {
+    background-color: var(--surface) !important;
+}
+
+html.dark .pagination .page-link,
+html.dark .pagination button {
+    background-color: var(--surface-2) !important;
+    color: var(--text) !important;
+    border-color: var(--border) !important;
+}
+
+html.dark .pagination .page-link:hover,
+html.dark .pagination button:hover {
+    background-color: var(--primary) !important;
+    color: #ffffff !important;
+}
+
+html.dark .pagination .page-link.active,
+html.dark .pagination button.active {
+    background-color: var(--primary) !important;
+    color: #ffffff !important;
+}
+
+/* BÚSQUEDA Y TEXTO */
+html.dark .search-box,
+html.dark .search-input {
+    background-color: var(--surface-2) !important;
+    color: var(--text) !important;
+    border-color: var(--border) !important;
+}
+
+html.dark h1, html.dark h2, html.dark h3, html.dark h4, html.dark h5, html.dark h6 {
+    color: var(--text) !important;
+}
+
+html.dark p, html.dark span, html.dark div {
+    color: var(--text);
+}
+
+html.dark .text-muted,
+html.dark .muted {
+    color: var(--text-muted) !important;
+}
+
+/* ICONOS Y SCROLLBARS */
+html.dark .icon,
+html.dark i {
+    color: var(--text-muted);
+}
+
+html.dark img[src*="placeholder"],
+html.dark .placeholder-img {
+    filter: brightness(0.7) contrast(1.2);
+}
+
+html.dark ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+html.dark ::-webkit-scrollbar-track {
+    background: var(--surface-2);
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+/* TABLA CONTENEDOR */
+html.dark .table-container,
+html.dark .data-table,
+html.dark .categories-table {
+    background-color: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 8px;
+}
+
+/* AJUSTES ESPECÍFICOS MODAL */
+.modal {
+  background-color: var(--surface) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3) !important;
+  padding: 1.5rem !important;
+}
+
+.modal input,
+.modal textarea,
+.modal select {
+  background-color: var(--surface-2) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+  padding: 0.5rem 0.75rem !important;
+}
+
+.modal input::placeholder,
+.modal textarea::placeholder {
+  color: var(--text-muted) !important;
+}
+
+.modal .close,
+.modal button.close {
+  background: transparent !important;
+  border: none !important;
+  color: var(--text) !important;
+  font-size: 1.5rem !important;
+  cursor: pointer;
+}
+
+.modal .btn-primary {
+  background-color: var(--primary) !important;
+  color: var(--primary-contrast) !important;
+  border-radius: 8px !important;
+  padding: 0.6rem 1.2rem !important;
+  font-weight: 600 !important;
 }

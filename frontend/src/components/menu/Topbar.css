@@ -1,27 +1,32 @@
+
 .topbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, #74B9E7 0%, #2B7FFF 100%);
+  background: var(--topbar-bg);  
   padding: 1rem 2rem;
   height: 80px;
-  border-bottom: 4px solid #fac801;
+  border-bottom: 4px solid var(--accent);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
+/* Icono de menú (hamburguesa en mobile) */
 .menu-icon {
   display: none;
   font-size: 1.8rem;
-  color: #000; 
+  color: var(--text); 
   cursor: pointer;
 }
 
+/* Logo */
 .logo img {
   height: 50px;
   max-width: 100%;
   object-fit: contain;
 }
 
+/* Acciones (iconos a la derecha) */
 .actions {
   display: flex;
   gap: 1.5rem;
@@ -31,15 +36,16 @@
 .actions svg {
   width: 26px;
   height: 26px;
-  color: #000; 
+  color: var(--text); 
   cursor: pointer;
   transition: color 0.3s ease;
 }
 
 .actions svg:hover {
-  color: white; 
+  color: var(--primary); 
 }
 
+/* Responsive */
 @media (max-width: 768px) {
   .menu-icon {
     display: block;
