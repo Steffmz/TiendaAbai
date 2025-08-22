@@ -31,10 +31,12 @@
 <script setup>
 import { Icon } from "@iconify/vue";
 import { useTheme } from '../../theme.js';
+import { useRouter } from 'vue-router';  // Import useRouter
 
 import logoNormal from "../../assets/img/abai-logo.png";
 import logoBlanco from "../../assets/img/Logo-blanco.png";
 
+const router = useRouter();  // Create a router instance
 const { isDark, toggle } = useTheme();
 
 function toggleDarkMode() {
@@ -44,9 +46,12 @@ function toggleDarkMode() {
 function showHelp() { console.log("Mostrar ayuda"); }
 function showProfile() { console.log("Mostrar perfil"); }
 function showNotifications() { console.log("Mostrar notificaciones"); }
+
+// Updated logout function
 function logout() { 
   if (confirm("¿Estás seguro de que quieres cerrar sesión?")) { 
-    console.log("Cerrar sesión"); 
+    localStorage.removeItem('authToken');  // Remove the token
+    router.push('/login');  // Redirect to the login page
   } 
 }
 </script>

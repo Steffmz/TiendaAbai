@@ -1,63 +1,73 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import { jwtDecode } from 'jwt-decode';
+import { createRouter, createWebHistory } from "vue-router";
+import { jwtDecode } from "jwt-decode";
 
 // Vistas y layouts
-import Login from '../components/login/Login.vue';
-import Dashboard from '../components/layouts/Dashboard.vue';
-import Categorias from '../components/categorias/Categorias.vue';
-import Productos from '../components/productos/Productos.vue';
-import Campana from '../components/campanas/Campana.vue';
-import Inicio from '../components/layouts/Inicio.vue';
-import GestionUsuarios from '../components/admin/GestionUsuarios.vue';
+import Login from "../components/login/Login.vue";
+import Dashboard from "../components/layouts/Dashboard.vue";
+import Categorias from "../components/categorias/Categorias.vue";
+import Productos from "../components/productos/Productos.vue";
+import Campana from "../components/campanas/Campana.vue";
+import Inicio from "../components/layouts/Inicio.vue";
+import GestionUsuarios from "../components/admin/GestionUsuarios.vue";
+import Calendario from "../components/Calendario.vue";
 
+// frontend/src/router/index.js
 
 const routes = [
-  { path: '/login', name: 'Login', component: Login },
-
-  { path: '/', redirect: '/dashboard/categorias' },
-
-  { 
-    path: '/inicio', 
-    name: 'Inicio', 
-    component: Inicio, 
-    meta: { requiresAuth: true } // Protegida, pero no requiere ser admin
-  },
-
-   { path: '/', redirect: '/inicio' },
+  { path: "/login", name: "Login", component: Login },
 
   {
-    path: '/dashboard',
+    path: "/inicio",
+    name: "Inicio",
+    component: Inicio,
+    meta: { requiresAuth: true },
+  },
+
+  {
+    path: "/dashboard",
     component: Dashboard,
     meta: { requiresAuth: true, requiresAdmin: true },
     children: [
       {
-        path: 'categorias',
-        name: 'Categorias',
-        component: Categorias
-      },
-            { // <-- AÑADE ESTE OBJETO COMPLETO
-        path: 'usuarios',
-        name: 'GestionUsuarios',
-        component: GestionUsuarios
+        path: "", // La ruta vacía del dashboard
+        redirect: "/dashboard/categorias", // Redirige a una página por defecto
       },
       {
-        path: 'productos/:categoriaId',
-        name: 'Productos',
-        component: Productos,
-        props: true
+        path: "categorias",
+        name: "Categorias",
+        component: Categorias,
       },
-       {
-        path: 'campanas',
-        name: 'Campana',
-        component: Campana
-      }
-    ]
+      {
+        path: "usuarios",
+        name: "GestionUsuarios",
+        component: GestionUsuarios,
+      },
+      {
+        path: "productos/:categoriaId",
+        name: "Productos",
+        component: Productos,
+        props: true,
+      },
+      {
+        path: "campanas",
+        name: "Campana",
+        component: Campana, // Esto ya es correcto y usa tu componente
+      },
+
+      {
+        path: "calendario",
+        name: "Calendario",
+        component: Calendario,
+      },
+    ],
   },
+
+  { path: "/:pathMatch(.*)*", redirect: "/inicio" },
 ];
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
+  routes,
 });
 
 // Middleware de protección
@@ -65,39 +75,38 @@ const router = createRouter({
 
 // Middleware de protección
 router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('authToken');
+  const token = localStorage.getItem("authToken");
 
   // Si la ruta no requiere autenticación, pero el usuario está logueado y va al login,
   // lo mandamos al dashboard o a su página de inicio. (Prevención)
-  if (to.name === 'Login' && token) {
+  if (to.name === "Login" && token) {
     const decodedToken = jwtDecode(token);
-    if (decodedToken.rol === 'Administrador') {
-      return next('/dashboard');
+    if (decodedToken.rol === "Administrador") {
+      return next("/dashboard");
     } else {
-      return next('/inicio'); // Redirige al inicio si ya está logueado
+      return next("/inicio"); // Redirige al inicio si ya está logueado
     }
   }
 
   if (to.meta.requiresAuth) {
-    if (!token) return next('/login');
+    if (!token) return next("/login");
 
     try {
       const decodedToken = jwtDecode(token);
 
       // --- ESTE ES EL CAMBIO IMPORTANTE ---
       // Si la ruta requiere admin y el usuario no lo es...
-      if (to.meta.requiresAdmin && decodedToken.rol !== 'Administrador') {
+      if (to.meta.requiresAdmin && decodedToken.rol !== "Administrador") {
         // ...lo mandamos a su propia página de inicio, NO a '/'.
-        return next('/inicio'); 
+        return next("/inicio");
       }
-      
+
       // Si el usuario es admin pero intenta acceder a una ruta de empleado (si la tuvieras),
       // podrías redirigirlo al dashboard. (Lógica opcional para el futuro).
-
     } catch (error) {
-      console.error('Token inválido:', error);
-      localStorage.removeItem('authToken');
-      return next('/login');
+      console.error("Token inválido:", error);
+      localStorage.removeItem("authToken");
+      return next("/login");
     }
   }
 
