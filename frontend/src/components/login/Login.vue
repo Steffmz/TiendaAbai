@@ -17,7 +17,7 @@ const errorMessage = ref("");
 // Objeto de registro con el campo "centroDeCostosNombre"
 const registro = ref({
   nombreCompleto: "",
-  cargo: "",
+  cargoNombre: "",
   sede: "",
   centroDeCostosNombre: "",
   email: "",
@@ -59,12 +59,15 @@ const login = async () => {
 const register = async () => {
   errorMessage.value = '';
   try {
-    await axios.post('http://localhost:3000/usuarios', registro.value);
-    
+    await axios.post('http://localhost:3000/usuarios', {
+      ...registro.value,
+      cargo: registro.value.cargoNombre
+    });
+
     alert('¡Registro exitoso! Ahora puedes iniciar sesión.');
     closeModal();
-    registro.value = { nombreCompleto: "", cargo: "", sede: "", centroDeCostosNombre: "", email: "", cedula: "", contrasena: "", rol: 'Empleado' };
-  
+    registro.value = { nombreCompleto: "", cargoNombre: "", sede: "", centroDeCostosNombre: "", email: "", cedula: "", contrasena: "", rol: 'Empleado' };
+
   } catch (error) {
      if (error.response) {
       errorMessage.value = error.response.data.message;
@@ -222,7 +225,7 @@ onMounted(() => {
           
           <div class="input-group">
             <label for="cargo-reg">Cargo</label>
-            <input type="text" id="cargo-reg" v-model="registro.cargo" placeholder="Ingresa tu cargo" required />
+            <input type="text" id="cargo-reg" v-model="registro.cargoNombre" placeholder="Ingresa tu cargo" required />
           </div>
           <div class="input-group">
             <label for="sede-reg">Sede</label>

@@ -54,22 +54,31 @@ app.post('/usuarios', async (req, res) => {
       create: { nombre: centroDeCostosNombre }, // Si no existe, lo creamos
     });
 
+    // Lógica para encontrar o crear el cargo
+    const cargoRecord = await prisma.cargos.upsert({
+      where: { nombre: cargo },
+      update: {}, // Si ya existe, no hacemos nada
+      create: { nombre: cargo }, // Si no existe, lo creamos
+    });
+
     // Crear el nuevo usuario en la base de datos
     const nuevoUsuario = await prisma.usuario.create({
       data: {
         cedula,
         nombreCompleto,
-        cargo,
         sede,
         email,
         contrasena: hashedPassword,
         rol,
-            centroDeCostos: {
-      connect: {
-        id: centroDeCostos.id, // Conéctate a un centro de costos con este ID
+        centroDeCostos: {
+          connect: {
+            id: centroDeCostos.id, // Conéctate a un centro de costos con este ID
+          },
+        },
+        cargos: {
+          connect: { id: cargoRecord.id },
+        },
       },
-    },
-  },
     });
 
     // Devolvemos el usuario creado (excluyendo la contraseña por seguridad)
