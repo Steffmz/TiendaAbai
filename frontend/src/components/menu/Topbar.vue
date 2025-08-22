@@ -35,6 +35,7 @@ import { useRouter } from 'vue-router';  // Import useRouter
 
 import logoNormal from "../../assets/img/abai-logo.png";
 import logoBlanco from "../../assets/img/Logo-blanco.png";
+const emit = defineEmits(['toggle', 'open-profile']);
 
 const router = useRouter();  // Create a router instance
 const { isDark, toggle } = useTheme();
@@ -44,7 +45,9 @@ function toggleDarkMode() {
 }
 
 function showHelp() { console.log("Mostrar ayuda"); }
-function showProfile() { console.log("Mostrar perfil"); }
+function showProfile() { 
+  emit('open-profile'); // <-- Emite el evento
+}
 function showNotifications() { console.log("Mostrar notificaciones"); }
 
 // Updated logout function

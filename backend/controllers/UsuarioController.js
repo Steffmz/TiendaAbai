@@ -148,3 +148,61 @@ exports.deleteUsuario = async (req, res) => {
     res.status(500).json({ message: 'Error al eliminar el usuario.' });
   }
 };
+exports.getMiPerfil = async (req, res) => {
+  const userId = req.usuario.userId;
+  try {
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: userId },
+      select: {
+        nombreCompleto: true,
+        email: true,
+        cedula: true,
+      }
+    });
+    if (!usuario) return res.status(404).json({ message: 'Usuario no encontrado.' });
+    res.json(usuario);
+  } catch (error) {
+    res.status(500).json({ message: 'Error al obtener el perfil.' });
+  }
+};
+
+// Actualizar el perfil del usuario logueado
+// backend/controllers/UsuarioController.js
+
+// ... (tus otras funciones)
+
+// Actualizar el perfil del usuario logueado
+exports.updateMiPerfil = async (req, res) => {
+  const userId = req.usuario.userId;
+  const { nombreCompleto, email, contrasena } = req.body;
+
+  try {
+    const dataToUpdate = {};
+
+    if (nombreCompleto) dataToUpdate.nombreCompleto = nombreCompleto;
+    if (email) dataToUpdate.email = email;
+    if (contrasena && contrasena.trim() !== '') {
+      dataToUpdate.contrasena = await bcrypt.hash(contrasena, 10);
+    }
+
+    if (Object.keys(dataToUpdate).length === 0) {
+      return res.status(400).json({ message: 'No se proporcionaron datos para actualizar.' });
+    }
+
+    await prisma.usuario.update({
+      where: { id: userId },
+      data: dataToUpdate,
+    });
+
+    // --- ESTA ES LA CORRECCIÓN ---
+    // Enviamos un estado 200 (OK) y un JSON con el mensaje de éxito.
+    res.status(200).json({ message: 'Perfil actualizado correctamente.' });
+
+  } catch (error) {
+    console.error("Error al actualizar perfil:", error);
+    if (error.code === 'P2002') {
+      return res.status(409).json({ message: 'El email ya está en uso por otro usuario.' });
+    }
+    res.status(500).json({ message: 'Error interno del servidor al actualizar el perfil.' });
+  }
+};
