@@ -12,5 +12,6 @@ router.get('/', UsuarioController.getAllUsuarios);
 router.post('/', UsuarioController.createUsuario);
 router.put('/:id', UsuarioController.updateUsuario);
 router.patch('/:id/toggle-status', UsuarioController.toggleUsuarioStatus); // Usamos PATCH para una acción específica
+router.delete('/:id', UsuarioController.deleteUsuario);
 
 module.exports = router;

@@ -1,8 +1,8 @@
 <template>
   <div class="page-container">
-    <!-- 2. Contenedor para centrar y dar ancho máximo -->
+    <!-- Contenedor para centrar y dar ancho máximo -->
     <div class="max-w-7xl w-full mx-auto">
-      <!-- Encabezado -->
+      <!-- Encabezado Unificado -->
       <div class="page-header">
         <h1 class="page-title">Calendario de Campañas</h1>
         <p class="page-subtitle">Visualiza todas tus campañas activas y programadas.</p>
@@ -28,7 +28,6 @@ import interactionPlugin from '@fullcalendar/interaction';
 const calendarOptions = ref({
   plugins: [dayGridPlugin, interactionPlugin],
   initialView: 'dayGridMonth',
-  // 1. CORRECCIÓN DE ALTURA: El calendario se ajustará al mes actual
   fixedWeekCount: false, 
   headerToolbar: {
     left: 'prev,next today',
@@ -59,8 +58,8 @@ async function fetchCampaigns() {
       start: campana.fechaInicio,
       end: campana.fechaFin,
       allDay: true,
-      backgroundColor: campana.aprobada ? '#3788d8' : '#d39e00',
-      borderColor: campana.aprobada ? '#3788d8' : '#d39e00'
+      backgroundColor: campana.aprobada ? '#3b82f6' : '#f59e0b',
+      borderColor: campana.aprobada ? '#3b82f6' : '#f59e0b'
     }));
     
     calendarOptions.value.events = events;
@@ -98,64 +97,61 @@ onMounted(() => {
   padding: 2rem;
   justify-content: flex-start;
 }
-
 .page-header {
-  margin-bottom: 1.5rem;
   text-align: center;
-  flex-shrink: 0;
+  margin-bottom: 1.5rem;
 }
-
-.page-title {
-  font-size: 1.8rem;
-  font-weight: 600;
+.page-title { 
+  font-size: 1.8rem; 
+  font-weight: 600; 
+  color: #f1f5f9;
 }
-
 .page-subtitle {
-  color: #6b7280;
+  color: #94a3b8;
+  margin-top: 0.25rem;
 }
 
-/* Este contenedor es necesario para que mx-auto funcione */
-.max-w-7xl {
-  max-width: 80rem; /* 1280px */
-}
-.w-full {
-  width: 100%;
-}
-.mx-auto {
-  margin-left: auto;
-  margin-right: auto;
-}
+/* Contenedor para centrar */
+.max-w-7xl { max-width: 80rem; }
+.w-full { width: 100%; }
+.mx-auto { margin-left: auto; margin-right: auto; }
 
 .calendar-container {
-  background-color: white;
+  background-color: #2d3748;
   padding: 1.5rem;
   border-radius: 8px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
 }
 
+:deep(th), :deep(td), :deep(h2) {
+  color: #f1f5f9;
+}
+
 :deep(.fc-button-primary) {
-  background-color: #74B9E7 !important;
-  border-color: #74B9E7 !important;
-  color: black;
+  background-color: #3b82f6 !important;
+  border-color: #3b82f6 !important;
+  color: white;
   font-weight: 500;
 }
 
 :deep(.fc-button-primary:hover) {
-  background-color: #FFB93B !important;
-  border-color: #FFB93B !important;
+  background-color: #2563eb !important;
+  border-color: #2563eb !important;
 }
 
 :deep(.fc-daygrid-day.fc-day-today) {
-  background-color: rgba(255, 185, 59, 0.15) !important;
+  background-color: rgba(59, 130, 246, 0.15) !important;
 }
 
 :deep(.fc-toolbar-title) {
   font-size: 1.5em;
-  color: #374151;
 }
 
 :deep(.fc-col-header-cell-cushion) {
-  color: #4b5563;
   font-weight: 600;
+}
+
+:deep(.fc-daygrid-day-number) {
+  color: #94a3b8;
 }
 </style>
