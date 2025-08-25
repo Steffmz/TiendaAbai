@@ -34,17 +34,17 @@
               </td>
               <td class="actions-cell">
                 <button @click="openDetailsModal(pedido)" class="btn btn-secondary">Detalles</button>
-                <select @change="updateStatus(pedido.id, $event.target.value)" class="status-select">
-                  <option disabled :selected="true">Cambiar...</option>
-                  <option value="Aprobado">Aprobar</option>
-                  <option value="Enviado">Enviar</option>
-                  <option value="Entregado">Entregar</option>
-                  <option value="Rechazado">Rechazar</option>
-                  <option value="Cancelado">Cancelar</option>
+                <select @change="updateStatus(pedido.id, $event.target.value)" class="status-select" :value="pedido.estado">
+                  <option disabled value="">Cambiar estado...</option>
+                  <option value="Aprobado">Aprobado</option>
+                  <option value="Enviado">Enviado</option>
+                  <option value="Entregado">Entregado</option>
+                  <option value="Rechazado">Rechazado</option>
+                  <option value="Cancelado">Cancelado</option>
                 </select>
               </td>
             </tr>
-            <tr v-if="!loading && pedidos.length === 0">
+             <tr v-if="!loading && pedidos.length === 0">
               <td colspan="6" class="text-center py-8">No hay pedidos para mostrar.</td>
             </tr>
           </tbody>
@@ -151,7 +151,7 @@ onMounted(fetchPedidos);
 </script>
 
 <style scoped>
-/* Estilos generales de la página */
+/* ESTILOS UNIFICADOS CON VARIABLES DE TEMA */
 .page-container {
   display: flex;
   flex-direction: column;
@@ -159,31 +159,18 @@ onMounted(fetchPedidos);
   padding: 2rem;
   justify-content: flex-start;
 }
-.page-header {
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-.page-title { 
-  font-size: 1.8rem; 
-  font-weight: 600; 
-  color: #f1f5f9;
-}
-.page-subtitle {
-  color: #94a3b8;
-  margin-top: 0.25rem;
-}
-.table-container { overflow-x: auto; background: #2d3748; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-table { width: 100%; border-collapse: collapse; }
-th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #4a5568; }
-th { background-color: #1a202c; }
+.max-w-7xl { max-width: 80rem; width: 100%; margin-left: auto; margin-right: auto; }
+
+.page-header { text-align: center; margin-bottom: 1.5rem; }
+.page-title { font-size: 1.8rem; font-weight: 600; color: var(--text); }
+.page-subtitle { color: var(--text-muted); margin-top: 0.25rem; }
+
+.table-container { background: var(--surface); border-radius: 8px; border: 1px solid var(--border); overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; color: var(--text); }
+th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border); text-align: center; vertical-align: middle; }
+th { background-color: var(--table-header); color: white; }
 .text-center { text-align: center; }
 
-/* Contenedor para centrar */
-.max-w-7xl { max-width: 80rem; }
-.w-full { width: 100%; }
-.mx-auto { margin-left: auto; margin-right: auto; }
-
-/* Badges de Estado */
 .badge { padding: 5px 12px; border-radius: 9999px; font-size: 0.8rem; font-weight: 600; color: white; }
 .badge.success { background-color: #22c55e; }
 .badge.success-dark { background-color: #15803d; }
@@ -192,21 +179,18 @@ th { background-color: #1a202c; }
 .badge.info { background-color: #3b82f6; }
 .badge.secondary { background-color: #6b7280; }
 
-/* Acciones */
-.actions-cell { display: flex; align-items: center; gap: 1rem; }
-.btn { padding: 0.5rem 1rem; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; transition: background-color 0.2s; }
-.btn-primary { background-color: #3b82f6; color: white; }
-.btn-secondary { background-color: #6b7280; color: white; }
-.status-select { background-color: #4a5568; color: white; border: 1px solid #6b7280; padding: 0.5rem; border-radius: 6px; cursor: pointer; }
-.status-select:focus { outline: none; border-color: #3b82f6; }
+.actions-cell { display: flex; align-items: center; justify-content: center; gap: 1rem; }
+.btn-primary { background-color: var(--primary); color: var(--primary-contrast); border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; }
+.btn-secondary { background-color: var(--surface-2); color: var(--text); border: 1px solid var(--border); padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; }
+.status-select { background-color: var(--surface-2); color: var(--text); border: 1px solid var(--border); padding: 0.5rem; border-radius: 6px; cursor: pointer; }
 
 /* Estilos del Modal */
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-.modal-content { background: #2d3748; color: #f1f5f9; padding: 2rem; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+.modal-content { background: var(--surface); color: var(--text); padding: 2rem; border-radius: 8px; width: 90%; max-width: 500px; border: 1px solid var(--border); }
 .modal-title { font-size: 1.5rem; margin-bottom: 1.5rem; text-align: center; }
-.details-subtitle { font-size: 1.1rem; margin-top: 1.5rem; margin-bottom: 0.5rem; border-bottom: 1px solid #4a5568; padding-bottom: 0.5rem; }
+.details-subtitle { font-size: 1.1rem; margin-top: 1.5rem; margin-bottom: 0.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
 .product-list { list-style: none; padding: 0; }
-.product-list li { padding: 0.5rem 0; border-bottom: 1px solid #4a5568; }
+.product-list li { padding: 0.5rem 0; border-bottom: 1px solid var(--border); }
 .product-list li:last-child { border-bottom: none; }
 .modal-actions { margin-top: 2rem; text-align: right; }
 </style>

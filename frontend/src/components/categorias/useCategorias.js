@@ -1,8 +1,22 @@
 import { ref, computed, onMounted } from 'vue';
-import Swal from 'sweetalert2'
+import axios from 'axios';
+import Swal from 'sweetalert2';
+
+const API_URL = 'http://localhost:3000/api/categorias';
+
+// Helper for authentication headers
+const getAuthHeaders = (isFormData = false) => {
+  const token = localStorage.getItem('authToken');
+  const headers = {
+    'Authorization': `Bearer ${token}`
+  };
+  if (!isFormData) {
+    headers['Content-Type'] = 'application/json';
+  }
+  return { headers };
+};
 
 export default function useCategorias() {
-
   const categorias = ref([]);
   const loading = ref(false);
   const error = ref(null);
@@ -12,8 +26,7 @@ export default function useCategorias() {
   const paginaActual = ref(1);
   const categoriasPorPagina = 5;
   const previewImage = ref(null);
-  
-  // Formulario
+
   const form = ref({
     id: null,
     nombre: '',
@@ -21,15 +34,13 @@ export default function useCategorias() {
     imagen: null
   });
 
-  // Placeholder para imágenes
-  const placeholder = '/uploads/Categorias/categoria-default.png';
+  const placeholder = '/img/no-image.png';
 
+  // Pagination and filtering logic
   const categoriasFiltradas = computed(() => {
     if (!filtro.value) return categorias.value;
-    
-    return categorias.value.filter(categoria =>
-      categoria.nombre.toLowerCase().includes(filtro.value.toLowerCase()) ||
-      (categoria.descripcion && categoria.descripcion.toLowerCase().includes(filtro.value.toLowerCase()))
+    return categorias.value.filter(cat =>
+      cat.nombre.toLowerCase().includes(filtro.value.toLowerCase())
     );
   });
 
@@ -38,351 +49,149 @@ export default function useCategorias() {
 
   const categoriasPaginadas = computed(() => {
     const inicio = (paginaActual.value - 1) * categoriasPorPagina;
-    const fin = inicio + categoriasPorPagina;
-    return categoriasFiltradas.value.slice(inicio, fin);
+    return categoriasFiltradas.value.slice(inicio, inicio + categoriasPorPagina);
   });
-
-  const filasVacias = computed(() => {
-    const filasUsadas = categoriasPaginadas.value.length;
-    return Math.max(0, categoriasPorPagina - filasUsadas);
-  });
-
+  
   const paginasVisibles = computed(() => {
     const total = totalPaginas.value;
     const actual = paginaActual.value;
-    const visible = [];
-
-    if (total <= 5) {
-      for (let i = 1; i <= total; i++) visible.push(i);
-    } else {
-      if (actual <= 3) {
-        for (let i = 1; i <= 5; i++) visible.push(i);
-      } else if (actual >= total - 2) {
-        for (let i = total - 4; i <= total; i++) visible.push(i);
-      } else {
-        for (let i = actual - 2; i <= actual + 2; i++) visible.push(i);
-      }
-    }
-
-    return visible;
+    if (total <= 5) return Array.from({ length: total }, (_, i) => i + 1);
+    return [1,2,3,4,5]; 
   });
 
-  const handleResponse = async (response) => {
-    console.log('Response status:', response.status);
-    console.log('Response ok:', response.ok);
-    
-    const contentType = response.headers.get('content-type');
-    console.log('Content-Type:', contentType);
-    
-    if (!contentType?.includes('application/json')) {
-      const textResponse = await response.text();
-      console.log('Non-JSON response:', textResponse);
-      
-      if (response.ok) {
-        return { success: true, message: textResponse || 'Operación exitosa' };
-      } else {
-        throw new Error(textResponse || `Error ${response.status}: ${response.statusText}`);
-      }
-    }
-    
-    try {
-      const jsonResponse = await response.json();
-      console.log('JSON response:', jsonResponse);
-      
-      if (!response.ok) {
-        throw new Error(jsonResponse.error || jsonResponse.message || `Error ${response.status}`);
-      }
-      
-      return jsonResponse;
-    } catch (parseError) {
-      console.error('Error parsing JSON:', parseError);
-      
-      if (response.ok) {
-        return { success: true };
-      } else {
-        throw new Error(`Error del servidor: ${response.status} ${response.statusText}`);
-      }
-    }
+  const irAPagina = (pagina) => {
+    if (pagina >= 1 && pagina <= totalPaginas.value) paginaActual.value = pagina;
   };
+  const paginaAnterior = () => { if (paginaActual.value > 1) paginaActual.value--; };
+  const paginaSiguiente = () => { if (paginaActual.value < totalPaginas.value) paginaActual.value++; };
 
+  // API calls with Axios and authentication
   const obtenerCategorias = async () => {
     loading.value = true;
-    error.value = null;
-    
     try {
-      console.log('🔍 Obteniendo categorías...');
-      
-      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-      const url = `${baseUrl}/api/categorias`;
-      
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        }
-      });
-
-      console.log('📡 Respuesta recibida:', response.status, response.statusText);
-      
-      const data = await handleResponse(response);
-      
-      console.log('📊 Datos recibidos:', data);
-      
-      categorias.value = Array.isArray(data) ? data.map(categoria => ({
-        id: categoria.id,
-        nombre: categoria.nombre,
-        descripcion: categoria.descripcion || '',
-         imagen: categoria.imagenUrl
-        ? `${baseUrl}${categoria.imagenUrl}` 
-        : `${baseUrl}/uploads/categoria-default.png`,
-        activo: categoria.activo,
-        fecha_creacion: categoria.fechaCreacion,
-        productos_count: categoria._count?.productos || 0
-      })) : [];
-      
-      console.log('✅ Categorías cargadas:', categorias.value.length);
-      
+      const { data } = await axios.get(API_URL, getAuthHeaders());
+      categorias.value = data;
     } catch (err) {
-      error.value = err.message;
-      console.error('❌ Error al obtener categorías:', err);
-      alert(`Error al cargar categorías: ${err.message}`);
+      error.value = err.response?.data?.error || 'Error loading categories';
+      Swal.fire('Error', error.value, 'error');
     } finally {
       loading.value = false;
     }
   };
 
-    const guardarCategoria = async () => {
+  const guardarCategoria = async () => {
     if (!form.value.nombre.trim()) {
-      Swal.fire('Error', 'El nombre de la categoría es obligatorio', 'warning');
-      return;
+      return Swal.fire('Attention', 'Category name is required.', 'warning');
     }
 
-    loading.value = true;
-    error.value = null;
+    const formData = new FormData();
+    formData.append('nombre', form.value.nombre.trim());
+    formData.append('descripcion', form.value.descripcion.trim());
+    if (form.value.imagen) {
+      formData.append('imagen', form.value.imagen);
+    }
 
     try {
-      const formData = new FormData();
-      formData.append('nombre', form.value.nombre.trim());
-      formData.append('descripcion', form.value.descripcion.trim() || '');
-      
-      if (form.value.imagen) {
-        formData.append('imagen', form.value.imagen);
+      if (editando.value) {
+        await axios.put(`${API_URL}/${form.value.id}`, formData, getAuthHeaders(true));
+      } else {
+        await axios.post(API_URL, formData, getAuthHeaders(true));
       }
-
-      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-      const url = editando.value 
-        ? `${baseUrl}/api/categorias/${form.value.id}` 
-        : `${baseUrl}/api/categorias`;
       
-      const method = editando.value ? 'PUT' : 'POST';
-
-      const response = await fetch(url, {
-        method: method,
-        body: formData
-      });
-
-      await handleResponse(response);
-
       await obtenerCategorias();
       cerrarModal();
-      
-      Swal.fire('Éxito', editando.value ? 'Categoría actualizada exitosamente' : 'Categoría creada exitosamente', 'success');
-      
+      Swal.fire('Success', `Category ${editando.value ? 'updated' : 'created'} successfully.`, 'success');
     } catch (err) {
-      error.value = err.message;
-      Swal.fire('Error', err.message, 'error');
-    } finally {
-      loading.value = false;
+      error.value = err.response?.data?.error || 'Could not save the category.';
+      Swal.fire('Error', error.value, 'error');
     }
   };
 
-  //Eliminar Categorias
-      const eliminarCategoria = async (categoria) => {
-          const result = await Swal.fire({
-            title: '¿Estás seguro?',
-            text: `Se eliminará la categoría "${categoria.nombre}"`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Sí, eliminar',
-            cancelButtonText: 'Cancelar'
-          });
-
-          if (!result.isConfirmed) return;
-
-          loading.value = true;
-          error.value = null;
-
-          try {
-            const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-            const response = await fetch(`${baseUrl}/api/categorias/${categoria.id}`, {
-              method: 'DELETE',
-              headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-              }
-            });
-
-            await handleResponse(response);
-
-            Swal.fire('Eliminado', 'La categoría fue eliminada correctamente', 'success');
-            await obtenerCategorias();
-            
-          } catch (err) {
-            error.value = err.message;
-            Swal.fire('Error', err.message, 'error');
-          } finally {
-            loading.value = false;
-          }
-        };
-
-  const cambiarEstado = async (categoria) => {
-  loading.value = true;
-  error.value = null;
-
-  try {
-    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-    const response = await fetch(`${baseUrl}/api/categorias/${categoria.id}/estado`, {
-      method: 'PATCH',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      }
+  const confirmarEliminar = async (categoria) => {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: `The category "${categoria.nombre}" will be deleted. This action cannot be undone.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel'
     });
 
-    const data = await handleResponse(response);
-
-    // Actualizar localmente 
-    const index = categorias.value.findIndex(c => c.id === categoria.id);
-    if (index !== -1) {
-      categorias.value[index].activo = data.categoria.activo;
+    if (result.isConfirmed) {
+      try {
+        await axios.delete(`${API_URL}/${categoria.id}`, getAuthHeaders());
+        Swal.fire('Deleted!', 'The category has been deleted.', 'success');
+        await obtenerCategorias();
+      } catch (err) {
+        error.value = err.response?.data?.error || 'Could not delete the category.';
+        Swal.fire('Error', error.value, 'error');
+      }
     }
+  };
 
-  } catch (err) {
-    error.value = err.message;
-    console.error('❌ Error al cambiar estado:', err);
-  } finally {
-    loading.value = false;
-  }
-};
+  const cambioEstado = async (categoria) => {
+    try {
+      await axios.patch(`${API_URL}/${categoria.id}/estado`, {}, getAuthHeaders());
+      const index = categorias.value.findIndex(c => c.id === categoria.id);
+      if (index !== -1) {
+        categorias.value[index].activo = !categorias.value[index].activo;
+      }
+    } catch (err) {
+        Swal.fire('Error', 'Could not change the status.', 'error');
+        await obtenerCategorias();
+    }
+  };
 
-  // Métodos de modal
+  // Modal control
+  const limpiarFormulario = () => {
+    form.value = { id: null, nombre: '', descripcion: '', imagen: null };
+    previewImage.value = null;
+  };
+
   const abrirModalNueva = () => {
-    console.log('📝 Abriendo modal nueva categoría');
     limpiarFormulario();
     editando.value = false;
     mostrarModal.value = true;
   };
 
   const abrirModalEditar = (categoria) => {
-    console.log('✏️ Abriendo modal editar categoría:', categoria);
+    editando.value = true;
     form.value = {
       id: categoria.id,
       nombre: categoria.nombre,
       descripcion: categoria.descripcion || '',
       imagen: null
     };
-    
-    
-    if (categoria.imagen) {
-      previewImage.value = categoria.imagen;
-    }
-    
-    editando.value = true;
+    previewImage.value = categoria.imagenUrl ? `http://localhost:3000${categoria.imagenUrl}` : null;
     mostrarModal.value = true;
   };
 
   const cerrarModal = () => {
-    console.log('❌ Cerrando modal');
     mostrarModal.value = false;
-    limpiarFormulario();
-  };
-
-  const limpiarFormulario = () => {
-    form.value = {
-      id: null,
-      nombre: '',
-      descripcion: '',
-      imagen: null
-    };
-    previewImage.value = null;
-    error.value = null;
   };
 
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
-    if (!file) {
-      console.log('📷 No se seleccionó archivo');
-      form.value.imagen = null;
-      previewImage.value = null;
-      return;
+    if (!file) return;
+    
+    if (!file.type.startsWith('image/')) {
+        return Swal.fire('Error', 'Please select an image file.', 'error');
     }
-
-    console.log('📷 Archivo seleccionado:', file.name, file.type, `${(file.size/1024/1024).toFixed(2)}MB`);
-
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
-    if (!allowedTypes.includes(file.type)) {
-      alert('Solo se permiten archivos de imagen (JPEG, PNG, GIF, WebP)');
-      event.target.value = '';
-      form.value.imagen = null;
-      previewImage.value = null;
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      alert('El archivo no puede ser mayor a 5MB');
-      event.target.value = '';
-      form.value.imagen = null;
-      previewImage.value = null;
-      return;
+    if (file.size > 5 * 1024 * 1024) { // 5MB
+        return Swal.fire('Error', 'The image cannot be larger than 5MB.', 'error');
     }
 
     form.value.imagen = file;
-
     const reader = new FileReader();
     reader.onload = (e) => {
       previewImage.value = e.target.result;
-      console.log('✅ Preview de imagen generado');
-    };
-    reader.onerror = (e) => {
-      console.error('❌ Error al crear preview:', e);
-      previewImage.value = null;
     };
     reader.readAsDataURL(file);
   };
 
-  const irAPagina = (pagina) => {
-    if (pagina >= 1 && pagina <= totalPaginas.value) {
-      paginaActual.value = pagina;
-    }
-  };
-
-  const paginaAnterior = () => {
-    if (paginaActual.value > 1) {
-      paginaActual.value--;
-    }
-  };
-
-  const paginaSiguiente = () => {
-    if (paginaActual.value < totalPaginas.value) {
-      paginaActual.value++;
-    }
-  };
-
-  const confirmarEliminar = (categoria) => {
-    eliminarCategoria(categoria);
-  };
-
-  const cambioEstado = (categoria) => {
-    cambiarEstado(categoria);
-  };
-
-  onMounted(() => {
-    console.log('🚀 Componente montado, cargando categorías...');
-    obtenerCategorias();
-  });
+  onMounted(obtenerCategorias);
 
   return {
     categorias,
@@ -394,17 +203,14 @@ export default function useCategorias() {
     form,
     previewImage,
     placeholder,
-    categoriasFiltradas,
+    categoriasPaginadas,
     totalCategorias,
     totalPaginas,
-    categoriasPaginadas,
-    filasVacias,
     paginaActual,
     paginasVisibles,
-    obtenerCategorias,
     guardarCategoria,
-    eliminarCategoria,
-    cambiarEstado,
+    confirmarEliminar,
+    cambioEstado,
     abrirModalNueva,
     abrirModalEditar,
     cerrarModal,
@@ -412,7 +218,5 @@ export default function useCategorias() {
     irAPagina,
     paginaAnterior,
     paginaSiguiente,
-    confirmarEliminar,
-    cambioEstado
   };
 }
