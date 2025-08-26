@@ -175,7 +175,11 @@ app.get('/api/perfil', authMiddleware, async (req, res) => {
         puntosTotales: true,
         rol: true,
         sede: true,
-        cargo: true,
+        cargos: {
+          select: {
+            nombre: true
+          }
+        }
       }
     });
 

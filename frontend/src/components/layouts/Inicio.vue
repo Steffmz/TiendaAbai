@@ -12,12 +12,20 @@
     <div v-else class="campaigns-grid">
       <div v-for="campana in campanasActivas" :key="campana.id" class="campaign-card">
         <div class="campaign-image">
-          <img :src="`http://localhost:3000${campana.imagenUrl}`" alt="Imagen de campaña" />
+          <img 
+            :src="`http://localhost:3000${campana.imagenUrl}`" 
+            alt="Imagen de campaña" 
+            @error="$event.target.src = 'https://placehold.co/400x200/e2e8f0/a0aec0?text=Sin+Imagen'"
+          />
         </div>
         <div class="campaign-content">
           <h3>{{ campana.titulo }}</h3>
           <p class="campaign-dates">Válido del {{ formatDate(campana.fechaInicio) }} al {{ formatDate(campana.fechaFin) }}</p>
-          <button class="btn-view">Ver Productos</button>
+          
+          <router-link :to="`/campana/${campana.id}`" class="btn-view">
+            Ver Productos
+          </router-link>
+
         </div>
       </div>
     </div>
@@ -35,7 +43,6 @@ const getAuthHeaders = () => ({
   headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
 });
 
-// Filtramos para mostrar solo campañas activas/aprobadas
 const campanasActivas = computed(() => 
   campanas.value.filter(c => c.aprobada)
 );
@@ -112,6 +119,9 @@ onMounted(fetchCampanas);
 }
 
 .btn-view {
+  display: block;
+  text-align: center;
+  text-decoration: none;
   width: 100%;
   padding: 0.75rem;
   background-color: var(--primary);

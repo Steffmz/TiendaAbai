@@ -17,6 +17,27 @@ const getCampanas = async (req, res) => {
   }
 };
 
+const getCampanaById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const campana = await prisma.campana.findUnique({
+      where: { id: parseInt(id) },
+      include: {
+        productos: true // Incluimos todos los productos de la campaña
+      }
+    });
+
+    if (!campana) {
+      return res.status(404).json({ message: "Campaña no encontrada" });
+    }
+    res.json(campana);
+  } catch (error) {
+    console.error(`Error al obtener la campaña ${id}:`, error);
+    res.status(500).json({ message: "Error interno del servidor." });
+  }
+};
+
+
 // Crear campaña (imagen + productos)
 const createCampana = async (req, res) => {
   try {
@@ -276,6 +297,7 @@ const quitarProducto = async (req, res) => {
 
 module.exports = {
   getCampanas,
+  getCampanaById,
   createCampana,
   updateCampana,
   deleteCampana,

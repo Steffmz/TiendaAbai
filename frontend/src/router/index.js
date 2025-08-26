@@ -1,17 +1,16 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { jwtDecode } from "jwt-decode";
-
-// Vistas y layouts
 import Login from "../components/login/Login.vue";
 import Dashboard from "../components/layouts/Dashboard.vue";
+import EmployeeLayout from "../components/layouts/EmployeeLayout.vue";
 import Inicio from "../components/layouts/Inicio.vue";
+import CampaignProducts from "../components/employee/CampaignProducts.vue";
 import Categorias from "../components/categorias/Categorias.vue";
 import Productos from "../components/productos/Productos.vue";
 import Campana from "../components/campanas/Campana.vue";
 import Calendario from "../components/Calendario.vue";
 import GestionUsuarios from "../components/admin/GestionUsuarios.vue";
 import GestionPedidos from "../components/admin/GestionPedidos.vue";
-import EmployeeLayout from "../components/layouts/EmployeeLayout.vue";
 
 const routes = [
   { path: "/login", name: "Login", component: Login },
@@ -34,10 +33,15 @@ const routes = [
         name: "Inicio",
         component: Inicio,
       },
+      {
+        path: "campana/:id",
+        name: "CampaignProducts",
+        component: CampaignProducts
+      },
       // { path: 'mi-perfil', name: 'MiPerfil', component: PerfilComponent }, // Próximamente
     ],
   },
-
+  // --- ADMIN ROUTES ---
   {
     path: "/dashboard",
     component: Dashboard,
@@ -100,7 +104,7 @@ router.beforeEach((to, from, next) => {
       if (decodedToken.rol === "Administrador") {
         return next("/dashboard");
       } else {
-        return next("/inicio");
+        return next("/");
       }
     } catch {
       localStorage.removeItem("authToken");
@@ -114,7 +118,7 @@ router.beforeEach((to, from, next) => {
     try {
       const decodedToken = jwtDecode(token);
       if (to.meta.requiresAdmin && decodedToken.rol !== "Administrador") {
-        return next("/inicio");
+        return next("/");
       }
     } catch (error) {
       console.error("Token inválido:", error);

@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const {
   getCampanas,
+  getCampanaById,
   createCampana,
   updateCampana,
   deleteCampana,
@@ -73,6 +74,7 @@ const handleMulterError = (err, req, res, next) => {
 
 //  Rutas
 router.get('/', getCampanas);
+router.get('/:id', getCampanaById); 
 router.post('/', upload.single('imagen'), handleMulterError, createCampana);
 router.put('/:id', upload.single('imagen'), handleMulterError, updateCampana);
 router.delete('/:id', deleteCampana);
