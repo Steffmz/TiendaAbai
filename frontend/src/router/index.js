@@ -1,17 +1,16 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { jwtDecode } from "jwt-decode";
-
-// Vistas y layouts
 import Login from "../components/login/Login.vue";
 import Dashboard from "../components/layouts/Dashboard.vue";
+import EmployeeLayout from "../components/layouts/EmployeeLayout.vue";
+import Inicio from "../components/layouts/Inicio.vue";
+import CampaignProducts from "../components/employee/CampaignProducts.vue";
 import Categorias from "../components/categorias/Categorias.vue";
 import Productos from "../components/productos/Productos.vue";
 import Campana from "../components/campanas/Campana.vue";
-import Inicio from "../components/layouts/Inicio.vue";
-import GestionUsuarios from "../components/admin/GestionUsuarios.vue";
 import Calendario from "../components/Calendario.vue";
-
-// frontend/src/router/index.js
+import GestionUsuarios from "../components/admin/GestionUsuarios.vue";
+import GestionPedidos from "../components/admin/GestionPedidos.vue";
 
 const routes = [
   { path: "/login", name: "Login", component: Login },
@@ -23,14 +22,34 @@ const routes = [
     meta: { requiresAuth: true },
   },
 
+  // --- RUTAS DEL EMPLEADO (AHORA ANIDADAS) ---
+  {
+    path: "/",
+    component: EmployeeLayout,
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: "", // La raíz ahora es la tienda
+        name: "Inicio",
+        component: Inicio,
+      },
+      {
+        path: "campana/:id",
+        name: "CampaignProducts",
+        component: CampaignProducts
+      },
+      // { path: 'mi-perfil', name: 'MiPerfil', component: PerfilComponent }, // Próximamente
+    ],
+  },
+  // --- ADMIN ROUTES ---
   {
     path: "/dashboard",
     component: Dashboard,
     meta: { requiresAuth: true, requiresAdmin: true },
     children: [
       {
-        path: "", // La ruta vacía del dashboard
-        redirect: "/dashboard/categorias", // Redirige a una página por defecto
+        path: "",
+        redirect: "/dashboard/categorias",
       },
       {
         path: "categorias",
@@ -51,18 +70,23 @@ const routes = [
       {
         path: "campanas",
         name: "Campana",
-        component: Campana, // Esto ya es correcto y usa tu componente
+        component: Campana,
       },
-
       {
         path: "calendario",
         name: "Calendario",
         component: Calendario,
       },
+      {
+        // La ruta que añadimos
+        path: "pedidos",
+        name: "GestionPedidos",
+        component: GestionPedidos, // Ahora 'GestionPedidos' sí está definido
+      },
     ],
   },
 
-  { path: "/:pathMatch(.*)*", redirect: "/inicio" },
+  { path: "/:pathMatch(.*)*", redirect: "/" },
 ];
 
 const router = createRouter({
@@ -71,20 +95,20 @@ const router = createRouter({
 });
 
 // Middleware de protección
-// router/index.js - CÓDIGO CORREGIDO
-
-// Middleware de protección
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem("authToken");
 
-  // Si la ruta no requiere autenticación, pero el usuario está logueado y va al login,
-  // lo mandamos al dashboard o a su página de inicio. (Prevención)
   if (to.name === "Login" && token) {
-    const decodedToken = jwtDecode(token);
-    if (decodedToken.rol === "Administrador") {
-      return next("/dashboard");
-    } else {
-      return next("/inicio"); // Redirige al inicio si ya está logueado
+    try {
+      const decodedToken = jwtDecode(token);
+      if (decodedToken.rol === "Administrador") {
+        return next("/dashboard");
+      } else {
+        return next("/");
+      }
+    } catch {
+      localStorage.removeItem("authToken");
+      return next("/login");
     }
   }
 
@@ -93,16 +117,9 @@ router.beforeEach((to, from, next) => {
 
     try {
       const decodedToken = jwtDecode(token);
-
-      // --- ESTE ES EL CAMBIO IMPORTANTE ---
-      // Si la ruta requiere admin y el usuario no lo es...
       if (to.meta.requiresAdmin && decodedToken.rol !== "Administrador") {
-        // ...lo mandamos a su propia página de inicio, NO a '/'.
-        return next("/inicio");
+        return next("/");
       }
-
-      // Si el usuario es admin pero intenta acceder a una ruta de empleado (si la tuvieras),
-      // podrías redirigirlo al dashboard. (Lógica opcional para el futuro).
     } catch (error) {
       console.error("Token inválido:", error);
       localStorage.removeItem("authToken");

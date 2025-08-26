@@ -1,6 +1,5 @@
 <template>
   <div class="page-container">
-    <!-- 2. Contenedor para centrar y dar ancho máximo -->
     <div class="max-w-7xl w-full mx-auto">
       <!-- Encabezado -->
       <div class="page-header">
@@ -28,7 +27,6 @@ import interactionPlugin from '@fullcalendar/interaction';
 const calendarOptions = ref({
   plugins: [dayGridPlugin, interactionPlugin],
   initialView: 'dayGridMonth',
-  // 1. CORRECCIÓN DE ALTURA: El calendario se ajustará al mes actual
   fixedWeekCount: false, 
   headerToolbar: {
     left: 'prev,next today',
@@ -59,8 +57,8 @@ async function fetchCampaigns() {
       start: campana.fechaInicio,
       end: campana.fechaFin,
       allDay: true,
-      backgroundColor: campana.aprobada ? '#3788d8' : '#d39e00',
-      borderColor: campana.aprobada ? '#3788d8' : '#d39e00'
+      backgroundColor: campana.aprobada ? '#3b82f6' : '#f59e0b',
+      borderColor: campana.aprobada ? '#3b82f6' : '#f59e0b'
     }));
     
     calendarOptions.value.events = events;
@@ -91,6 +89,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* ESTILOS UNIFICADOS CON VARIABLES DE TEMA */
 .page-container {
   display: flex;
   flex-direction: column;
@@ -98,64 +97,61 @@ onMounted(() => {
   padding: 2rem;
   justify-content: flex-start;
 }
+.max-w-7xl { max-width: 80rem; width: 100%; margin-left: auto; margin-right: auto; }
 
-.page-header {
-  margin-bottom: 1.5rem;
-  text-align: center;
-  flex-shrink: 0;
-}
-
-.page-title {
-  font-size: 1.8rem;
-  font-weight: 600;
-}
-
-.page-subtitle {
-  color: #6b7280;
-}
-
-/* Este contenedor es necesario para que mx-auto funcione */
-.max-w-7xl {
-  max-width: 80rem; /* 1280px */
-}
-.w-full {
-  width: 100%;
-}
-.mx-auto {
-  margin-left: auto;
-  margin-right: auto;
-}
+.page-header { text-align: center; margin-bottom: 1.5rem; }
+.page-title { font-size: 1.8rem; font-weight: 600; color: var(--text); }
+.page-subtitle { color: var(--text-muted); margin-top: 0.25rem; }
 
 .calendar-container {
-  background-color: white;
+  background-color: var(--surface);
   padding: 1.5rem;
   border-radius: 8px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border);
+}
+
+/* Estilos profundos para FullCalendar */
+:deep(th), :deep(td), :deep(h2) {
+  color: var(--text);
+}
+:deep(.fc-scrollgrid) {
+  border-color: var(--border) !important;
+}
+:deep(.fc-daygrid-day) {
+  border-color: var(--border) !important;
 }
 
 :deep(.fc-button-primary) {
-  background-color: #74B9E7 !important;
-  border-color: #74B9E7 !important;
-  color: black;
+  background-color: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: var(--primary-contrast) !important;
   font-weight: 500;
 }
-
 :deep(.fc-button-primary:hover) {
-  background-color: #FFB93B !important;
-  border-color: #FFB93B !important;
+  background-color: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: black !important;
+}
+:deep(.fc-button-active) {
+  background-color: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: black !important;
 }
 
 :deep(.fc-daygrid-day.fc-day-today) {
-  background-color: rgba(255, 185, 59, 0.15) !important;
+  background-color: rgba(43, 127, 255, 0.1) !important;
 }
 
 :deep(.fc-toolbar-title) {
   font-size: 1.5em;
-  color: #374151;
 }
 
 :deep(.fc-col-header-cell-cushion) {
-  color: #4b5563;
   font-weight: 600;
+  color: var(--text-muted);
+}
+
+:deep(.fc-daygrid-day-number) {
+  color: var(--text-muted);
 }
 </style>

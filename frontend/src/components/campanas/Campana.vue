@@ -356,13 +356,10 @@ const {
 } = useCampana()
 </script>
 <style scoped>
-/* ... al final de <style scoped> ... */
-
-/* --- ESTILOS FINALES PARA EL MODAL Y FORMULARIO --- */
 
 .modal-content {
   width: 95%;
-  max-width: 800px; /* Un modal más ancho */
+  max-width: 800px;
   padding: 2rem;
 }
 

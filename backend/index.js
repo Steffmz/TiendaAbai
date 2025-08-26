@@ -9,6 +9,8 @@ const CategoriasRoutes = require('./routes/CategoriasRouter');
 const CampanaRouter = require('./routes/CampanaRouter');
 const adminMiddleware = require('./middleware/adminMiddleware');
 const UsuarioRouter = require('./routes/UsuarioRouter');
+const PedidoRouter = require('./routes/PedidoRouter');
+
 const path = require('path');
 
 const prisma = new PrismaClient();
@@ -28,6 +30,7 @@ app.use('/api/productos', ProductosRoutes);
 app.use("/api/categorias", CategoriasRoutes);
 app.use('/api/campanas', CampanaRouter);
 app.use('/api/usuarios', UsuarioRouter);
+app.use('/api/pedidos', PedidoRouter);
 
 
 // --- RUTAS DE LA APLICACIÓN ---
@@ -37,53 +40,54 @@ app.use('/api/usuarios', UsuarioRouter);
  * Incluye la lógica para crear el centro de costos si no existe.
  */
 app.post('/usuarios', async (req, res) => {
-  // Extraemos todos los datos necesarios del cuerpo de la petición
+  // Extraemos los datos que envía el formulario de registro
   const { cedula, nombreCompleto, cargo, sede, email, contrasena, rol, centroDeCostosNombre } = req.body;
 
   try {
     // Validar que los datos necesarios están presentes
     if (!email || !contrasena || !cedula || !nombreCompleto || !cargo || !sede || !centroDeCostosNombre) {
-      return res.status(400).json({ message: "Todos los campos, incluido el centro de costos, son requeridos." });
+      return res.status(400).json({ message: "Todos los campos son requeridos." });
     }
     
-    // Encriptar la contraseña antes de guardarla
     const hashedPassword = await bcrypt.hash(contrasena, 10);
 
-    // Lógica para encontrar o crear el centro de costos
-    const centroDeCostos = await prisma.centroDeCostos.upsert({
-      where: { nombre: centroDeCostosNombre },
-      update: {}, // Si ya existe, no hacemos nada
-      create: { nombre: centroDeCostosNombre }, // Si no existe, lo creamos
-    });
-
-    // Crear el nuevo usuario en la base de datos
+    // --- LÓGICA CORREGIDA PARA CARGO Y CENTRO DE COSTOS ---
+    // Usamos una transacción de Prisma para asegurar que ambas operaciones (o ninguna) se completen.
+    const [cargoRecord, centroDeCostosRecord] = await prisma.$transaction([
+      prisma.cargos.upsert({
+        where: { nombre: cargo }, // Busca el cargo por nombre
+        update: {}, // Si existe, no hace nada
+        create: { nombre: cargo }, // Si no existe, lo crea
+      }),
+      prisma.centroDeCostos.upsert({
+        where: { nombre: centroDeCostosNombre },
+        update: {},
+        create: { nombre: centroDeCostosNombre },
+      })
+    ]);
+    
+    // Crear el nuevo usuario usando los IDs obtenidos
     const nuevoUsuario = await prisma.usuario.create({
       data: {
         cedula,
         nombreCompleto,
-        cargo,
         sede,
         email,
         contrasena: hashedPassword,
-        rol,
-            centroDeCostos: {
-      connect: {
-        id: centroDeCostos.id, // Conéctate a un centro de costos con este ID
+        rol: rol || 'Empleado', // Asegura un rol por defecto
+        // Conectar usando los IDs correctos
+        cargoId: cargoRecord.id,
+        centroDeCostosId: centroDeCostosRecord.id,
       },
-    },
-  },
     });
 
-    // Devolvemos el usuario creado (excluyendo la contraseña por seguridad)
     const { contrasena: _, ...usuarioSinContrasena } = nuevoUsuario;
     res.status(201).json(usuarioSinContrasena);
 
   } catch (error) {
-    // Manejar error de campos únicos (email o cédula duplicados)
     if (error.code === 'P2002') {
       return res.status(409).json({ message: `El campo '${error.meta.target[0]}' ya está en uso.` });
     }
-    
     console.error("Error al crear usuario:", error);
     res.status(500).json({ message: 'Error interno del servidor al crear el usuario.' });
   }
@@ -171,7 +175,11 @@ app.get('/api/perfil', authMiddleware, async (req, res) => {
         puntosTotales: true,
         rol: true,
         sede: true,
-        cargo: true,
+        cargos: {
+          select: {
+            nombre: true
+          }
+        }
       }
     });
 
