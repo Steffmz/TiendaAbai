@@ -85,14 +85,16 @@ export default function useCampana() {
 
   // Cargar campañas
   const cargarCampanas = async () => {
-    try {
-      // 2. AÑADE getAuthHeaders() A LA PETICIÓN
-      const { data } = await axios.get(API_URL, getAuthHeaders());
-      campanas.value = data;
-    } catch (err) {
-      console.error("Error cargando campañas:", err);
-    }
-  };
+  try {
+    const token = localStorage.getItem("authToken");
+    const response = token
+      ? await axios.get(API_URL, getAuthHeaders())
+      : await axios.get(API_URL);
+    campanas.value = response.data;
+  } catch (err) {
+    console.error("Error cargando campañas:", err);
+  }
+};
 
   // Cargar productos
   const cargarProductos = async () => {

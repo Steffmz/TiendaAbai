@@ -3,7 +3,7 @@ import { jwtDecode } from "jwt-decode";
 import Login from "../components/login/Login.vue";
 import Dashboard from "../components/layouts/Dashboard.vue";
 import EmployeeLayout from "../components/layouts/EmployeeLayout.vue";
-import Inicio from "../components/layouts/Inicio.vue";
+import Inicio from "../components/inicio/Inicio.vue"; // OJO: aquí está Inicio.vue en carpeta /inicio
 import CampaignProducts from "../components/employee/CampaignProducts.vue";
 import Categorias from "../components/categorias/Categorias.vue";
 import Productos from "../components/productos/Productos.vue";
@@ -13,76 +13,48 @@ import GestionUsuarios from "../components/admin/GestionUsuarios.vue";
 import GestionPedidos from "../components/admin/GestionPedidos.vue";
 
 const routes = [
-  { path: "/login", name: "Login", component: Login },
-
-  {
-    path: "/inicio",
-    name: "Inicio",
-    component: Inicio,
-    meta: { requiresAuth: true },
-  },
-
-  // --- RUTAS DEL EMPLEADO (AHORA ANIDADAS) ---
+  // --- PÁGINA INICIO PÚBLICA ---
   {
     path: "/",
+    name: "Inicio",
+    component: Inicio, // Público, se muestra primero
+  },
+
+  // --- LOGIN ---
+  { 
+    path: "/login", 
+    name: "Login", 
+    component: Login 
+  },
+
+  // --- RUTAS DEL EMPLEADO ---
+  {
+    path: "/empleado",
     component: EmployeeLayout,
     meta: { requiresAuth: true },
     children: [
       {
-        path: "", // La raíz ahora es la tienda
-        name: "Inicio",
-        component: Inicio,
-      },
-      {
         path: "campana/:id",
         name: "CampaignProducts",
-        component: CampaignProducts
+        component: CampaignProducts,
       },
-      // { path: 'mi-perfil', name: 'MiPerfil', component: PerfilComponent }, // Próximamente
+      // { path: 'mi-perfil', name: 'MiPerfil', component: PerfilComponent },
     ],
   },
-  // --- ADMIN ROUTES ---
+
+  // --- RUTAS DEL ADMIN ---
   {
     path: "/dashboard",
     component: Dashboard,
     meta: { requiresAuth: true, requiresAdmin: true },
     children: [
-      {
-        path: "",
-        redirect: "/dashboard/categorias",
-      },
-      {
-        path: "categorias",
-        name: "Categorias",
-        component: Categorias,
-      },
-      {
-        path: "usuarios",
-        name: "GestionUsuarios",
-        component: GestionUsuarios,
-      },
-      {
-        path: "productos/:categoriaId",
-        name: "Productos",
-        component: Productos,
-        props: true,
-      },
-      {
-        path: "campanas",
-        name: "Campana",
-        component: Campana,
-      },
-      {
-        path: "calendario",
-        name: "Calendario",
-        component: Calendario,
-      },
-      {
-        // La ruta que añadimos
-        path: "pedidos",
-        name: "GestionPedidos",
-        component: GestionPedidos, // Ahora 'GestionPedidos' sí está definido
-      },
+      { path: "", redirect: "/dashboard/categorias" },
+      { path: "categorias", name: "Categorias", component: Categorias },
+      { path: "usuarios", name: "GestionUsuarios", component: GestionUsuarios },
+      { path: "productos/:categoriaId", name: "Productos", component: Productos, props: true },
+      { path: "campanas", name: "Campana", component: Campana },
+      { path: "calendario", name: "Calendario", component: Calendario },
+      { path: "pedidos", name: "GestionPedidos", component: GestionPedidos },
     ],
   },
 
@@ -94,7 +66,7 @@ const router = createRouter({
   routes,
 });
 
-// Middleware de protección
+// --- Middleware de protección ---
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem("authToken");
 
@@ -104,7 +76,7 @@ router.beforeEach((to, from, next) => {
       if (decodedToken.rol === "Administrador") {
         return next("/dashboard");
       } else {
-        return next("/");
+        return next("/empleado");
       }
     } catch {
       localStorage.removeItem("authToken");
@@ -118,7 +90,7 @@ router.beforeEach((to, from, next) => {
     try {
       const decodedToken = jwtDecode(token);
       if (to.meta.requiresAdmin && decodedToken.rol !== "Administrador") {
-        return next("/");
+        return next("/empleado");
       }
     } catch (error) {
       console.error("Token inválido:", error);
