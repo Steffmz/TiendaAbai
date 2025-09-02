@@ -259,7 +259,7 @@ export default {
   <div class="h-full flex flex-col" :style="{ background: 'var(--bg)', color: 'var(--text)' }">
     <div class="max-w-[1100px] w-full mx-auto px-4">
       <!-- Flecha para volver atrás -->
-      <div class="pt-4 px-6 mb-2" :style="{ background: 'var(--surface)' }">
+      <div class="pt-4 px-6 mb-2">
         <button 
           @click="$router.go(-1)"
           class="flex items-center transition-colors"
@@ -273,7 +273,7 @@ export default {
       </div>
 
       <!-- Título y botón -->
-      <div class="pb-2 px-6 mb-4 shadow-sm" :style="{ background: 'var(--surface)' }">
+      <div class="pb-2 px-6 mb-4 shadow-sm" :style="{  }">
         <div class="text-center mb-4">
           <h1 class="text-4xl font-bold mb-1" :style="{ color: 'var(--text)' }">
             Catalogo de  {{ categoriaNombre || 'Categoría' }}

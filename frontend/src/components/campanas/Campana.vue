@@ -208,10 +208,16 @@
               <input type="file" @change="manejarSubidaImagen" accept="image/*" />
             </div>
 
-            <div v-if="previewImage" class="form-group grid-col-span-2">
-              <label>Vista Previa</label>
-              <img :src="previewImage" class="form-preview-image" alt="Preview" />
+          <div v-if="previewImage" class="form-group col-span-2">
+            <label class="block font-semibold mb-2">Vista Previa</label>
+            <div class="flex justify-center">
+              <img 
+                :src="previewImage" 
+                alt="Preview" 
+                class="max-w-[120px] max-h-[120px] object-contain rounded-md border shadow"
+              />
             </div>
+          </div>
 
             <div class="form-group grid-col-span-2">
               <label>Productos</label>
@@ -237,58 +243,88 @@
     </div>
 
     <!-- Modal Selección de productos (formulario) -->
-    <div v-if="modalSeleccionProductos"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white rounded-xl p-4 w-full max-w-lg">
-        <h2 class="text-lg font-bold mb-3">Seleccionar Productos</h2>
-        <table class="w-full border">
-          <thead>
-            <tr class="bg-gray-100">
-              <th class="p-2">✔</th>
-              <th class="p-2">Nombre</th>
-              <th class="p-2">Precio</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="p in productos" :key="p.id" class="border-t">
-              <td class="text-center">
-                <!-- REEMPLAZA ESTE INPUT -->
-                <input type="checkbox" :checked="isProductoSeleccionado(p)" @change="toggleProductoSeleccionado(p)" />
-              </td>
-              <td class="p-2">{{ p.nombre }}</td>
-              <td class="p-2">{{ p.precioPuntos }}</td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="flex justify-end mt-3">
-          <button class="bg-gray-500 text-white px-3 py-1 rounded"
-            @click="modalSeleccionProductos = false">Cerrar</button>
+          <div v-if="modalSeleccionProductos"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-4 w-full max-w-lg">
+          <h2 class="text-lg font-bold mb-3">Seleccionar Productos</h2>
+          <table class="w-full border">
+            <thead>
+              <tr class="bg-gray-100">
+                <th class="p-2">✔</th>
+                <th class="p-2">Nombre</th>
+                <th class="p-2">Puntos</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="p in productos" :key="p.id" class="border-t">
+                <td class="text-center">
+                  <input
+                    type="checkbox"
+                    :checked="isProductoSeleccionado(p)"
+                    @change="toggleProductoSeleccionado(p)"
+                  />
+                </td>
+                <td class="p-2">{{ p.nombre }}</td>
+                <td class="p-2">{{ p.precioPuntos }} pts</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="flex justify-end mt-3">
+            <button
+              class="bg-gray-500 text-white px-3 py-1 rounded"
+              @click="modalSeleccionProductos = false"
+            >
+              Cerrar
+            </button>
+          </div>
         </div>
       </div>
-    </div>
 
 
     <!-- Modal Ver productos (tabla) -->
     <div v-if="modalVerProductos" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-        <h2 class="text-xl font-bold mb-4 text-center">Productos de {{ campanaActual?.titulo }}</h2>
+        <h2 class="text-xl font-bold mb-4 text-center">
+          Productos de {{ campanaActual?.titulo }}
+        </h2>
 
         <ul v-if="campanaActual?.productos?.length" class="divide-y">
-          <li v-for="prod in campanaActual.productos" :key="prod.id" class="flex justify-between py-2">
-            <span>{{ prod.nombre }}</span>
-            <span class="font-semibold text-gray-700">{{ prod.precio }} $</span>
+          <li
+            v-for="prod in campanaActual.productos"
+            :key="prod.id"
+            class="flex justify-between items-center py-2"
+          >
+            <!-- Nombre -->
+            <span class="flex-1">{{ prod.nombre }}</span>
+
+            <!-- Puntos -->
+            <span class="text-sm text-indigo-600 mr-4">
+              {{ prod.precioPuntos }} pts
+            </span>
+
+            <!-- Precio (si existe en tu objeto) -->
+            <span class="font-semibold text-gray-700">
+              {{ prod.precio }} $
+            </span>
           </li>
         </ul>
-        <p v-else class="text-gray-500 text-center">No hay productos en esta campaña.</p>
+
+        <p v-else class="text-gray-500 text-center">
+          No hay productos en esta campaña.
+        </p>
 
         <div class="mt-4 text-right">
-          <button @click="modalVerProductos = false"
-            class="bg-[#74B9E7] hover:bg-[#FFB93B] text-white px-4 py-2 rounded transition">
+          <button
+            @click="modalVerProductos = false"
+            class="bg-[#74B9E7] hover:bg-[#FFB93B] text-white px-4 py-2 rounded transition"
+          >
             Cerrar
           </button>
         </div>
       </div>
     </div>
+
 
     <!-- Paginación -->
     <div class="flex flex-col items-center justify-center mt-4">

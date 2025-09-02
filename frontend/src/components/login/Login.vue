@@ -6,15 +6,13 @@ import axios from 'axios';
 import { useRouter } from 'vue-router';
 import { jwtDecode } from 'jwt-decode';
 
-const router = useRouter(); // Y esta
+const router = useRouter(); 
 
-// --- Variables reactivas ---
 const cedula = ref("");
 const password = ref("");
 const showModal = ref(false);
 const errorMessage = ref("");
 
-// Objeto de registro con el campo "centroDeCostosNombre"
 const registro = ref({
   nombreCompleto: "",
   cargo: "",
@@ -80,37 +78,34 @@ const closeModal = () => {
 };
 
 // --- Animación del Canvas (Optimizada) ---
-// Login.vue - CÓDIGO OPTIMIZADO
 
 onMounted(() => {
   const canvas = document.getElementById("magneticCanvas");
-  if (!canvas) return; // Salir si el canvas no existe
+  if (!canvas) return; 
 
   const ctx = canvas.getContext("2d");
 
   let width = (canvas.width = window.innerWidth);
   let height = (canvas.height = window.innerHeight);
-  let animationFrameId; // Para poder cancelar la animación
+  let animationFrameId; 
 
   const particles = [];
-  // --- OPTIMIZACIÓN 1: Reducir partículas y distancia ---
-  const particleCount = 70; // Reducido desde 150
-  const maxDistanceSquared = 120 * 120; // Compararemos cuadrados para evitar Math.sqrt
+  const particleCount = 70; 
+  const maxDistanceSquared = 120 * 120; 
 
   class Particle {
     constructor() {
       this.x = Math.random() * width;
       this.y = Math.random() * height;
-      this.radius = Math.random() * 2 + 1; // Radios más pequeños y variados
-      this.vx = (Math.random() - 0.5) * 0.5; // Velocidad reducida
+      this.radius = Math.random() * 2 + 1; 
+      this.vx = (Math.random() - 0.5) * 0.5; 
       this.vy = (Math.random() - 0.5) * 0.5;
     }
 
     draw() {
       ctx.beginPath();
       ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(255, 255, 255, 0.7)"; // Usar un color más sutil
-      // --- OPTIMIZACIÓN 2: Eliminar sombras en partículas, son muy costosas ---
+      ctx.fillStyle = "rgba(255, 255, 255, 0.7)"; 
       ctx.fill();
     }
 
@@ -130,16 +125,13 @@ onMounted(() => {
   function animate() {
     ctx.clearRect(0, 0, width, height);
     
-    // Dibujar todas las partículas primero
     for (const p of particles) {
       p.update();
       p.draw();
     }
 
-    // Luego, dibujar las líneas de conexión
     ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
     ctx.lineWidth = 1;
-    // --- OPTIMIZACIÓN 3: Eliminar sombra en las líneas ---
 
     for (let i = 0; i < particleCount; i++) {
       for (let j = i + 1; j < particleCount; j++) {
@@ -170,7 +162,6 @@ onMounted(() => {
   window.addEventListener("resize", handleResize);
 
   onBeforeUnmount(() => {
-    // --- OPTIMIZACIÓN 4: Cancelar la animación al salir del componente ---
     cancelAnimationFrame(animationFrameId);
     window.removeEventListener("resize", handleResize);
   });

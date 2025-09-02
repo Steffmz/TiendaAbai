@@ -68,6 +68,7 @@
                 type="password" required /></div>
             <div class="form-group"><label>Rol</label><select v-model="form.rol" required>
                 <option value="Empleado">Empleado</option>
+                <option value="Administrador">Administrador</option>
               </select></div>
             <div class="form-group"><label>Cargo ID</label><input v-model.number="form.cargoId" type="number"
                 placeholder="ID del Cargo existente" required /></div>
