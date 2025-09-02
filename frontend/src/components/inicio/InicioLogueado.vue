@@ -200,93 +200,70 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
+import { useRouter } from "vue-router"; // Importamos el router
+import axios from 'axios';
 import Swal from "sweetalert2";
-import useCampana from "../campanas/useCampana.js";
 
-// ✅ Categorías
-const categorias = [
-  { nombre: "Moda" },
-  { nombre: "Belleza" },
-  { nombre: "Gastronomía" },
-  { nombre: "Deportes" },
-  { nombre: "Turismo" },
-  { nombre: "Servicios" },
-];
+const router = useRouter(); // Creamos instancia del router
 
-// ✅ Productos de ejemplo
-const productos = [
-  { id: 1, nombre: "Camiseta", descripcion: "De algodón", precio: 40, img: "https://picsum.photos/300/200?random=11", categoria: "Moda" },
-  { id: 2, nombre: "Zapatos", descripcion: "De cuero", precio: 80, img: "https://picsum.photos/300/200?random=12", categoria: "Moda" },
-  { id: 3, nombre: "Perfume", descripcion: "Aroma floral", precio: 120, img: "https://picsum.photos/300/200?random=13", categoria: "Belleza" },
-  { id: 4, nombre: "Pizza", descripcion: "Familiar", precio: 25, img: "https://picsum.photos/300/200?random=14", categoria: "Gastronomía" },
-  // agrega más...
-];
+// --- Estados para datos reales ---
+const categorias = ref([]);
+const productos = ref([]);
+const campanas = ref([]);
+const loading = ref(true);
 
-// ✅ Estado productos
+const getAuthHeaders = () => ({
+  headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+});
+
+// --- Cargar datos reales desde la API ---
+const cargarDatos = async () => {
+  loading.value = true;
+  try {
+    const [resCategorias, resProductos, resCampanas] = await Promise.all([
+      axios.get('http://localhost:3000/api/categorias', getAuthHeaders()),
+      axios.get('http://localhost:3000/api/productos', getAuthHeaders()),
+      axios.get('http://localhost:3000/api/campanas', getAuthHeaders())
+    ]);
+    categorias.value = resCategorias.data;
+    productos.value = resProductos.data;
+    campanas.value = resCampanas.data;
+  } catch (error) {
+    console.error("Error al cargar datos para la tienda:", error);
+    Swal.fire('Error', 'No se pudieron cargar los datos de la tienda.', 'error');
+  } finally {
+    loading.value = false;
+  }
+};
+
+onMounted(cargarDatos);
+
+// --- Lógica de filtrado y paginación (como ya la tenías) ---
 const categoriaSeleccionada = ref("");
 const productosFiltrados = ref([]);
 const paginaActual = ref(1);
 const productosPorPagina = 9;
 
-const totalPaginas = computed(() =>
-  Math.ceil(productosFiltrados.value.length / productosPorPagina)
-);
-
+const totalPaginas = computed(() => Math.ceil(productosFiltrados.value.length / productosPorPagina));
 const productosPaginados = computed(() => {
   const start = (paginaActual.value - 1) * productosPorPagina;
-  const end = start + productosPorPagina;
-  return productosFiltrados.value.slice(start, end);
+  return productosFiltrados.value.slice(start, start + productosPorPagina);
 });
 
 function filtrarProductos() {
   paginaActual.value = 1;
-  productosFiltrados.value = productos.filter(
-    (p) => p.categoria === categoriaSeleccionada.value
+  productosFiltrados.value = productos.value.filter(
+    (p) => p.categoria.nombre === categoriaSeleccionada.value
   );
 }
 
-// ✅ Destacados
-const destacados = [
-  { titulo: "Nuevo Producto Moda", categoria: "Moda", img: "https://picsum.photos/300/200?random=1" },
-  { titulo: "Descuento Belleza", categoria: "Belleza", img: "https://picsum.photos/300/200?random=2" },
-  { titulo: "Evento Gastronomía", categoria: "Gastronomía", img: "https://picsum.photos/300/200?random=3" },
-];
-
-// ✅ Campañas
-const { campanas, cargarCampanas } = useCampana();
-const campanasFiltradas = computed(() =>
-  campanas.value.filter(c => c.aprobada === true)
-);
-
-// Modal
-const modalAbierto = ref(false);
-const campanaSeleccionada = ref({});
-
-onMounted(() => {
-  cargarCampanas();
-});
+// --- Lógica de campañas ---
+const campanasFiltradas = computed(() => campanas.value.filter(c => c.aprobada === true));
 
 const verCampana = (campana) => {
-  campanaSeleccionada.value = campana;
-  modalAbierto.value = true;
+  // Usamos el router para navegar a la vista de productos de la campaña
+  router.push(`/empleado/campana/${campana.id}`);
 };
 
-const cerrarModal = () => {
-  modalAbierto.value = false;
-  campanaSeleccionada.value = {};
-};
-
-const formatearFecha = (f) => new Date(f).toLocaleDateString();
-
-const participarCampana = () => {
-  Swal.fire({
-    icon: "info",
-    title: "Inicia sesión",
-    text: "Debes iniciar sesión para participar en esta campaña.",
-    confirmButtonText: "Ir a login",
-    confirmButtonColor: "#2563eb",
-  }).then(() => {
-    window.location.href = "/login";
-  });
-};
+const formatearFecha = (f) => new Date(f).toLocaleDateString('es-CO');
 </script>
