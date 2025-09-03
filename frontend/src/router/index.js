@@ -3,12 +3,12 @@ import { jwtDecode } from "jwt-decode";
 
 // Vistas y layouts
 import Login from "../components/login/Login.vue";
+import Inicio from "../components/inicio/Inicio.vue";
+import InicioLogueado from "../components/inicio/InicioLogueado.vue";
+import EmployeeLayout from "../components/layouts/EmployeeLayout.vue"; // Layout para EMPLEADOS
+import CampaignProducts from "../components/employee/CampaignProducts.vue"; // LA NUEVA PÁGINA
 import Dashboard from "../components/layouts/Dashboard.vue";
-import EmployeeLayout from "../components/layouts/EmployeeLayout.vue";
-import Inicio from "../components/inicio/Inicio.vue"; // Esta será la TIENDA
-import CampaignProducts from "../components/employee/CampaignProducts.vue";
-
-// Vistas de Admin (importa solo las que necesites para el router)
+// ... Vistas de Admin
 import GestionUsuarios from "../components/admin/GestionUsuarios.vue";
 import Categorias from "../components/categorias/Categorias.vue";
 import Campana from "../components/campanas/Campana.vue";
@@ -16,28 +16,22 @@ import Calendario from "../components/Calendario.vue";
 import GestionPedidos from "../components/admin/GestionPedidos.vue";
 
 const routes = [
-  // --- LOGIN (PÚBLICO) ---
-  { 
-    path: "/login", 
-    name: "Login", 
-    component: Login 
-  },
+  // --- RUTAS PÚBLICAS ---
+  { path: "/", name: "InicioPublico", component: Inicio, meta: { publicOnly: true } },
+  { path: "/login", name: "Login", component: Login, meta: { publicOnly: true } },
 
-  // --- RUTAS DEL EMPLEADO ---
+  // --- RUTAS DE EMPLEADO (protegidas) ---
   {
-    path: "/", // La raíz será la base para el empleado
+    path: "/tienda",
     component: EmployeeLayout,
     meta: { requiresAuth: true },
     children: [
       {
-        path: "", // La ruta / se redirige a la tienda
-        redirect: "/tienda",
-      },
-      {
-        path: "tienda", // La tienda principal
+        path: "", // La ruta /tienda muestra el catálogo
         name: "Tienda",
-        component: Inicio,
+        component: InicioLogueado,
       },
+      // --- ESTA ES LA RUTA NUEVA ---
       {
         path: "campana/:id",
         name: "CampaignProducts",
@@ -46,7 +40,7 @@ const routes = [
     ],
   },
 
-  // --- RUTAS DEL ADMIN ---
+  // --- RUTAS DE ADMIN ---
   {
     path: "/dashboard",
     component: Dashboard,
@@ -58,12 +52,10 @@ const routes = [
       { path: "campanas", name: "Campana", component: Campana },
       { path: "calendario", name: "Calendario", component: Calendario },
       { path: "pedidos", name: "GestionPedidos", component: GestionPedidos },
-      // ... tus otras rutas de admin
     ],
   },
 
-  // Atrapa cualquier ruta no definida y redirige al login
-  { path: "/:pathMatch(.*)*", redirect: "/login" },
+  { path: "/:pathMatch(.*)*", redirect: "/" },
 ];
 
 const router = createRouter({
@@ -77,17 +69,17 @@ router.beforeEach((to, from, next) => {
   let decodedToken = null;
 
   if (token) {
-    try { decodedToken = jwtDecode(token); }
+    try { decodedToken = jwtDecode(token); } 
     catch (error) { localStorage.removeItem("authToken"); }
   }
   
-  if (to.name === 'Login' && decodedToken) {
+  if (to.meta.publicOnly && decodedToken) {
     if (decodedToken.rol === "Administrador") return next("/dashboard");
     return next("/tienda");
   }
 
   if (to.meta.requiresAuth && !decodedToken) {
-    return next('/login');
+    return next("/login");
   }
 
   if (to.meta.requiresAdmin && decodedToken?.rol !== 'Administrador') {

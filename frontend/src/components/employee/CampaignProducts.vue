@@ -40,7 +40,9 @@ const campaign = ref(null);
 const loading = ref(true);
 const campaignId = route.params.id;
 
-const getAuthHeaders = () => ({ headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }});
+const getAuthHeaders = () => ({ 
+  headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+});
 
 const fetchCampaignProducts = async () => {
   loading.value = true;
@@ -48,7 +50,7 @@ const fetchCampaignProducts = async () => {
     const { data } = await axios.get(`http://localhost:3000/api/campanas/${campaignId}`, getAuthHeaders());
     campaign.value = data;
   } catch (error) {
-    console.error("Error al cargar los productos de la campaña:", error);
+    console.error("Error loading campaign products:", error);
   } finally {
     loading.value = false;
   }
@@ -56,12 +58,12 @@ const fetchCampaignProducts = async () => {
 
 const redeemProduct = async (product) => {
   const result = await Swal.fire({
-    title: '¿Confirmar Canje?',
-    html: `Estás a punto de canjear <b>${product.nombre}</b> por <b>${product.precioPuntos} puntos</b>.`,
+    title: 'Confirm Redemption?',
+    html: `You are about to redeem <b>${product.nombre}</b> for <b>${product.precioPuntos} points</b>.`,
     icon: 'question',
     showCancelButton: true,
-    confirmButtonText: 'Sí, ¡canjear!',
-    cancelButtonText: 'Cancelar',
+    confirmButtonText: 'Yes, redeem!',
+    cancelButtonText: 'Cancel',
   });
 
   if (result.isConfirmed) {
@@ -69,11 +71,11 @@ const redeemProduct = async (product) => {
       const payload = { productoId: product.id, cantidad: 1 };
       const response = await axios.post('http://localhost:3000/api/pedidos', payload, getAuthHeaders());
       
-      Swal.fire('¡Éxito!', response.data.message, 'success');
-      product.stock -= 1; // Actualizamos el stock en la vista
-      emit('redemption-successful'); // Emitimos un evento para actualizar los puntos en el layout
+      Swal.fire('Success!', response.data.message, 'success');
+      product.stock -= 1;
+      emit('redemption-successful');
     } catch (error) {
-      Swal.fire('Error', error.response?.data?.message || 'No se pudo realizar el canje.', 'error');
+      Swal.fire('Error', error.response?.data?.message || 'Could not complete redemption.', 'error');
     }
   }
 };
