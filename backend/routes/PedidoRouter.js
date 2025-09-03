@@ -7,6 +7,8 @@ const adminMiddleware = require('../middleware/adminMiddleware');
 // Un usuario autenticado (empleado o admin) puede crear un pedido
 router.post('/', authMiddleware, PedidoController.createPedido);
 
+router.get('/mis-pedidos', authMiddleware, PedidoController.getMisPedidos);
+
 // Las siguientes rutas solo son para administradores
 router.use(adminMiddleware);
 

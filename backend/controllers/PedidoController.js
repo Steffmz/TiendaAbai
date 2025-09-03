@@ -115,10 +115,37 @@ const createPedido = async (req, res) => {
   }
 };
 
+const getMisPedidos = async (req, res) => {
+  const usuarioId = req.usuario.userId; // Obtenemos el ID del token
+  try {
+    const pedidos = await prisma.pedido.findMany({
+      where: { usuarioId: usuarioId },
+      orderBy: { fecha: 'desc' },
+      include: {
+        detalles: {
+          include: {
+            producto: {
+              select: {
+                nombre: true,
+                imagenUrl: true
+              }
+            }
+          }
+        }
+      }
+    });
+    res.json(pedidos);
+  } catch (error) {
+    console.error("Error al obtener mis pedidos:", error);
+    res.status(500).json({ message: 'Error interno del servidor.' });
+  }
+};
+
 // --- ESTA ES LA CORRECCIÓN ---
 // Exportamos todas las funciones juntas al final.
 module.exports = {
   getAllPedidos,
   updateEstadoPedido, 
-  createPedido
+  createPedido,
+  getMisPedidos
 };

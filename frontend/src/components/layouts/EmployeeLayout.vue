@@ -7,6 +7,7 @@
         </div>
         <nav class="nav-links">
           <router-link to="/tienda">Tienda</router-link>
+          <router-link to="/tienda/mi-perfil">Mi Perfil</router-link>
         </nav>
         <div class="user-info">
           <span v-if="userData.nombreCompleto">Hola, {{ userData.nombreCompleto.split(' ')[0] }}</span>
@@ -22,7 +23,7 @@
     </header>
 
     <main class="main-content">
-      <router-view />
+      <router-view @redemption-successful="fetchUserData" />
     </main>
   </div>
 </template>
