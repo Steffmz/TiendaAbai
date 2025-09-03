@@ -1,57 +1,56 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { jwtDecode } from "jwt-decode";
+
+// Vistas y layouts
 import Login from "../components/login/Login.vue";
+import Inicio from "../components/inicio/Inicio.vue";
+import InicioLogueado from "../components/inicio/InicioLogueado.vue";
+import EmployeeLayout from "../components/layouts/EmployeeLayout.vue"; // Layout para EMPLEADOS
+import CampaignProducts from "../components/employee/CampaignProducts.vue"; // LA NUEVA PÁGINA
 import Dashboard from "../components/layouts/Dashboard.vue";
-import EmployeeLayout from "../components/layouts/EmployeeLayout.vue";
-import Inicio from "../components/inicio/Inicio.vue"; // OJO: aquí está Inicio.vue en carpeta /inicio
-import CampaignProducts from "../components/employee/CampaignProducts.vue";
+// ... Vistas de Admin
+import GestionUsuarios from "../components/admin/GestionUsuarios.vue";
 import Categorias from "../components/categorias/Categorias.vue";
-import Productos from "../components/productos/Productos.vue";
 import Campana from "../components/campanas/Campana.vue";
 import Calendario from "../components/Calendario.vue";
-import GestionUsuarios from "../components/admin/GestionUsuarios.vue";
 import GestionPedidos from "../components/admin/GestionPedidos.vue";
+import MiPerfil from '../components/employee/MiPerfil.vue';
 
 const routes = [
-  // --- PÁGINA INICIO PÚBLICA ---
-  {
-    path: "/",
-    name: "Inicio",
-    component: Inicio, // Público, se muestra primero
-  },
+  // --- RUTAS PÚBLICAS ---
+  { path: "/", name: "InicioPublico", component: Inicio, meta: { publicOnly: true } },
+  { path: "/login", name: "Login", component: Login, meta: { publicOnly: true } },
 
-  // --- LOGIN ---
-  { 
-    path: "/login", 
-    name: "Login", 
-    component: Login 
-  },
-
-  // --- RUTAS DEL EMPLEADO ---
+  // --- RUTAS DE EMPLEADO (protegidas) ---
   {
-    path: "/empleado",
+    path: "/tienda",
     component: EmployeeLayout,
     meta: { requiresAuth: true },
     children: [
+      {
+        path: "", // La ruta /tienda muestra el catálogo
+        name: "Tienda",
+        component: InicioLogueado,
+      },
+      // --- ESTA ES LA RUTA NUEVA ---
       {
         path: "campana/:id",
         name: "CampaignProducts",
         component: CampaignProducts,
       },
-      // { path: 'mi-perfil', name: 'MiPerfil', component: PerfilComponent },
+      { path: 'mi-perfil', name: 'MiPerfil', component: MiPerfil }
     ],
   },
 
-  // --- RUTAS DEL ADMIN ---
+  // --- RUTAS DE ADMIN ---
   {
     path: "/dashboard",
     component: Dashboard,
     meta: { requiresAuth: true, requiresAdmin: true },
     children: [
-      { path: "", redirect: "/dashboard/categorias" },
-      { path: "categorias", name: "Categorias", component: Categorias },
+      { path: "", redirect: "/dashboard/usuarios" },
       { path: "usuarios", name: "GestionUsuarios", component: GestionUsuarios },
-      { path: "productos/:categoriaId", name: "Productos", component: Productos, props: true },
+      { path: "categorias", name: "Categorias", component: Categorias },
       { path: "campanas", name: "Campana", component: Campana },
       { path: "calendario", name: "Calendario", component: Calendario },
       { path: "pedidos", name: "GestionPedidos", component: GestionPedidos },
@@ -69,34 +68,24 @@ const router = createRouter({
 // --- Middleware de protección ---
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem("authToken");
+  let decodedToken = null;
 
-  if (to.name === "Login" && token) {
-    try {
-      const decodedToken = jwtDecode(token);
-      if (decodedToken.rol === "Administrador") {
-        return next("/dashboard");
-      } else {
-        return next("/empleado");
-      }
-    } catch {
-      localStorage.removeItem("authToken");
-      return next("/login");
-    }
+  if (token) {
+    try { decodedToken = jwtDecode(token); } 
+    catch (error) { localStorage.removeItem("authToken"); }
+  }
+  
+  if (to.meta.publicOnly && decodedToken) {
+    if (decodedToken.rol === "Administrador") return next("/dashboard");
+    return next("/tienda");
   }
 
-  if (to.meta.requiresAuth) {
-    if (!token) return next("/login");
+  if (to.meta.requiresAuth && !decodedToken) {
+    return next("/login");
+  }
 
-    try {
-      const decodedToken = jwtDecode(token);
-      if (to.meta.requiresAdmin && decodedToken.rol !== "Administrador") {
-        return next("/empleado");
-      }
-    } catch (error) {
-      console.error("Token inválido:", error);
-      localStorage.removeItem("authToken");
-      return next("/login");
-    }
+  if (to.meta.requiresAdmin && decodedToken?.rol !== 'Administrador') {
+    return next('/tienda');
   }
 
   next();

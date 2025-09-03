@@ -38,17 +38,17 @@ const login = async () => {
 
     const decodedToken = jwtDecode(token);
 
-      if (decodedToken.rol === 'Administrador') {
+    if (decodedToken.rol === 'Administrador') {
       router.push('/dashboard');
     } else {
-      router.push('/inicio'); 
+      router.push('/tienda'); 
     }
 
   } catch (error) {
     if (error.response) {
       errorMessage.value = error.response.data.message;
     } else {
-      errorMessage.value = 'Error de conexión con el servidor.';
+      errorMessage.value = 'Error connecting to the server.';
     }
   }
 };

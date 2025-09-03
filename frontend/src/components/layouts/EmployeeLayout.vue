@@ -6,7 +6,8 @@
           <img src="../../assets/img/Logo-blanco.png" alt="ABAI Logo" />
         </div>
         <nav class="nav-links">
-          <router-link to="/">Tienda</router-link>
+          <router-link to="/tienda">Tienda</router-link>
+          <router-link to="/tienda/mi-perfil">Mi Perfil</router-link>
         </nav>
         <div class="user-info">
           <span v-if="userData.nombreCompleto">Hola, {{ userData.nombreCompleto.split(' ')[0] }}</span>
@@ -22,7 +23,7 @@
     </header>
 
     <main class="main-content">
-      <router-view @redemption-successful="fetchUserData"/>
+      <router-view @redemption-successful="fetchUserData" />
     </main>
   </div>
 </template>
@@ -48,7 +49,7 @@ const fetchUserData = async () => {
     userData.value = data;
   } catch (error) {
     console.error("Error al cargar datos del usuario:", error);
-    logout(); // Si hay un error con los datos, cerramos sesión por seguridad
+    logout();
   }
 };
 
@@ -71,6 +72,9 @@ onMounted(fetchUserData);
   color: white;
   padding: 0 2rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 50;
 }
 
 .navbar-content {

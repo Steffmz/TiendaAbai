@@ -34,13 +34,15 @@ import { useRoute } from 'vue-router';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
-const emit = defineEmits(['redemption-successful']);
+const emit = defineEmits(['redemption-successful']); // Para actualizar los puntos en el header
 const route = useRoute();
 const campaign = ref(null);
 const loading = ref(true);
 const campaignId = route.params.id;
 
-const getAuthHeaders = () => ({ headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }});
+const getAuthHeaders = () => ({ 
+  headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+});
 
 const fetchCampaignProducts = async () => {
   loading.value = true;
@@ -62,6 +64,10 @@ const redeemProduct = async (product) => {
     showCancelButton: true,
     confirmButtonText: 'Sí, ¡canjear!',
     cancelButtonText: 'Cancelar',
+    customClass: {
+      confirmButton: 'swal-confirm-button',
+      cancelButton: 'swal-cancel-button'
+    }
   });
 
   if (result.isConfirmed) {
@@ -69,9 +75,10 @@ const redeemProduct = async (product) => {
       const payload = { productoId: product.id, cantidad: 1 };
       const response = await axios.post('http://localhost:3000/api/pedidos', payload, getAuthHeaders());
       
-      Swal.fire('¡Éxito!', response.data.message, 'success');
+      await Swal.fire('¡Éxito!', response.data.message, 'success');
+      
       product.stock -= 1; // Actualizamos el stock en la vista
-      emit('redemption-successful'); // Emitimos un evento para actualizar los puntos en el layout
+      emit('redemption-successful'); // Avisamos al layout que actualice los puntos
     } catch (error) {
       Swal.fire('Error', error.response?.data?.message || 'No se pudo realizar el canje.', 'error');
     }
