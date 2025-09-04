@@ -195,7 +195,7 @@ onMounted(() => {
               <label for="password">Contraseña</label>
               <input type="password" id="password" v-model="password" placeholder="Ingresa tu contraseña" required />
             </div>
-            <a href="#" class="forgot-link">¿Olvidaste tu contraseña?</a>
+            <router-link to="/forgot-password" class="forgot-link">¿Olvidaste tu contraseña?</router-link>
             <button type="submit" class="btn-login">Iniciar Sesión</button>
           </form>
           <div class="register-link">

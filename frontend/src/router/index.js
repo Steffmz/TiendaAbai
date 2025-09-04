@@ -3,10 +3,12 @@ import { jwtDecode } from "jwt-decode";
 
 // Vistas y layouts
 import Login from "../components/login/Login.vue";
+import ForgotPassword from "../components/login/ForgotPassword.vue";
+import ResetPassword from "../components/login/ResetPassword.vue";
 import Inicio from "../components/inicio/Inicio.vue";
 import InicioLogueado from "../components/inicio/InicioLogueado.vue";
-import EmployeeLayout from "../components/layouts/EmployeeLayout.vue"; // Layout para EMPLEADOS
-import CampaignProducts from "../components/employee/CampaignProducts.vue"; // LA NUEVA PÁGINA
+import EmployeeLayout from "../components/layouts/EmployeeLayout.vue";
+import CampaignProducts from "../components/employee/CampaignProducts.vue";
 import Dashboard from "../components/layouts/Dashboard.vue";
 // ... Vistas de Admin
 import GestionUsuarios from "../components/admin/GestionUsuarios.vue";
@@ -30,6 +32,18 @@ const routes = [
     path: "/login",
     name: "Login",
     component: Login,
+    meta: { publicOnly: true },
+  },
+  {
+    path: "/forgot-password",
+    name: "ForgotPassword",
+    component: ForgotPassword,
+    meta: { publicOnly: true },
+  },
+  {
+    path: "/reset-password/:token",
+    name: "ResetPassword",
+    component: ResetPassword,
     meta: { publicOnly: true },
   },
 
