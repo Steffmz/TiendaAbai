@@ -42,45 +42,74 @@ const updateEstadoPedido = async (req, res) => {
   }
 
   try {
-    const pedido = await prisma.pedido.findUnique({ where: { id: parseInt(id) } });
-    if (!pedido) {
-      return res.status(404).json({ message: 'Pedido no encontrado' });
-    }
-
-    const dataToUpdate = { estado };
-    if (['Aprobado', 'Rechazado', 'Cancelado'].includes(estado)) {
-      dataToUpdate.aprobadoPorAdminId = adminId;
-      dataToUpdate.fechaAprobacion = new Date();
-    }
-
-    const pedidoActualizado = await prisma.pedido.update({
-      where: { id: parseInt(id) },
-      data: dataToUpdate,
-    });
-
-    // --- LÓGICA DE NOTIFICACIÓN ---
-    if (['Aprobado', 'Enviado', 'Rechazado'].includes(estado)) {
-      let titulo = `Tu pedido #${pedido.id} ha sido ${estado.toLowerCase()}.`;
-      let mensaje = `Tu canje ha sido actualizado al estado: ${estado}.`;
-      if (estado === 'Aprobado') mensaje = 'Hemos recibido tu canje y está siendo procesado.';
-      if (estado === 'Enviado') mensaje = '¡Buenas noticias! Tu producto ya está en camino.';
-      if (estado === 'Rechazado') mensaje = 'Lamentablemente, tu canje ha sido rechazado. Contacta a soporte para más detalles.';
-      
-      await prisma.notificacion.create({
-        data: {
-          titulo,
-          mensaje,
-          usuarioId: pedido.usuarioId, // Notificación para el empleado
-          pedidoId: pedido.id
-        }
+    const pedidoActualizado = await prisma.$transaction(async (tx) => {
+      const pedido = await tx.pedido.findUnique({
+        where: { id: parseInt(id) },
+        include: { detalles: true }
       });
-    }
-    // --- FIN DE LÓGICA DE NOTIFICACIÓN ---
+
+      if (!pedido) {
+        throw new Error('Pedido no encontrado');
+      }
+
+      const estadoAnterior = pedido.estado;
+      
+      // --- LÓGICA DE DEVOLUCIÓN DE PUNTOS Y STOCK ---
+      if (['Cancelado', 'Rechazado'].includes(estado) && !['Cancelado', 'Rechazado'].includes(estadoAnterior)) {
+        // Devolver puntos al usuario
+        await tx.usuario.update({
+          where: { id: pedido.usuarioId },
+          data: { puntosTotales: { increment: pedido.totalPuntos } }
+        });
+
+        // Devolver stock a los productos
+        for (const detalle of pedido.detalles) {
+          await tx.producto.update({
+            where: { id: detalle.productoId },
+            data: { stock: { increment: detalle.cantidad } }
+          });
+        }
+        
+        // Registrar la devolución en el historial
+        await tx.historialPuntos.create({
+          data: {
+            puntos: pedido.totalPuntos, // Positivo porque es una devolución
+            tipo: 'AJUSTE',
+            descripcion: `Devolución por pedido #${pedido.id} ${estado.toLowerCase()}`,
+            beneficiarioId: pedido.usuarioId,
+            adminCreadorId: adminId,
+          }
+        });
+      }
+
+      // Actualizar el estado del pedido
+      const dataToUpdate = { estado };
+      if (['Aprobado', 'Rechazado', 'Cancelado'].includes(estado)) {
+        dataToUpdate.aprobadoPorAdminId = adminId;
+        dataToUpdate.fechaAprobacion = new Date();
+      }
+      
+      const pedidoActualizado = await tx.pedido.update({
+        where: { id: parseInt(id) },
+        data: dataToUpdate,
+      });
+
+      // Lógica de notificación (existente)
+      if (['Aprobado', 'Enviado', 'Rechazado', 'Cancelado'].includes(estado)) {
+        let titulo = `Tu pedido #${pedido.id} ha sido ${estado.toLowerCase()}.`;
+        let mensaje = `Tu canje ha sido actualizado al estado: ${estado}.`;
+        await tx.notificacion.create({
+          data: { titulo, mensaje, usuarioId: pedido.usuarioId, pedidoId: pedido.id }
+        });
+      }
+      
+      return pedidoActualizado;
+    });
 
     res.json({ message: 'Estado del pedido actualizado.', pedido: pedidoActualizado });
   } catch (error) {
     console.error(`Error al actualizar estado del pedido ${id}:`, error);
-    res.status(500).json({ message: 'Error al actualizar el estado del pedido.' });
+    res.status(500).json({ message: error.message || 'Error al actualizar el estado del pedido.' });
   }
 };
 
@@ -94,7 +123,6 @@ const createPedido = async (req, res) => {
   }
 
   try {
-    // Usamos una transacción para asegurar que todas las operaciones se completen o ninguna lo haga
     const resultado = await prisma.$transaction(async (tx) => {
       const producto = await tx.producto.findUnique({ where: { id: parseInt(productoId) } });
       if (!producto) throw new Error("Producto no encontrado.");
@@ -133,6 +161,17 @@ const createPedido = async (req, res) => {
           },
         },
       });
+
+      const notificacionesAdmin = admins.map(admin => tx.notificacion.create({
+        data: {
+          titulo: 'Nuevo Pedido Recibido',
+          mensaje: `El usuario ${usuario.nombreCompleto} ha realizado un nuevo pedido (#${nuevoPedido.id}).`,
+          usuarioId: admin.id,
+          pedidoId: nuevoPedido.id
+        }
+      }));
+
+      await Promise.all(notificacionesAdmin);
 
       // 4. --- AÑADIMOS EL REGISTRO EN EL HISTORIAL ---
       await tx.historialPuntos.create({
@@ -181,11 +220,93 @@ const getMisPedidos = async (req, res) => {
     res.status(500).json({ message: 'Error interno del servidor.' });
   }
 };
+const crearPedidoDesdeCarrito = async (req, res) => {
+  const usuarioId = req.usuario.userId;
 
+  try {
+    const resultado = await prisma.$transaction(async (tx) => {
+      // 1. Obtener todos los items del carrito del usuario
+      const carritoItems = await tx.carrito.findMany({
+        where: { usuarioId },
+        include: { producto: true },
+      });
+
+      if (carritoItems.length === 0) {
+        throw new Error("Tu carrito está vacío.");
+      }
+
+      // 2. Calcular el costo total y verificar el stock
+      let costoTotalPuntos = 0;
+      for (const item of carritoItems) {
+        if (item.producto.stock < item.cantidad) {
+          throw new Error(`No hay suficiente stock para ${item.producto.nombre}.`);
+        }
+        costoTotalPuntos += item.producto.precioPuntos * item.cantidad;
+      }
+
+      const usuario = await tx.usuario.findUnique({ where: { id: usuarioId } });
+      if (usuario.puntosTotales < costoTotalPuntos) {
+        throw new Error("No tienes suficientes puntos para realizar este canje.");
+      }
+
+      // 3. Actualizar puntos del usuario y stock de productos
+      await tx.usuario.update({
+        where: { id: usuarioId },
+        data: { puntosTotales: { decrement: costoTotalPuntos } },
+      });
+
+      for (const item of carritoItems) {
+        await tx.producto.update({
+          where: { id: item.productoId },
+          data: { stock: { decrement: item.cantidad } },
+        });
+      }
+
+      // 4. Crear el pedido con sus detalles
+      const nuevoPedido = await tx.pedido.create({
+        data: {
+          usuarioId,
+          totalPuntos: costoTotalPuntos,
+          estado: 'Pendiente',
+          detalles: {
+            create: carritoItems.map(item => ({
+              productoId: item.productoId,
+              cantidad: item.cantidad,
+              puntosUnitarios: item.producto.precioPuntos,
+            })),
+          },
+        },
+      });
+      
+      // 5. Crear un único registro en el historial para todo el canje
+      await tx.historialPuntos.create({
+          data: {
+              puntos: -costoTotalPuntos,
+              tipo: 'CANJE',
+              descripcion: `Canje del pedido #${nuevoPedido.id}`,
+              beneficiarioId: usuarioId,
+              origenId: nuevoPedido.id,
+          }
+      });
+      
+      // 6. Vaciar el carrito del usuario
+      await tx.carrito.deleteMany({ where: { usuarioId } });
+
+      return nuevoPedido;
+    });
+
+    res.status(201).json({ message: '¡Canje realizado con éxito! Tu pedido está pendiente de aprobación.', pedido: resultado });
+
+  } catch (error) {
+    console.error("Error al crear el pedido desde el carrito:", error.message);
+    res.status(400).json({ message: error.message || "Error interno del servidor." });
+  }
+};
 
 module.exports = {
   getAllPedidos,
   updateEstadoPedido, 
   createPedido,
+  crearPedidoDesdeCarrito,
   getMisPedidos
 };

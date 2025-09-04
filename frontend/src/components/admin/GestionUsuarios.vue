@@ -18,6 +18,7 @@
               <th>Nombre Completo</th>
               <th>Cédula</th>
               <th>Email</th>
+              <th>Puntos</th> 
               <th>Rol</th>
               <th>Estado</th>
               <th>Acciones</th>
@@ -31,6 +32,7 @@
               <td>{{ usuario.nombreCompleto }}</td>
               <td>{{ usuario.cedula }}</td>
               <td>{{ usuario.email }}</td>
+              <td>{{ usuario.puntosTotales }}</td>
               <td>{{ usuario.rol }}</td>
               <td>
                 <span :class="['badge', usuario.activo ? 'success' : 'danger']">
@@ -39,6 +41,7 @@
               </td>
               <td class="actions-cell">
                 <button @click="openModal(usuario)" class="btn btn-edit">Editar</button>
+                <button @click="openPuntosModal(usuario)" class="btn btn-info">Puntos</button>
                 <button @click="toggleStatus(usuario)"
                   :class="['btn', usuario.activo ? 'btn-danger' : 'btn-success']">{{ usuario.activo ? 'Desactivar' :
                   'Activar' }}</button>
@@ -55,40 +58,36 @@
 
     <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
       <div class="modal-content">
-        <h2 class="modal-title">{{ isEditMode ? 'Editar Usuario' : 'Crear Usuario' }}</h2>
-        <form @submit.prevent="saveUsuario">
-          <div class="form-grid">
-            <div class="form-group"><label>Nombre Completo</label><input v-model="form.nombreCompleto" type="text"
-                required /></div>
-            <div class="form-group"><label>Cédula</label><input v-model="form.cedula" type="text" :disabled="isEditMode"
-                required /></div>
-            <div class="form-group"><label>Email</label><input v-model="form.email" type="email" required /></div>
-            <div class="form-group"><label>Sede</label><input v-model="form.sede" type="text" required /></div>
-            <div class="form-group" v-if="!isEditMode"><label>Contraseña</label><input v-model="form.contrasena"
-                type="password" required /></div>
-            <div class="form-group"><label>Rol</label><select v-model="form.rol" required>
-                <option value="Empleado">Empleado</option>
-                <option value="Administrador">Administrador</option>
-              </select></div>
-            <div class="form-group"><label>Cargo ID</label><input v-model.number="form.cargoId" type="number"
-                placeholder="ID del Cargo existente" required /></div>
-            <div class="form-group"><label>Centro de Costos ID</label><input v-model.number="form.centroDeCostosId"
-                type="number" placeholder="ID del C. de Costos existente" required /></div>
+        </div>
+    </div>
+    
+    <div v-if="showPuntosModal" class="modal-overlay" @click.self="closePuntosModal">
+      <div class="modal-content">
+        <h2 class="modal-title">Ajustar Puntos a {{ formPuntos.nombreCompleto }}</h2>
+        <form @submit.prevent="savePuntos">
+          <div class="form-group">
+            <label>Puntos a Añadir/Quitar</label>
+            <input v-model.number="formPuntos.puntos" type="number" required placeholder="Ej: 100 para añadir, -50 para quitar" />
+          </div>
+          <div class="form-group">
+            <label>Motivo del Ajuste</label>
+            <textarea v-model="formPuntos.descripcion" required placeholder="Ej: Bono por desempeño Q3"></textarea>
           </div>
           <div class="modal-actions">
-            <button type="button" @click="closeModal" class="btn btn-secondary">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Guardar</button>
+            <button type="button" @click="closePuntosModal" class="btn btn-secondary">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Guardar Ajuste</button>
           </div>
         </form>
       </div>
     </div>
+
   </div>
 </template>
 
 <script setup>
-// El script no necesita cambios
 import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
+import Swal from 'sweetalert2'; // Importamos SweetAlert2
 
 const usuarios = ref([]);
 const loading = ref(true);
@@ -97,6 +96,40 @@ const isEditMode = ref(false);
 const form = ref({});
 const searchQuery = ref('');
 const API_URL = `${import.meta.env.VITE_API_BASE_URL}/api/usuarios`;
+
+// --- LÓGICA NUEVA PARA EL MODAL DE PUNTOS ---
+const showPuntosModal = ref(false);
+const formPuntos = ref({});
+
+const openPuntosModal = (usuario) => {
+  formPuntos.value = { 
+    id: usuario.id, 
+    nombreCompleto: usuario.nombreCompleto, 
+    puntos: '', 
+    descripcion: '' 
+  };
+  showPuntosModal.value = true;
+};
+
+const closePuntosModal = () => {
+  showPuntosModal.value = false;
+};
+
+const savePuntos = async () => {
+  try {
+    await axios.post(`${API_URL}/${formPuntos.value.id}/puntos`, {
+      puntos: formPuntos.value.puntos,
+      descripcion: formPuntos.value.descripcion
+    }, getAuthHeaders());
+    
+    Swal.fire('Éxito', 'Puntos ajustados correctamente.', 'success');
+    closePuntosModal();
+    fetchUsuarios();
+  } catch (error) {
+    Swal.fire('Error', error.response?.data?.message || 'No se pudo ajustar los puntos.', 'error');
+  }
+};
+// --- FIN DE LÓGICA NUEVA ---
 
 const filteredUsuarios = computed(() => {
   if (!searchQuery.value) return usuarios.value;
@@ -114,40 +147,72 @@ const fetchUsuarios = async () => {
   try {
     const response = await axios.get(API_URL, getAuthHeaders());
     usuarios.value = response.data;
-  } catch (error) { console.error("Error al cargar usuarios:", error); }
+  } catch (error) { 
+    console.error("Error al cargar usuarios:", error); 
+    Swal.fire('Error', 'No se pudieron cargar los usuarios.', 'error');
+  }
   finally { loading.value = false; }
 };
+
 const saveUsuario = async () => {
   try {
     if (isEditMode.value) {
       await axios.put(`${API_URL}/${form.value.id}`, form.value, getAuthHeaders());
-      alert('Usuario actualizado con éxito.');
+      Swal.fire('Éxito', 'Usuario actualizado con éxito.', 'success');
     } else {
       await axios.post(API_URL, form.value, getAuthHeaders());
-      alert('Usuario creado con éxito.');
+      Swal.fire('Éxito', 'Usuario creado con éxito.', 'success');
     }
     closeModal();
     fetchUsuarios();
   } catch (error) {
-    alert(`Error: ${error.response?.data?.message || 'No se pudo guardar el usuario.'}`);
+    Swal.fire('Error', error.response?.data?.message || 'No se pudo guardar el usuario.', 'error');
   }
 };
+
 const toggleStatus = async (usuario) => {
-  if (!confirm(`¿Estás seguro de que quieres ${usuario.activo ? 'desactivar' : 'activar'} a ${usuario.nombreCompleto}?`)) return;
-  try {
-    await axios.patch(`${API_URL}/${usuario.id}/toggle-status`, {}, getAuthHeaders());
-    alert('Estado del usuario actualizado.');
-    fetchUsuarios();
-  } catch (error) { alert('No se pudo actualizar el estado.'); }
+  const result = await Swal.fire({
+      title: '¿Confirmar cambio?',
+      text: `¿Estás seguro de que quieres ${usuario.activo ? 'desactivar' : 'activar'} a ${usuario.nombreCompleto}?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, cambiar',
+      cancelButtonText: 'Cancelar'
+  });
+
+  if (result.isConfirmed) {
+      try {
+        await axios.patch(`${API_URL}/${usuario.id}/toggle-status`, {}, getAuthHeaders());
+        Swal.fire('Éxito', 'Estado del usuario actualizado.', 'success');
+        fetchUsuarios();
+      } catch (error) { 
+        Swal.fire('Error', 'No se pudo actualizar el estado.', 'error');
+      }
+  }
 };
+
 const deleteUsuario = async (usuario) => {
-  if (!confirm(`¿Estás seguro de que quieres ELIMINAR PERMANENTEMENTE a ${usuario.nombreCompleto}?`)) return;
-  try {
-    await axios.delete(`${API_URL}/${usuario.id}`, getAuthHeaders());
-    alert('Usuario eliminado con éxito.');
-    fetchUsuarios();
-  } catch (error) { alert('No se pudo eliminar el usuario.'); }
+  const result = await Swal.fire({
+      title: '¿ELIMINAR PERMANENTEMENTE?',
+      text: `Esta acción no se puede deshacer. Se eliminará a ${usuario.nombreCompleto}.`,
+      icon: 'error',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+  });
+
+  if (result.isConfirmed) {
+      try {
+        await axios.delete(`${API_URL}/${usuario.id}`, getAuthHeaders());
+        Swal.fire('Eliminado', 'Usuario eliminado con éxito.', 'success');
+        fetchUsuarios();
+      } catch (error) { 
+        Swal.fire('Error', 'No se pudo eliminar el usuario.', 'error');
+      }
+  }
 };
+
 const openModal = (usuario = null) => {
   if (usuario) {
     isEditMode.value = true;
@@ -158,6 +223,7 @@ const openModal = (usuario = null) => {
   }
   showModal.value = true;
 };
+
 const closeModal = () => { showModal.value = false; };
 onMounted(fetchUsuarios);
 </script>
@@ -361,5 +427,19 @@ td {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
+}
+.btn-info {
+  background-color: #3b82f6; /* Un azul para diferenciar */
+  color: white;
+}
+.form-group textarea {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background-color: var(--surface-2);
+  color: var(--text);
+  min-height: 80px; /* Para dar más espacio al motivo */
+  resize: vertical;
 }
 </style>

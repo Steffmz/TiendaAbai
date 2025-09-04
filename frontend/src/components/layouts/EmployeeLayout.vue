@@ -28,6 +28,7 @@
               <path fill="currentColor"
                 d="M21 19v1H3v-1l2-2v-6c0-3.1 2.03-5.83 5-6.71V4a2 2 0 0 1 2-2a2 2 0 0 1 2 2v.29c2.97.88 5 3.61 5 6.71v6zm-7 2a2 2 0 0 1-2 2a2 2 0 0 1-2-2" />
             </svg>
+             <span v-if="unreadCount > 0" class="cart-badge">{{ unreadCount }}</span>
           </button>
 
           <button @click="logout" class="logout-button" title="Cerrar Sesión">
@@ -54,6 +55,7 @@ import { useRouter } from 'vue-router';
 import axios from 'axios';
 import NotificationsPanel from '../shared/NotificationsPanel.vue';
 import { useCarrito } from '../../composables/useCarrito';
+import { useNotifications } from '../../composables/useNotifications';
 
 const router = useRouter();
 const userData = ref({
@@ -67,6 +69,7 @@ const { totalItems, fetchCarrito } = useCarrito();
 const getAuthHeaders = () => ({
   headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
 });
+const { unreadCount, fetchUnreadCount, markAllAsRead } = useNotifications();
 
 const fetchUserData = async () => {
   try {
@@ -86,9 +89,18 @@ const logout = () => {
 
 const toggleNotifications = () => {
   showNotifications.value = !showNotifications.value;
+  // Si abrimos el panel, marcamos como leídas
+  if (showNotifications.value) {
+    markAllAsRead();
+  }
 };
 
-onMounted(fetchUserData);
+onMounted(() => {
+  fetchUserData();
+  // --- CORRECCIÓN 2: Asegúrate de que esta línea esté presente ---
+  fetchUnreadCount();
+});
+
 </script>
 
 <style scoped>
