@@ -10,17 +10,19 @@ const CampanaRouter = require('./routes/CampanaRouter');
 const adminMiddleware = require('./middleware/adminMiddleware');
 const UsuarioRouter = require('./routes/UsuarioRouter');
 const PedidoRouter = require('./routes/PedidoRouter');
+const CarritoRouter = require('./routes/CarritoRouter');
 
 const path = require('path');
 
 const prisma = new PrismaClient();
 const app = express();
 const PORT = process.env.PORT || 3000;
-
+// ...
+const NotificacionRouter = require('./routes/NotificacionRouter');
 // --- MIDDLEWARES ---
 app.use(cors());
-app.use(express.json()); // Para JSON
-app.use(express.urlencoded({ extended: true })); // Por si mandas formularios
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Servir archivos estáticos (para las imágenes)
 app.use('/uploads/', express.static(path.join(__dirname, 'uploads')));
@@ -31,6 +33,8 @@ app.use("/api/categorias", CategoriasRoutes);
 app.use('/api/campanas', CampanaRouter);
 app.use('/api/usuarios', UsuarioRouter);
 app.use('/api/pedidos', PedidoRouter);
+app.use('/api/notificaciones', NotificacionRouter);
+app.use('/api/carrito', CarritoRouter);
 
 
 // --- RUTAS DE LA APLICACIÓN ---

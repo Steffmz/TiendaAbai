@@ -6,7 +6,7 @@ import axios from 'axios';
 import { useRouter } from 'vue-router';
 import { jwtDecode } from 'jwt-decode';
 
-const router = useRouter(); 
+const router = useRouter();
 
 const cedula = ref("");
 const password = ref("");
@@ -28,11 +28,11 @@ const registro = ref({
 const login = async () => {
   errorMessage.value = '';
   try {
-    const response = await axios.post('http://localhost:3000/auth/login', {
+    const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, { //...
       cedula: cedula.value,
       contrasena: password.value,
     });
-    
+
     const { token } = response.data;
     localStorage.setItem('authToken', token);
 
@@ -41,7 +41,7 @@ const login = async () => {
     if (decodedToken.rol === 'Administrador') {
       router.push('/dashboard');
     } else {
-      router.push('/tienda'); 
+      router.push('/tienda');
     }
 
   } catch (error) {
@@ -57,14 +57,14 @@ const login = async () => {
 const register = async () => {
   errorMessage.value = '';
   try {
-    await axios.post('http://localhost:3000/usuarios', registro.value);
-    
+    await axios.post(`${import.meta.env.VITE_API_BASE_URL}/usuarios`, registro.value);
+
     alert('¡Registro exitoso! Ahora puedes iniciar sesión.');
     closeModal();
     registro.value = { nombreCompleto: "", cargo: "", sede: "", centroDeCostosNombre: "", email: "", cedula: "", contrasena: "", rol: 'Empleado' };
-  
+
   } catch (error) {
-     if (error.response) {
+    if (error.response) {
       errorMessage.value = error.response.data.message;
     } else {
       errorMessage.value = 'Error de conexión con el servidor.';
@@ -73,39 +73,39 @@ const register = async () => {
 };
 
 const closeModal = () => {
-    showModal.value = false;
-    errorMessage.value = '';
+  showModal.value = false;
+  errorMessage.value = '';
 };
 
 // --- Animación del Canvas (Optimizada) ---
 
 onMounted(() => {
   const canvas = document.getElementById("magneticCanvas");
-  if (!canvas) return; 
+  if (!canvas) return;
 
   const ctx = canvas.getContext("2d");
 
   let width = (canvas.width = window.innerWidth);
   let height = (canvas.height = window.innerHeight);
-  let animationFrameId; 
+  let animationFrameId;
 
   const particles = [];
-  const particleCount = 70; 
-  const maxDistanceSquared = 120 * 120; 
+  const particleCount = 70;
+  const maxDistanceSquared = 120 * 120;
 
   class Particle {
     constructor() {
       this.x = Math.random() * width;
       this.y = Math.random() * height;
-      this.radius = Math.random() * 2 + 1; 
-      this.vx = (Math.random() - 0.5) * 0.5; 
+      this.radius = Math.random() * 2 + 1;
+      this.vx = (Math.random() - 0.5) * 0.5;
       this.vy = (Math.random() - 0.5) * 0.5;
     }
 
     draw() {
       ctx.beginPath();
       ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(255, 255, 255, 0.7)"; 
+      ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
       ctx.fill();
     }
 
@@ -124,7 +124,7 @@ onMounted(() => {
 
   function animate() {
     ctx.clearRect(0, 0, width, height);
-    
+
     for (const p of particles) {
       p.update();
       p.draw();
@@ -182,11 +182,7 @@ onMounted(() => {
       <div class="login-right">
         <div class="login-card">
           <div class="logo-container">
-            <img
-              src="../../assets/img/abai-logo.png"
-              alt="Logo Abai"
-              class="logo-abai"
-            />
+            <img src="../../assets/img/abai-logo.png" alt="Logo Abai" class="logo-abai" />
           </div>
           <h2 class="title">BIENVENIDOS</h2>
           <p v-if="errorMessage && !showModal" class="error-text">{{ errorMessage }}</p>
@@ -221,7 +217,7 @@ onMounted(() => {
             <label for="nombre">Nombre Completo</label>
             <input type="text" id="nombre" v-model="registro.nombreCompleto" placeholder="Ingresa tu nombre" required />
           </div>
-          
+
           <div class="input-group">
             <label for="cargo-reg">Cargo</label>
             <input type="text" id="cargo-reg" v-model="registro.cargo" placeholder="Ingresa tu cargo" required />
@@ -233,7 +229,8 @@ onMounted(() => {
 
           <div class="input-group">
             <label for="centro-costos-reg">Centro de Costos</label>
-            <input type="text" id="centro-costos-reg" v-model="registro.centroDeCostosNombre" placeholder="Ej: Marketing, Operaciones" required />
+            <input type="text" id="centro-costos-reg" v-model="registro.centroDeCostosNombre"
+              placeholder="Ej: Marketing, Operaciones" required />
           </div>
 
           <div class="input-group">
@@ -246,7 +243,8 @@ onMounted(() => {
           </div>
           <div class="input-group">
             <label for="password-reg">Contraseña</label>
-            <input type="password" id="password-reg" v-model="registro.contrasena" placeholder="Crea una contraseña" required />
+            <input type="password" id="password-reg" v-model="registro.contrasena" placeholder="Crea una contraseña"
+              required />
           </div>
           <button type="submit" class="btn-login">Registrarse</button>
         </form>

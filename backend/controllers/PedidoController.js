@@ -42,6 +42,11 @@ const updateEstadoPedido = async (req, res) => {
   }
 
   try {
+    const pedido = await prisma.pedido.findUnique({ where: { id: parseInt(id) } });
+    if (!pedido) {
+      return res.status(404).json({ message: 'Pedido no encontrado' });
+    }
+
     const dataToUpdate = { estado };
     if (['Aprobado', 'Rechazado', 'Cancelado'].includes(estado)) {
       dataToUpdate.aprobadoPorAdminId = adminId;
@@ -52,6 +57,26 @@ const updateEstadoPedido = async (req, res) => {
       where: { id: parseInt(id) },
       data: dataToUpdate,
     });
+
+    // --- LÓGICA DE NOTIFICACIÓN ---
+    if (['Aprobado', 'Enviado', 'Rechazado'].includes(estado)) {
+      let titulo = `Tu pedido #${pedido.id} ha sido ${estado.toLowerCase()}.`;
+      let mensaje = `Tu canje ha sido actualizado al estado: ${estado}.`;
+      if (estado === 'Aprobado') mensaje = 'Hemos recibido tu canje y está siendo procesado.';
+      if (estado === 'Enviado') mensaje = '¡Buenas noticias! Tu producto ya está en camino.';
+      if (estado === 'Rechazado') mensaje = 'Lamentablemente, tu canje ha sido rechazado. Contacta a soporte para más detalles.';
+      
+      await prisma.notificacion.create({
+        data: {
+          titulo,
+          mensaje,
+          usuarioId: pedido.usuarioId, // Notificación para el empleado
+          pedidoId: pedido.id
+        }
+      });
+    }
+    // --- FIN DE LÓGICA DE NOTIFICACIÓN ---
+
     res.json({ message: 'Estado del pedido actualizado.', pedido: pedidoActualizado });
   } catch (error) {
     console.error(`Error al actualizar estado del pedido ${id}:`, error);

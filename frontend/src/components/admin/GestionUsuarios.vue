@@ -96,7 +96,7 @@ const showModal = ref(false);
 const isEditMode = ref(false);
 const form = ref({});
 const searchQuery = ref('');
-const API_URL = 'http://localhost:3000/api/usuarios';
+const API_URL = `${import.meta.env.VITE_API_BASE_URL}/api/usuarios`;
 
 const filteredUsuarios = computed(() => {
   if (!searchQuery.value) return usuarios.value;

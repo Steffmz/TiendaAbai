@@ -31,13 +31,14 @@
 <script setup>
 import { Icon } from "@iconify/vue";
 import { useTheme } from '../../theme.js';
-import { useRouter } from 'vue-router';  // Import useRouter
+import { useRouter } from 'vue-router';
 
 import logoNormal from "../../assets/img/abai-logo.png";
 import logoBlanco from "../../assets/img/Logo-blanco.png";
-const emit = defineEmits(['toggle', 'open-profile']);
 
-const router = useRouter();  // Create a router instance
+const emit = defineEmits(['toggle', 'open-profile', 'toggle-notifications']); // <-- Añade el nuevo evento
+
+const router = useRouter();
 const { isDark, toggle } = useTheme();
 
 function toggleDarkMode() {
@@ -46,15 +47,17 @@ function toggleDarkMode() {
 
 function showHelp() { console.log("Mostrar ayuda"); }
 function showProfile() { 
-  emit('open-profile'); // <-- Emite el evento
+  emit('open-profile');
 }
-function showNotifications() { console.log("Mostrar notificaciones"); }
+// Función para avisar al Dashboard que abra/cierre el panel
+function showNotifications() { 
+  emit('toggle-notifications'); 
+}
 
-// Updated logout function
 function logout() { 
   if (confirm("¿Estás seguro de que quieres cerrar sesión?")) { 
-    localStorage.removeItem('authToken');  // Remove the token
-    router.push('/login');  // Redirect to the login page
+    localStorage.removeItem('authToken');
+    router.push('/login');
   } 
 }
 </script>
