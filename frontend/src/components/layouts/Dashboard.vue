@@ -2,14 +2,20 @@
   <div class="dashboard-layout">
     <Sidebar :isCollapsed="isCollapsed" @toggle="toggleSidebar" />
     <div class="main-content" :class="{ collapsed: isCollapsed }">
-      <!-- Pasamos el evento 'open-profile' desde Topbar -->
-      <Topbar @open-profile="showProfileModal = true" />
+      <Topbar 
+        @open-profile="showProfileModal = true" 
+        @toggle-notifications="showNotifications = !showNotifications"
+      />
       <div class="page-content">
         <router-view />
       </div>
     </div>
-    <!-- Añadimos el modal aquí -->
-    <ProfileModal :show="showProfileModal" @close="showProfileModal = false" @profileUpdated="fetchAdminData" />
+    <ProfileModal 
+      :show="showProfileModal" 
+      @close="showProfileModal = false" 
+      @profileUpdated="fetchAdminData" 
+    />
+    <NotificationsPanel :show="showNotifications" @close="showNotifications = false" />
   </div>
 </template>
 
@@ -20,11 +26,13 @@ import axios from 'axios';
 import Sidebar from '../menu/Sidebar.vue';
 import Topbar from '../menu/Topbar.vue';
 import ProfileModal from '../admin/ProfileModal.vue';
+import NotificationsPanel from '../shared/NotificationsPanel.vue'; // <-- Importa el panel
 
 const isCollapsed = ref(false);
 const showProfileModal = ref(false);
-const adminData = ref({}); // Para guardar los datos del admin
-const router = useRouter(); // Para la función de logout
+const showNotifications = ref(false); // <-- Añade el estado
+const adminData = ref({});
+const router = useRouter();
 
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value;
@@ -34,14 +42,13 @@ const getAuthHeaders = () => ({
   headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
 });
 
-// Función para obtener los datos del perfil del admin
 const fetchAdminData = async () => {
   try {
     const { data } = await axios.get('http://localhost:3000/api/perfil', getAuthHeaders());
     adminData.value = data;
   } catch (error) {
     console.error("Error al cargar datos del admin:", error);
-    logout(); // Si hay un error (ej. token inválido), cerramos sesión
+    logout();
   }
 };
 
@@ -50,7 +57,6 @@ const logout = () => {
   router.push('/login');
 };
 
-// Al cargar el dashboard, obtenemos los datos del admin
 onMounted(fetchAdminData);
 </script>
 

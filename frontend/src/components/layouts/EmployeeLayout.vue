@@ -10,18 +10,23 @@
           <router-link to="/tienda/mi-perfil">Mi Perfil</router-link>
         </nav>
         <div class="user-info">
+          <!-- Usamos un v-if para no mostrar el "Hola," hasta que tengamos el nombre -->
           <span v-if="userData.nombreCompleto">Hola, {{ userData.nombreCompleto.split(' ')[0] }}</span>
           <span class="points-badge">{{ userData.puntosTotales }} Puntos</span>
+          
+          <button @click="toggleNotifications" class="notification-button" title="Notificaciones">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M21 19v1H3v-1l2-2v-6c0-3.1 2.03-5.83 5-6.71V4a2 2 0 0 1 2-2a2 2 0 0 1 2 2v.29c2.97.88 5 3.61 5 6.71v6zm-7 2a2 2 0 0 1-2 2a2 2 0 0 1-2-2"/></svg>
+          </button>
+
           <button @click="logout" class="logout-button" title="Cerrar Sesión">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-              <path fill="currentColor"
-                d="M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h7v2H5v14h7v2zm11-4l-1.375-1.45l2.55-2.55H9v-2h8.175l-2.55-2.55L16 7l5 5z" />
-            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h7v2H5v14h7v2zm11-4l-1.375-1.45l2.55-2.55H9v-2h8.175l-2.55-2.55L16 7l5 5z" /></svg>
           </button>
         </div>
       </div>
     </header>
-
+    
+    <NotificationsPanel :show="showNotifications" @close="showNotifications = false" />
+    
     <main class="main-content">
       <router-view @redemption-successful="fetchUserData" />
     </main>
@@ -32,12 +37,14 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import NotificationsPanel from '../shared/NotificationsPanel.vue';
 
 const router = useRouter();
 const userData = ref({
-  nombreCompleto: 'Usuario',
+  nombreCompleto: '', // Empezamos con el nombre vacío
   puntosTotales: 0
 });
+const showNotifications = ref(false);
 
 const getAuthHeaders = () => ({
   headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
@@ -48,8 +55,8 @@ const fetchUserData = async () => {
     const { data } = await axios.get('http://localhost:3000/api/perfil', getAuthHeaders());
     userData.value = data;
   } catch (error) {
-    console.error("Error al cargar datos del usuario:", error);
-    logout();
+    console.error("Error al cargar datos del usuario en el layout:", error);
+    logout(); // Si falla, cerramos sesión para evitar inconsistencias
   }
 };
 
@@ -58,15 +65,19 @@ const logout = () => {
   router.push('/login');
 };
 
+const toggleNotifications = () => {
+  showNotifications.value = !showNotifications.value;
+};
+
 onMounted(fetchUserData);
 </script>
 
 <style scoped>
+/* Tus estilos existentes se mantienen igual */
 .employee-layout {
   background-color: #f4f7fa;
   min-height: 100vh;
 }
-
 .navbar {
   background: linear-gradient(135deg, #74B9E7 0%, #2B7FFF 100%);
   color: white;
@@ -76,7 +87,6 @@ onMounted(fetchUserData);
   top: 0;
   z-index: 50;
 }
-
 .navbar-content {
   display: flex;
   align-items: center;
@@ -85,11 +95,9 @@ onMounted(fetchUserData);
   max-width: 1280px;
   margin: auto;
 }
-
 .logo img {
   height: 40px;
 }
-
 .nav-links a {
   color: white;
   text-decoration: none;
@@ -99,17 +107,14 @@ onMounted(fetchUserData);
   border-bottom: 2px solid transparent;
   transition: border-color 0.3s;
 }
-
 .nav-links a.router-link-exact-active {
   border-bottom-color: white;
 }
-
 .user-info {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
-
 .points-badge {
   background-color: rgba(255, 255, 255, 0.2);
   padding: 0.4rem 0.8rem;
@@ -117,8 +122,7 @@ onMounted(fetchUserData);
   font-weight: 600;
   font-size: 0.9rem;
 }
-
-.logout-button {
+.logout-button, .notification-button {
   background: none;
   border: none;
   color: white;
@@ -126,11 +130,9 @@ onMounted(fetchUserData);
   opacity: 0.8;
   transition: opacity 0.3s;
 }
-
-.logout-button:hover {
+.logout-button:hover, .notification-button:hover {
   opacity: 1;
 }
-
 .main-content {
   padding: 2rem;
   max-width: 1280px;

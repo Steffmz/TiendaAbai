@@ -16,7 +16,8 @@ const path = require('path');
 const prisma = new PrismaClient();
 const app = express();
 const PORT = process.env.PORT || 3000;
-
+// ...
+const NotificacionRouter = require('./routes/NotificacionRouter');
 // --- MIDDLEWARES ---
 app.use(cors());
 app.use(express.json()); // Para JSON
@@ -31,6 +32,7 @@ app.use("/api/categorias", CategoriasRoutes);
 app.use('/api/campanas', CampanaRouter);
 app.use('/api/usuarios', UsuarioRouter);
 app.use('/api/pedidos', PedidoRouter);
+app.use('/api/notificaciones', NotificacionRouter);
 
 
 // --- RUTAS DE LA APLICACIÓN ---
