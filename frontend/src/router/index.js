@@ -15,6 +15,7 @@ import Campana from "../components/campanas/Campana.vue";
 import Calendario from "../components/Calendario.vue";
 import GestionPedidos from "../components/admin/GestionPedidos.vue";
 import MiPerfil from '../components/employee/MiPerfil.vue';
+import Carrito from '../components/employee/Carrito.vue';
 
 const routes = [
   // --- RUTAS PÚBLICAS ---
@@ -37,6 +38,11 @@ const routes = [
         path: "campana/:id",
         name: "CampaignProducts",
         component: CampaignProducts,
+      },
+            { 
+        path: 'carrito', 
+        name: 'Carrito', 
+        component: Carrito 
       },
       { path: 'mi-perfil', name: 'MiPerfil', component: MiPerfil }
     ],

@@ -4,18 +4,10 @@
       <h2 class="text-2xl font-bold text-center mb-8">Categorías</h2>
       <div class="flex items-center justify-center gap-4 mb-6">
         <label for="categoria" class="text-lg font-semibold text-gray-700">Seleccionar categoría:</label>
-        <select
-          id="categoria"
-          v-model="categoriaSeleccionadaId"
-          @change="filtrarProductos"
-          class="border rounded-lg px-4 py-2 focus:ring focus:ring-blue-300 min-w-[250px]"
-        >
+        <select id="categoria" v-model="categoriaSeleccionadaId" @change="filtrarProductos"
+          class="border rounded-lg px-4 py-2 focus:ring focus:ring-blue-300 min-w-[250px]">
           <option :value="null">-- Selecciona una categoría --</option>
-          <option
-            v-for="categoria in categorias"
-            :key="categoria.id"
-            :value="categoria.id"
-          >
+          <option v-for="categoria in categorias" :key="categoria.id" :value="categoria.id">
             {{ categoria.nombre }}
           </option>
         </select>
@@ -24,27 +16,30 @@
       <div v-if="loadingProductos" class="text-center text-gray-500 mt-10">Cargando productos...</div>
       <div v-else-if="productosFiltrados.length > 0">
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          <div
-            v-for="producto in productosPaginados"
-            :key="producto.id"
-            class="bg-white rounded-xl shadow p-4 hover:shadow-lg transition"
-          >
-            <img
-              :src="`http://localhost:3000${producto.imagenUrl}`"
-              :alt="producto.nombre"
+          <div v-for="producto in productosPaginados" :key="producto.id"
+            class="bg-white rounded-xl shadow p-4 hover:shadow-lg transition">
+            <img :src="`http://localhost:3000${producto.imagenUrl}`" :alt="producto.nombre"
               @error="$event.target.src = 'https://placehold.co/400x300/e2e8f0/a0aec0?text=Producto'"
-              class="w-full h-40 object-cover rounded-lg mb-3"
-            />
+              class="w-full h-40 object-cover rounded-lg mb-3" />
             <h3 class="text-lg font-semibold">{{ producto.nombre }}</h3>
             <p class="text-gray-600 truncate">{{ producto.descripcion }}</p>
             <p class="text-indigo-600 font-bold mt-2">{{ producto.precioPuntos }} Puntos</p>
           </div>
         </div>
+        <div v-for="producto in productosPaginados" :key="producto.id"
+          class="bg-white rounded-xl shadow p-4 hover:shadow-lg transition">
+          <button @click="agregarAlCarrito(producto.id)"
+            class="px-5 py-2 bg-[#74B9E7] text-black font-medium rounded-lg hover:bg-[#FFB93B] transition mt-4 w-full">
+            Agregar al Carrito
+          </button>
+        </div>
 
         <div class="flex justify-center items-center gap-2 mt-6">
-          <button @click="paginaActual--" :disabled="paginaActual === 1" class="px-3 py-1 rounded bg-gray-200 disabled:opacity-50">Anterior</button>
+          <button @click="paginaActual--" :disabled="paginaActual === 1"
+            class="px-3 py-1 rounded bg-gray-200 disabled:opacity-50">Anterior</button>
           <span class="px-3 py-1 font-semibold">Página {{ paginaActual }} de {{ totalPaginas }}</span>
-          <button @click="paginaActual++" :disabled="paginaActual === totalPaginas" class="px-3 py-1 rounded bg-gray-200 disabled:opacity-50">Siguiente</button>
+          <button @click="paginaActual++" :disabled="paginaActual === totalPaginas"
+            class="px-3 py-1 rounded bg-gray-200 disabled:opacity-50">Siguiente</button>
         </div>
       </div>
       <p v-else class="text-center text-gray-500 mt-10">
@@ -55,13 +50,15 @@
     <div>
       <h2 class="text-2xl font-bold text-center mb-8">Campañas Activas</h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        <div v-for="campana in campanasFiltradas" :key="campana.id" class="bg-white shadow-md rounded-2xl p-6 flex flex-col justify-between hover:shadow-lg transition">
+        <div v-for="campana in campanasFiltradas" :key="campana.id"
+          class="bg-white shadow-md rounded-2xl p-6 flex flex-col justify-between hover:shadow-lg transition">
           <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-semibold text-gray-800">{{ campana.titulo }}</h3>
             <span class="px-3 py-1 text-xs rounded-full font-medium bg-yellow-400 text-black">Activa</span>
           </div>
           <p class="text-sm text-gray-600 mb-6 line-clamp-3">{{ campana.descripcion }}</p>
-          <button class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition self-end" @click="verCampana(campana)">
+          <button class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition self-end"
+            @click="verCampana(campana)">
             Ver campaña
           </button>
         </div>
@@ -117,7 +114,7 @@ const productosFiltrados = computed(() => {
   }
   const categoriaNombre = categorias.value.find(c => c.id === categoriaSeleccionadaId.value)?.nombre;
   if (!categoriaNombre) return [];
-  
+
   return productos.value.filter(
     (p) => p.categoria.nombre === categoriaNombre
   );
