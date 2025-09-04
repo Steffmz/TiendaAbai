@@ -12,12 +12,16 @@
           <input v-model="form.email" type="email" required />
         </div>
         <div class="form-group">
+          <label>Contraseña Actual</label>
+          <input v-model="form.contrasenaActual" type="password" placeholder="Requerida si cambias la contraseña" />
+        </div>
+        <div class="form-group">
           <label>Nueva Contraseña</label>
           <input v-model="form.contrasena" type="password" placeholder="Dejar en blanco para no cambiar" />
         </div>
         <div class="modal-actions">
-          <button type="button" @click="$emit('close')" class="btn btn-secondary">Cancelar</button>
-          <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+          <button type="button" @click="$emit('close')" class="btn-secondary">Cancelar</button>
+          <button type="submit" class="btn-primary">Guardar Cambios</button>
         </div>
       </form>
     </div>
@@ -29,32 +33,30 @@ import { ref, watch } from 'vue';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
-const props = defineProps({
-  show: Boolean
-});
-const emit = defineEmits(['close']); // Define emit
+const props = defineProps({ show: Boolean });
+const emit = defineEmits(['close', 'profileUpdated']); // Añadimos 'profileUpdated'
 
 const form = ref({
   nombreCompleto: '',
   email: '',
-  contrasena: ''
+  contrasena: '',
+  contrasenaActual: ''
 });
 
-const API_URL = 'http://localhost:3000/api/usuarios/me';
-
-const getAuthHeaders = () => ({
-  headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
-});
+const API_URL_PERFIL = 'http://localhost:3000/api/perfil'; // Para obtener los datos iniciales
+const API_URL_UPDATE = 'http://localhost:3000/api/usuarios/me'; // Para actualizar
+const getAuthHeaders = () => ({ headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` } });
 
 const fetchProfile = async () => {
-  if (!props.show) return;
   try {
-    const { data } = await axios.get(API_URL, getAuthHeaders());
+    const { data } = await axios.get(API_URL_PERFIL, getAuthHeaders());
     form.value.nombreCompleto = data.nombreCompleto;
     form.value.email = data.email;
-    form.value.contrasena = '';
+    form.value.contrasena = ''; // Siempre limpiar la contraseña al abrir
+    form.value.contrasenaActual = ''; // Siempre limpiar al abrir
   } catch (error) {
-    Swal.fire('Error', 'No se pudieron cargar los datos del perfil.', 'error');
+    console.error("Error al cargar datos del perfil del admin:", error);
+    Swal.fire('Error', 'No se pudieron cargar los datos de tu perfil.', 'error');
   }
 };
 
@@ -64,13 +66,15 @@ const updateProfile = async () => {
       nombreCompleto: form.value.nombreCompleto,
       email: form.value.email
     };
-    if (form.value.contrasena) {
+    if (form.value.contrasena) { // Solo si se intentó cambiar la contraseña
       payload.contrasena = form.value.contrasena;
+      payload.contrasenaActual = form.value.contrasenaActual;
     }
-    
-    await axios.put(API_URL, payload, getAuthHeaders());
+
+    await axios.put(API_URL_UPDATE, payload, getAuthHeaders());
     Swal.fire('Éxito', 'Perfil actualizado correctamente.', 'success');
     emit('close');
+    emit('profileUpdated'); // Emitir evento para que el layout sepa que debe recargar
   } catch (error) {
     Swal.fire('Error', error.response?.data?.message || 'No se pudo actualizar el perfil.', 'error');
   }
@@ -78,20 +82,105 @@ const updateProfile = async () => {
 
 watch(() => props.show, (newValue) => {
   if (newValue) {
-    fetchProfile();
+    fetchProfile(); // Cargar los datos solo cuando el modal se abre
   }
 });
 </script>
 
 <style scoped>
-/* Copia los estilos del modal de GestionUsuarios.vue para mantener la consistencia */
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-.modal-content { background: #2d3748; padding: 2rem; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-.modal-title { font-size: 1.5rem; font-weight: 600; margin-bottom: 1.5rem; text-align: center; }
-.form-group { display: flex; flex-direction: column; margin-bottom: 1rem; }
-.form-group label { margin-bottom: 0.5rem; font-weight: 500; }
-.form-group input { width: 100%; padding: 0.6rem; border: 1px solid #4a5568; border-radius: 4px; background-color: #1a202c; color: white; }
-.modal-actions { margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 1rem; }
-.btn-primary { background-color: #3b82f6; }
-.btn-secondary { background-color: #6b7280; }
+/* Estilos del modal (asegúrate de que coincidan con tus estilos globales o usa variables CSS) */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  /* Color de fondo blanco */
+  padding: 2rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  color: #333;
+  /* Color de texto oscuro para contraste */
+}
+
+.modal-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #1a202c;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #4a5568;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  box-sizing: border-box;
+  /* Para que el padding no añada ancho extra */
+  background-color: #f7fafc;
+  color: #1a202c;
+}
+
+.modal-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.btn-primary {
+  background-color: #4299e1;
+  /* Un azul primario */
+  color: white;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.btn-primary:hover {
+  background-color: #3182ce;
+}
+
+.btn-secondary {
+  background-color: #e2e8f0;
+  /* Un gris secundario */
+  color: #4a5568;
+  padding: 0.75rem 1.25rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.btn-secondary:hover {
+  background-color: #cbd5e0;
+  border-color: #a0aec0;
+}
 </style>

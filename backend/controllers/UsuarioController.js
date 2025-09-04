@@ -1,12 +1,9 @@
-// backend/controllers/UsuarioController.js
-
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const bcrypt = require('bcryptjs');
 
 // Obtener todos los usuarios (para el admin)
 exports.getAllUsuarios = async (req, res) => {
-  // El middleware de autenticación nos da el usuario logueado en req.usuario
   const adminId = req.usuario.userId;
 
   try {
@@ -166,23 +163,40 @@ exports.getMiPerfil = async (req, res) => {
   }
 };
 
-// Actualizar el perfil del usuario logueado
-// backend/controllers/UsuarioController.js
-
-// ... (tus otras funciones)
-
-// Actualizar el perfil del usuario logueado
 exports.updateMiPerfil = async (req, res) => {
   const userId = req.usuario.userId;
-  const { nombreCompleto, email, contrasena } = req.body;
+  // Añadimos 'contrasenaActual' a los datos que recibimos
+  const { nombreCompleto, email, contrasena, contrasenaActual } = req.body;
 
   try {
     const dataToUpdate = {};
+    const usuario = await prisma.usuario.findUnique({ where: { id: userId } });
 
-    if (nombreCompleto) dataToUpdate.nombreCompleto = nombreCompleto;
-    if (email) dataToUpdate.email = email;
+    if (!usuario) {
+      return res.status(404).json({ message: "Usuario no encontrado." });
+    }
+
+    // --- LÓGICA DE ACTUALIZACIÓN DE CONTRASEÑA ---
     if (contrasena && contrasena.trim() !== '') {
+      // 1. Verificamos que nos hayan enviado la contraseña actual
+      if (!contrasenaActual || contrasenaActual.trim() === '') {
+        return res.status(400).json({ message: 'Para cambiar tu contraseña, debes proporcionar tu contraseña actual.' });
+      }
+      // 2. Comparamos la contraseña actual con la de la base de datos
+      const esValida = await bcrypt.compare(contrasenaActual, usuario.contrasena);
+      if (!esValida) {
+        return res.status(401).json({ message: 'La contraseña actual es incorrecta.' });
+      }
+      // 3. Si todo es correcto, encriptamos la nueva contraseña
       dataToUpdate.contrasena = await bcrypt.hash(contrasena, 10);
+    }
+
+    // Actualizamos nombre y email si se proporcionaron
+    if (nombreCompleto && nombreCompleto !== usuario.nombreCompleto) {
+      dataToUpdate.nombreCompleto = nombreCompleto;
+    }
+    if (email && email !== usuario.email) {
+      dataToUpdate.email = email;
     }
 
     if (Object.keys(dataToUpdate).length === 0) {
@@ -194,8 +208,6 @@ exports.updateMiPerfil = async (req, res) => {
       data: dataToUpdate,
     });
 
-    // --- ESTA ES LA CORRECCIÓN ---
-    // Enviamos un estado 200 (OK) y un JSON con el mensaje de éxito.
     res.status(200).json({ message: 'Perfil actualizado correctamente.' });
 
   } catch (error) {
