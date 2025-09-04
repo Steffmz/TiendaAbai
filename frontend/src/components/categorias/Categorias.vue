@@ -42,7 +42,7 @@
             <tr v-else v-for="categoria in categoriasPaginadas" :key="categoria.id">
               <td class="flex justify-center py-2">
                 <div class="w-14 h-14 rounded-lg overflow-hidden border image-border">
-                  <img :src="categoria.imagenUrl ? `http://localhost:3000${categoria.imagenUrl}` : placeholder" class="w-full h-full object-cover" alt="Foto"/>
+                  <img :src="categoria.imagenUrl ? `${API_BASE_URL}${categoria.imagenUrl}` : placeholder" class="w-full h-full object-cover" alt="Foto"/>
                 </div>
               </td>
               <td class="text-center">{{ categoria.nombre }}</td>
@@ -119,7 +119,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import useCategorias from './useCategorias';
 import Switch from './Switch.vue';
-
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const router = useRouter();
 const mostrarDescripcion = ref(null);
 

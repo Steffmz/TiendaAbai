@@ -18,7 +18,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           <div v-for="producto in productosPaginados" :key="producto.id"
             class="bg-white rounded-xl shadow p-4 hover:shadow-lg transition">
-            <img :src="`http://localhost:3000${producto.imagenUrl}`" :alt="producto.nombre"
+            <img :src="`${API_BASE_URL}${producto.imagenUrl}`" :alt="producto.nombre"
               @error="$event.target.src = 'https://placehold.co/400x300/e2e8f0/a0aec0?text=Producto'"
               class="w-full h-40 object-cover rounded-lg mb-3" />
             <h3 class="text-lg font-semibold">{{ producto.nombre }}</h3>
@@ -72,7 +72,8 @@ import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import axios from 'axios';
 import Swal from "sweetalert2";
-
+import { useCarrito } from '../../composables/useCarrito';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const router = useRouter();
 const categorias = ref([]);
 const campanas = ref([]);
@@ -137,4 +138,5 @@ const verCampana = (campana) => {
 };
 
 const formatearFecha = (f) => new Date(f).toLocaleDateString('es-CO');
+const { agregarAlCarrito } = useCarrito();
 </script>

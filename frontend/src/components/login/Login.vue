@@ -28,7 +28,7 @@ const registro = ref({
 const login = async () => {
   errorMessage.value = '';
   try {
-    const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, { //...
+    const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/login`, { //...
       cedula: cedula.value,
       contrasena: password.value,
     });
@@ -57,7 +57,7 @@ const login = async () => {
 const register = async () => {
   errorMessage.value = '';
   try {
-    await axios.post(`${import.meta.env.VITE_API_BASE_URL}/usuarios`, registro.value);
+    await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/register`, registro.value);
 
     alert('¡Registro exitoso! Ahora puedes iniciar sesión.');
     closeModal();

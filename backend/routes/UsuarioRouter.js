@@ -7,7 +7,7 @@ const authMiddleware = require('../middleware/authMiddleware');
 const adminMiddleware = require('../middleware/adminMiddleware');
 
 // --- Rutas de Perfil (protegidas por autenticación general) ---
-router.get('/me', authMiddleware, UsuarioController.getMiPerfil);
+
 router.put('/me', authMiddleware, UsuarioController.updateMiPerfil);
 
 // --- Rutas de Administración (protegidas por el middleware de admin) ---

@@ -145,23 +145,6 @@ exports.deleteUsuario = async (req, res) => {
     res.status(500).json({ message: 'Error al eliminar el usuario.' });
   }
 };
-exports.getMiPerfil = async (req, res) => {
-  const userId = req.usuario.userId;
-  try {
-    const usuario = await prisma.usuario.findUnique({
-      where: { id: userId },
-      select: {
-        nombreCompleto: true,
-        email: true,
-        cedula: true,
-      }
-    });
-    if (!usuario) return res.status(404).json({ message: 'Usuario no encontrado.' });
-    res.json(usuario);
-  } catch (error) {
-    res.status(500).json({ message: 'Error al obtener el perfil.' });
-  }
-};
 
 exports.updateMiPerfil = async (req, res) => {
   const userId = req.usuario.userId;
