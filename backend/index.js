@@ -15,6 +15,7 @@ const PedidoRouter = require('./routes/PedidoRouter');
 const NotificacionRouter = require('./routes/NotificacionRouter');
 const CarritoRouter = require('./routes/CarritoRouter');
 const PerfilRouter = require('./routes/PerfilRouter');
+const HistorialRouter = require('./routes/HistorialRouter');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -37,6 +38,7 @@ app.use('/api/usuarios', UsuarioRouter);
 app.use('/api/pedidos', PedidoRouter);
 app.use('/api/notificaciones', NotificacionRouter);
 app.use('/api/carrito', CarritoRouter);
+app.use('/api/historial', HistorialRouter);
 
 
 // --- INICIO DEL SERVIDOR ---

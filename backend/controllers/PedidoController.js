@@ -94,6 +94,7 @@ const createPedido = async (req, res) => {
   }
 
   try {
+    // Usamos una transacción para asegurar que todas las operaciones se completen o ninguna lo haga
     const resultado = await prisma.$transaction(async (tx) => {
       const producto = await tx.producto.findUnique({ where: { id: parseInt(productoId) } });
       if (!producto) throw new Error("Producto no encontrado.");
@@ -105,16 +106,19 @@ const createPedido = async (req, res) => {
         throw new Error("No tienes suficientes puntos para realizar este canje.");
       }
 
+      // 1. Restar puntos al usuario
       await tx.usuario.update({
         where: { id: usuarioId },
         data: { puntosTotales: { decrement: costoTotalPuntos } },
       });
 
+      // 2. Restar stock al producto
       await tx.producto.update({
         where: { id: parseInt(productoId) },
         data: { stock: { decrement: cantidad } },
       });
 
+      // 3. Crear el pedido
       const nuevoPedido = await tx.pedido.create({
         data: {
           usuarioId: usuarioId,
@@ -129,6 +133,18 @@ const createPedido = async (req, res) => {
           },
         },
       });
+
+      // 4. --- AÑADIMOS EL REGISTRO EN EL HISTORIAL ---
+      await tx.historialPuntos.create({
+        data: {
+          puntos: -costoTotalPuntos, // Guardamos como un número negativo porque es un gasto
+          tipo: 'CANJE',
+          descripcion: `Canje de ${cantidad} x ${producto.nombre}`,
+          beneficiarioId: usuarioId,
+          origenId: nuevoPedido.id, // Opcional: guardamos el ID del pedido como referencia
+        }
+      });
+
       return nuevoPedido;
     });
 
@@ -166,8 +182,7 @@ const getMisPedidos = async (req, res) => {
   }
 };
 
-// --- ESTA ES LA CORRECCIÓN ---
-// Exportamos todas las funciones juntas al final.
+
 module.exports = {
   getAllPedidos,
   updateEstadoPedido, 
