@@ -2,7 +2,7 @@ import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
-const API_URL = 'http://localhost:3000/api/categorias';
+const API_URL = `${import.meta.env.VITE_API_BASE_URL}/api/categorias`;
 
 // Helper for authentication headers
 const getAuthHeaders = (isFormData = false) => {
@@ -164,7 +164,7 @@ export default function useCategorias() {
       descripcion: categoria.descripcion || '',
       imagen: null
     };
-    previewImage.value = categoria.imagenUrl ? `http://localhost:3000${categoria.imagenUrl}` : null;
+    previewImage.value = categoria.imagenUrl ? `${import.meta.env.VITE_API_BASE_URL}${categoria.imagenUrl}` : null;
     mostrarModal.value = true;
   };
 

@@ -9,7 +9,7 @@
     <div v-else class="cart-content">
       <div class="cart-items">
         <div v-for="item in carrito" :key="item.id" class="cart-item">
-          <img :src="`http://localhost:3000${item.producto.imagenUrl}`" :alt="item.producto.nombre" class="item-image"/>
+          <img :src="`${API_BASE_URL}${item.producto.imagenUrl}`" :alt="item.producto.nombre" class="item-image"/>
           <div class="item-details">
             <h3>{{ item.producto.nombre }}</h3>
             <p>{{ item.producto.precioPuntos }} puntos</p>
@@ -43,6 +43,9 @@
 import { onMounted } from 'vue';
 import { useCarrito } from '../../composables/useCarrito';
 import { useRouter } from 'vue-router';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 
 const router = useRouter();
 const {

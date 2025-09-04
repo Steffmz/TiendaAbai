@@ -14,13 +14,24 @@ import Categorias from "../components/categorias/Categorias.vue";
 import Campana from "../components/campanas/Campana.vue";
 import Calendario from "../components/Calendario.vue";
 import GestionPedidos from "../components/admin/GestionPedidos.vue";
-import MiPerfil from '../components/employee/MiPerfil.vue';
-import Carrito from '../components/employee/Carrito.vue';
+import MiPerfil from "../components/employee/MiPerfil.vue";
+import Carrito from "../components/employee/Carrito.vue";
+import Productos from "../components/productos/Productos.vue";
 
 const routes = [
   // --- RUTAS PÚBLICAS ---
-  { path: "/", name: "InicioPublico", component: Inicio, meta: { publicOnly: true } },
-  { path: "/login", name: "Login", component: Login, meta: { publicOnly: true } },
+  {
+    path: "/",
+    name: "InicioPublico",
+    component: Inicio,
+    meta: { publicOnly: true },
+  },
+  {
+    path: "/login",
+    name: "Login",
+    component: Login,
+    meta: { publicOnly: true },
+  },
 
   // --- RUTAS DE EMPLEADO (protegidas) ---
   {
@@ -39,12 +50,12 @@ const routes = [
         name: "CampaignProducts",
         component: CampaignProducts,
       },
-            { 
-        path: 'carrito', 
-        name: 'Carrito', 
-        component: Carrito 
+      {
+        path: "carrito",
+        name: "Carrito",
+        component: Carrito,
       },
-      { path: 'mi-perfil', name: 'MiPerfil', component: MiPerfil }
+      { path: "mi-perfil", name: "MiPerfil", component: MiPerfil },
     ],
   },
 
@@ -57,6 +68,14 @@ const routes = [
       { path: "", redirect: "/dashboard/usuarios" },
       { path: "usuarios", name: "GestionUsuarios", component: GestionUsuarios },
       { path: "categorias", name: "Categorias", component: Categorias },
+
+      {
+        path: "productos/:categoriaId",
+        name: "AdminProductos",
+        component: Productos,
+        props: true, // Esto permite que el ID de la categoría llegue como prop al componente
+      },
+
       { path: "campanas", name: "Campana", component: Campana },
       { path: "calendario", name: "Calendario", component: Calendario },
       { path: "pedidos", name: "GestionPedidos", component: GestionPedidos },
@@ -77,10 +96,13 @@ router.beforeEach((to, from, next) => {
   let decodedToken = null;
 
   if (token) {
-    try { decodedToken = jwtDecode(token); } 
-    catch (error) { localStorage.removeItem("authToken"); }
+    try {
+      decodedToken = jwtDecode(token);
+    } catch (error) {
+      localStorage.removeItem("authToken");
+    }
   }
-  
+
   if (to.meta.publicOnly && decodedToken) {
     if (decodedToken.rol === "Administrador") return next("/dashboard");
     return next("/tienda");
@@ -90,8 +112,8 @@ router.beforeEach((to, from, next) => {
     return next("/login");
   }
 
-  if (to.meta.requiresAdmin && decodedToken?.rol !== 'Administrador') {
-    return next('/tienda');
+  if (to.meta.requiresAdmin && decodedToken?.rol !== "Administrador") {
+    return next("/tienda");
   }
 
   next();

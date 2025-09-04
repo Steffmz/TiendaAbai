@@ -2,8 +2,8 @@ import { ref, computed, onMounted } from "vue";
 import axios from "axios";
 import Swal from "sweetalert2";
 
-const API_URL = "http://localhost:3000/api/campanas";
-const API_PRODUCTOS = "http://localhost:3000/api/productos";
+const API_URL = `${import.meta.env.VITE_API_BASE_URL}/api/campanas`;
+const API_PRODUCTOS = `${import.meta.env.VITE_API_BASE_URL}/api/productos`;
 
 const getAuthHeaders = () => ({
   headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` },

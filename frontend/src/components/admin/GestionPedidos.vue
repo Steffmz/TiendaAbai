@@ -80,7 +80,7 @@ const pedidos = ref([]);
 const loading = ref(true);
 const selectedPedido = ref(null);
 
-const API_URL = 'http://localhost:3000/api/pedidos';
+const API_URL = `${import.meta.env.VITE_API_BASE_URL}/api/pedidos`;
 
 const getAuthHeaders = () => ({
   headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
