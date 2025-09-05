@@ -121,12 +121,30 @@ exports.toggleUsuarioStatus = async (req, res) => {
 exports.deleteUsuario = async (req, res) => {
   const { id } = req.params;
   try {
-    await prisma.usuario.delete({
-      where: { id: parseInt(id) },
+    await prisma.$transaction(async (tx) => {
+      const userId = parseInt(id);
+      await tx.historialPuntos.deleteMany({
+        where: { beneficiarioId: userId },
+      });
+      await tx.historialPuntos.updateMany({
+        where: { adminCreadorId: userId },
+        data: { adminCreadorId: null }
+      });
+      await tx.pedido.updateMany({
+          where: { aprobadoPorAdminId: userId },
+          data: { aprobadoPorAdminId: null }
+      });
+      await tx.usuario.delete({
+        where: { id: userId },
+      });
     });
-    res.status(200).json({ message: 'Usuario eliminado permanentemente.' });
+    
+    res.status(200).json({ message: 'Usuario y su historial asociado eliminados permanentemente.' });
   } catch (error) {
     console.error(`Error al eliminar usuario ${id}:`, error);
+    if (error.code === 'P2003') {
+        return res.status(409).json({ message: 'No se puede eliminar el usuario porque aún tiene pedidos o canjes activos. Primero debe gestionarlos.' });
+    }
     res.status(500).json({ message: 'Error al eliminar el usuario.' });
   }
 };
