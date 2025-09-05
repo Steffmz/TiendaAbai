@@ -5,20 +5,18 @@
         <h1 class="page-title">Gestión de Usuarios</h1>
         <p class="page-subtitle">Administra los usuarios del sistema.</p>
       </div>
-
       <div class="actions-bar">
         <input type="text" v-model="searchQuery" placeholder="Buscar por nombre o cédula..." class="search-input" />
         <button @click="openModal()" class="btn-primary">+ Nuevo Usuario</button>
       </div>
-
       <div class="table-container">
         <table>
           <thead>
             <tr>
               <th>Nombre Completo</th>
               <th>Cédula</th>
+              <th>Puntos</th>
               <th>Email</th>
-              <th>Puntos</th> 
               <th>Rol</th>
               <th>Estado</th>
               <th>Acciones</th>
@@ -26,13 +24,13 @@
           </thead>
           <tbody>
             <tr v-if="loading">
-              <td colspan="6" class="text-center py-8">Cargando...</td>
+              <td colspan="7" class="text-center py-8">Cargando...</td>
             </tr>
             <tr v-for="usuario in filteredUsuarios" :key="usuario.id">
               <td>{{ usuario.nombreCompleto }}</td>
               <td>{{ usuario.cedula }}</td>
-              <td>{{ usuario.email }}</td>
               <td>{{ usuario.puntosTotales }}</td>
+              <td>{{ usuario.email }}</td>
               <td>{{ usuario.rol }}</td>
               <td>
                 <span :class="['badge', usuario.activo ? 'success' : 'danger']">
@@ -45,11 +43,11 @@
                 <button @click="toggleStatus(usuario)"
                   :class="['btn', usuario.activo ? 'btn-danger' : 'btn-success']">{{ usuario.activo ? 'Desactivar' :
                   'Activar' }}</button>
-                <button @click="deleteUsuario(usuario)" class="btn btn-danger">Eliminar</button>
+                <button @click="deleteUsuario(usuario)" class="btn btn-danger">Eliminar</button>  
               </td>
             </tr>
             <tr v-if="!loading && filteredUsuarios.length === 0">
-              <td colspan="6" class="text-center py-8">No se encontraron usuarios.</td>
+              <td colspan="7" class="text-center py-8">No se encontraron usuarios.</td>
             </tr>
           </tbody>
         </table>
@@ -58,16 +56,42 @@
 
     <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
       <div class="modal-content">
-        </div>
+        <h2 class="modal-title">{{ isEditMode ? 'Editar Usuario' : 'Crear Usuario' }}</h2>
+        <form @submit.prevent="saveUsuario">
+          <div class="form-grid">
+            <div class="form-group"><label>Nombre Completo</label><input v-model="form.nombreCompleto" type="text"
+                required /></div>
+            <div class="form-group"><label>Cédula</label><input v-model="form.cedula" type="text" :disabled="isEditMode"
+                required /></div>
+            <div class="form-group"><label>Email</label><input v-model="form.email" type="email" required /></div>
+            <div class="form-group"><label>Sede</label><input v-model="form.sede" type="text" required /></div>
+            <div class="form-group" v-if="!isEditMode"><label>Contraseña</label><input v-model="form.contrasena"
+                type="password" required /></div>
+            <div class="form-group"><label>Rol</label><select v-model="form.rol" required>
+                <option value="Empleado">Empleado</option>
+                <option value="Administrador">Administrador</option>
+              </select></div>
+            <div class="form-group"><label>Cargo ID</label><input v-model.number="form.cargoId" type="number"
+                placeholder="ID del Cargo existente" required /></div>
+            <div class="form-group"><label>Centro de Costos ID</label><input v-model.number="form.centroDeCostosId"
+                type="number" placeholder="ID del C. de Costos existente" required /></div>
+          </div>
+          <div class="modal-actions">
+            <button type="button" @click="closeModal" class="btn btn-secondary">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+          </div>
+        </form>
+      </div>
     </div>
-    
+
     <div v-if="showPuntosModal" class="modal-overlay" @click.self="closePuntosModal">
       <div class="modal-content">
         <h2 class="modal-title">Ajustar Puntos a {{ formPuntos.nombreCompleto }}</h2>
         <form @submit.prevent="savePuntos">
           <div class="form-group">
             <label>Puntos a Añadir/Quitar</label>
-            <input v-model.number="formPuntos.puntos" type="number" required placeholder="Ej: 100 para añadir, -50 para quitar" />
+            <input v-model.number="formPuntos.puntos" type="number" required
+              placeholder="Ej: 100 para añadir, -50 para quitar" />
           </div>
           <div class="form-group">
             <label>Motivo del Ajuste</label>
@@ -80,14 +104,13 @@
         </form>
       </div>
     </div>
-
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
-import Swal from 'sweetalert2'; // Importamos SweetAlert2
+import Swal from 'sweetalert2';
 
 const usuarios = ref([]);
 const loading = ref(true);
@@ -96,17 +119,15 @@ const isEditMode = ref(false);
 const form = ref({});
 const searchQuery = ref('');
 const API_URL = `${import.meta.env.VITE_API_BASE_URL}/api/usuarios`;
-
-// --- LÓGICA NUEVA PARA EL MODAL DE PUNTOS ---
 const showPuntosModal = ref(false);
 const formPuntos = ref({});
 
 const openPuntosModal = (usuario) => {
-  formPuntos.value = { 
-    id: usuario.id, 
-    nombreCompleto: usuario.nombreCompleto, 
-    puntos: '', 
-    descripcion: '' 
+  formPuntos.value = {
+    id: usuario.id,
+    nombreCompleto: usuario.nombreCompleto,
+    puntos: '',
+    descripcion: ''
   };
   showPuntosModal.value = true;
 };
@@ -121,7 +142,7 @@ const savePuntos = async () => {
       puntos: formPuntos.value.puntos,
       descripcion: formPuntos.value.descripcion
     }, getAuthHeaders());
-    
+
     Swal.fire('Éxito', 'Puntos ajustados correctamente.', 'success');
     closePuntosModal();
     fetchUsuarios();
@@ -129,7 +150,6 @@ const savePuntos = async () => {
     Swal.fire('Error', error.response?.data?.message || 'No se pudo ajustar los puntos.', 'error');
   }
 };
-// --- FIN DE LÓGICA NUEVA ---
 
 const filteredUsuarios = computed(() => {
   if (!searchQuery.value) return usuarios.value;
@@ -147,8 +167,8 @@ const fetchUsuarios = async () => {
   try {
     const response = await axios.get(API_URL, getAuthHeaders());
     usuarios.value = response.data;
-  } catch (error) { 
-    console.error("Error al cargar usuarios:", error); 
+  } catch (error) {
+    console.error("Error al cargar usuarios:", error);
     Swal.fire('Error', 'No se pudieron cargar los usuarios.', 'error');
   }
   finally { loading.value = false; }
@@ -172,44 +192,44 @@ const saveUsuario = async () => {
 
 const toggleStatus = async (usuario) => {
   const result = await Swal.fire({
-      title: '¿Confirmar cambio?',
-      text: `¿Estás seguro de que quieres ${usuario.activo ? 'desactivar' : 'activar'} a ${usuario.nombreCompleto}?`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Sí, cambiar',
-      cancelButtonText: 'Cancelar'
+    title: '¿Confirmar cambio?',
+    text: `¿Estás seguro de que quieres ${usuario.activo ? 'desactivar' : 'activar'} a ${usuario.nombreCompleto}?`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, cambiar',
+    cancelButtonText: 'Cancelar'
   });
 
   if (result.isConfirmed) {
-      try {
-        await axios.patch(`${API_URL}/${usuario.id}/toggle-status`, {}, getAuthHeaders());
-        Swal.fire('Éxito', 'Estado del usuario actualizado.', 'success');
-        fetchUsuarios();
-      } catch (error) { 
-        Swal.fire('Error', 'No se pudo actualizar el estado.', 'error');
-      }
+    try {
+      await axios.patch(`${API_URL}/${usuario.id}/toggle-status`, {}, getAuthHeaders());
+      Swal.fire('Éxito', 'Estado del usuario actualizado.', 'success');
+      fetchUsuarios();
+    } catch (error) {
+      Swal.fire('Error', 'No se pudo actualizar el estado.', 'error');
+    }
   }
 };
 
 const deleteUsuario = async (usuario) => {
   const result = await Swal.fire({
-      title: '¿ELIMINAR PERMANENTEMENTE?',
-      text: `Esta acción no se puede deshacer. Se eliminará a ${usuario.nombreCompleto}.`,
-      icon: 'error',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
+    title: '¿ELIMINAR PERMANENTEMENTE?',
+    text: `Esta acción no se puede deshacer. Se eliminará a ${usuario.nombreCompleto}.`,
+    icon: 'error',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar'
   });
 
   if (result.isConfirmed) {
-      try {
-        await axios.delete(`${API_URL}/${usuario.id}`, getAuthHeaders());
-        Swal.fire('Eliminado', 'Usuario eliminado con éxito.', 'success');
-        fetchUsuarios();
-      } catch (error) { 
-        Swal.fire('Error', 'No se pudo eliminar el usuario.', 'error');
-      }
+    try {
+      await axios.delete(`${API_URL}/${usuario.id}`, getAuthHeaders());
+      Swal.fire('Eliminado', 'Usuario eliminado con éxito.', 'success');
+      fetchUsuarios();
+    } catch (error) {
+      Swal.fire('Error', 'No se pudo eliminar el usuario.', 'error');
+    }
   }
 };
 
@@ -233,7 +253,7 @@ onMounted(fetchUsuarios);
 .page-container {
   display: flex;
   flex-direction: column;
-  height: 100%; /* <-- Esta es la línea que faltaba */
+  height: 100%;
   padding: 2rem;
   justify-content: flex-start;
 }
@@ -277,7 +297,6 @@ onMounted(fetchUsuarios);
   color: var(--text);
 }
 
-/* Tabla */
 .table-container {
   overflow-x: auto;
   background: var(--surface);
@@ -308,7 +327,6 @@ td {
   text-align: center;
 }
 
-/* Botones y Badges */
 .btn {
   padding: 0.5rem 1rem;
   border: none;
@@ -344,6 +362,11 @@ td {
   color: white;
 }
 
+.btn-info {
+  background-color: #3b82f6;
+  color: white;
+}
+
 .actions-cell {
   display: flex;
   justify-content: center;
@@ -367,7 +390,6 @@ td {
   color: #ef4444;
 }
 
-/* Modal */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -413,7 +435,8 @@ td {
 }
 
 .form-group input,
-.form-group select {
+.form-group select,
+.form-group textarea {
   width: 100%;
   padding: 0.6rem;
   border: 1px solid var(--border);
@@ -428,18 +451,9 @@ td {
   justify-content: flex-end;
   gap: 1rem;
 }
-.btn-info {
-  background-color: #3b82f6; /* Un azul para diferenciar */
-  color: white;
-}
+
 .form-group textarea {
-  width: 100%;
-  padding: 0.6rem;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background-color: var(--surface-2);
-  color: var(--text);
-  min-height: 80px; /* Para dar más espacio al motivo */
+  min-height: 80px;
   resize: vertical;
 }
 </style>

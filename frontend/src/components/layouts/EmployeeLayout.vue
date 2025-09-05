@@ -11,7 +11,6 @@
           <router-link to="/tienda/mi-perfil">Mi Perfil</router-link>
         </nav>
         <div class="user-info">
-          <!-- Usamos un v-if para no mostrar el "Hola," hasta que tengamos el nombre -->
           <span v-if="userData.nombreCompleto">Hola, {{ userData.nombreCompleto.split(' ')[0] }}</span>
           <span class="points-badge">{{ userData.puntosTotales }} Puntos</span>
 
@@ -28,7 +27,7 @@
               <path fill="currentColor"
                 d="M21 19v1H3v-1l2-2v-6c0-3.1 2.03-5.83 5-6.71V4a2 2 0 0 1 2-2a2 2 0 0 1 2 2v.29c2.97.88 5 3.61 5 6.71v6zm-7 2a2 2 0 0 1-2 2a2 2 0 0 1-2-2" />
             </svg>
-             <span v-if="unreadCount > 0" class="cart-badge">{{ unreadCount }}</span>
+            <span v-if="unreadCount > 0" class="cart-badge">{{ unreadCount }}</span>
           </button>
 
           <button @click="logout" class="logout-button" title="Cerrar Sesión">
@@ -75,7 +74,7 @@ const fetchUserData = async () => {
   try {
     const { data } = await axios.get('http://localhost:3000/api/perfil', getAuthHeaders());
     userData.value = data;
-    await fetchCarrito(); 
+    await fetchCarrito();
   } catch (error) {
     console.error("Error al cargar datos del usuario en el layout:", error);
     logout(); // Si falla, cerramos sesión para evitar inconsistencias
@@ -170,6 +169,9 @@ onMounted(() => {
   opacity: 0.8;
   transition: opacity 0.3s;
 }
+.notification-button {
+  position: relative;
+  }
 
 .logout-button:hover,
 .notification-button:hover {
@@ -181,6 +183,7 @@ onMounted(() => {
   max-width: 1280px;
   margin: auto;
 }
+
 /* Tus estilos existentes... */
 .cart-button {
   position: relative;
@@ -189,6 +192,7 @@ onMounted(() => {
   color: white;
   cursor: pointer;
 }
+
 .cart-badge {
   position: absolute;
   top: -5px;
@@ -200,10 +204,12 @@ onMounted(() => {
   font-size: 0.75rem;
   font-weight: bold;
 }
+
 .employee-layout {
   background-color: #f4f7fa;
   min-height: 100vh;
 }
+
 .navbar {
   background: linear-gradient(135deg, #74B9E7 0%, #2B7FFF 100%);
   color: white;
@@ -213,6 +219,7 @@ onMounted(() => {
   top: 0;
   z-index: 50;
 }
+
 .navbar-content {
   display: flex;
   align-items: center;
@@ -221,9 +228,11 @@ onMounted(() => {
   max-width: 1280px;
   margin: auto;
 }
+
 .logo img {
   height: 40px;
 }
+
 .nav-links a {
   color: white;
   text-decoration: none;
@@ -233,14 +242,17 @@ onMounted(() => {
   border-bottom: 2px solid transparent;
   transition: border-color 0.3s;
 }
+
 .nav-links a.router-link-exact-active {
   border-bottom-color: white;
 }
+
 .user-info {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
+
 .points-badge {
   background-color: rgba(255, 255, 255, 0.2);
   padding: 0.4rem 0.8rem;
@@ -248,7 +260,9 @@ onMounted(() => {
   font-weight: 600;
   font-size: 0.9rem;
 }
-.logout-button, .notification-button {
+
+.logout-button,
+.notification-button {
   background: none;
   border: none;
   color: white;
@@ -256,9 +270,12 @@ onMounted(() => {
   opacity: 0.8;
   transition: opacity 0.3s;
 }
-.logout-button:hover, .notification-button:hover {
+
+.logout-button:hover,
+.notification-button:hover {
   opacity: 1;
 }
+
 .main-content {
   padding: 2rem;
   max-width: 1280px;

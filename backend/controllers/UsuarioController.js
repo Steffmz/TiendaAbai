@@ -2,23 +2,21 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const bcrypt = require('bcryptjs');
 
-// Obtener todos los usuarios (para el admin)
 exports.getAllUsuarios = async (req, res) => {
   const adminId = req.usuario.userId;
 
   try {
     const usuarios = await prisma.usuario.findMany({
       where: {
-        // Añadimos una condición AND para que se cumplan ambas reglas
         AND: [
           {
             id: {
-              not: adminId // Regla 1: No mostrarse a sí mismo
+              not: adminId
             }
           },
           {
             rol: {
-              not: 'Administrador' // Regla 2: No mostrar otros administradores
+              not: 'Administrador'
             }
           }
         ]
@@ -45,16 +43,9 @@ exports.getAllUsuarios = async (req, res) => {
     res.status(500).json({ message: 'Error interno del servidor.' });
   }
 };
-// Crear un nuevo usuario (desde el panel de admin)
-// backend/controllers/UsuarioController.js
-
-// ... (otras funciones) ...
 
 exports.createUsuario = async (req, res) => {
-    // ASEGÚRATE DE QUE 'sede' ESTÉ AQUÍ
     const { cedula, nombreCompleto, email, contrasena, rol, sede, cargoId, centroDeCostosId } = req.body;
-
-    // Y AQUÍ EN LA VALIDACIÓN
     if (!cedula || !nombreCompleto || !email || !contrasena || !rol || !sede || !cargoId || !centroDeCostosId) {
         return res.status(400).json({ message: 'Todos los campos son requeridos.' });
     }
@@ -68,13 +59,12 @@ exports.createUsuario = async (req, res) => {
                 email,
                 contrasena: hashedPassword,
                 rol,
-                sede, // <-- El campo ya está aquí, que es lo correcto
+                sede,
                 cargoId: parseInt(cargoId),
                 centroDeCostosId: parseInt(centroDeCostosId),
                 activo: true,
             },
         });
-        // Por seguridad, no devolvemos la contraseña
         const { contrasena: _, ...usuarioSinContrasena } = nuevoUsuario;
         res.status(201).json(usuarioSinContrasena);
     } catch (error) {
@@ -86,9 +76,6 @@ exports.createUsuario = async (req, res) => {
     }
 };
 
-// ... (resto de funciones) ...
-
-// Actualizar un usuario existente
 exports.updateUsuario = async (req, res) => {
   const { id } = req.params;
   const { nombreCompleto, email, rol, sede, activo, cargoId, centroDeCostosId } = req.body;
@@ -113,7 +100,6 @@ exports.updateUsuario = async (req, res) => {
   }
 };
 
-// Desactivar/Activar un usuario (Soft Delete)
 exports.toggleUsuarioStatus = async (req, res) => {
     const { id } = req.params;
     try {
@@ -135,8 +121,6 @@ exports.toggleUsuarioStatus = async (req, res) => {
 exports.deleteUsuario = async (req, res) => {
   const { id } = req.params;
   try {
-    // Aquí podrías añadir lógica para eliminar relaciones si es necesario
-    // Por ahora, lo eliminaremos directamente.
     await prisma.usuario.delete({
       where: { id: parseInt(id) },
     });
@@ -231,20 +215,20 @@ exports.ajustarPuntos = async (req, res) => {
   }
 };
 exports.getMiPerfil = async (req, res) => {
-  const userId = req.usuario.userId;
-  try {
-    const usuario = await prisma.usuario.findUnique({
-      where: { id: userId },
-      select: {
-        nombreCompleto: true,
-        email: true,
-        cedula: true,
-        puntosTotales: true, // Asegúrate de incluir los puntos
-      }
-    });
-    if (!usuario) return res.status(404).json({ message: 'Usuario no encontrado.' });
-    res.json(usuario);
-  } catch (error) {
-    res.status(500).json({ message: 'Error al obtener el perfil.' });
-  }
+  const userId = req.usuario.userId;
+  try {
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: userId },
+      select: {
+        nombreCompleto: true,
+        email: true,
+        cedula: true,
+        puntosTotales: true, // Asegúrate de incluir los puntos
+      }
+    });
+    if (!usuario) return res.status(404).json({ message: 'Usuario no encontrado.' });
+    res.json(usuario);
+  } catch (error) {
+    res.status(500).json({ message: 'Error al obtener el perfil.' });
+  }
 };

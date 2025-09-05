@@ -40,14 +40,13 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted, defineEmits } from 'vue';
 import { useCarrito } from '../../composables/useCarrito';
 import { useRouter } from 'vue-router';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const emit = defineEmits(['redemption-successful']);
 
-
-const router = useRouter();
 const {
   carrito,
   loading,

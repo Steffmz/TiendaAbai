@@ -1,8 +1,7 @@
-// frontend/src/composables/useCarrito.js
-
-import { ref, computed } from "vue";
+import { ref, computed, getCurrentInstance } from "vue";
 import axios from "axios";
 import Swal from "sweetalert2";
+import { useNotifications } from "./useNotifications";
 
 const API_URL = `${import.meta.env.VITE_API_BASE_URL}/api/carrito`;
 
@@ -15,6 +14,7 @@ const carrito = ref([]);
 const loading = ref(false);
 
 export function useCarrito() {
+  const instance = getCurrentInstance();
   const totalItems = computed(() =>
     carrito.value.reduce((total, item) => total + item.cantidad, 0)
   );
@@ -112,18 +112,20 @@ export function useCarrito() {
     if (isConfirmed) {
       loading.value = true;
       try {
-        // --- CAMBIO AQUÍ: Llamamos al nuevo endpoint ---
         await axios.post(
-          "http://localhost:3000/api/pedidos/desde-carrito",
+          `${import.meta.env.VITE_API_BASE_URL}/api/pedidos/desde-carrito`,
           {},
           getAuthHeaders()
         );
 
-        await fetchCarrito(); // El carrito estará vacío
+        await fetchCarrito();
 
-        // Buscamos el composable de notificaciones y actualizamos el contador
         const { fetchUnreadCount } = useNotifications();
         await fetchUnreadCount();
+
+        if (instance) {
+          instance.emit("redemption-successful");
+        }
 
         Swal.fire(
           "¡Canje Exitoso!",
