@@ -7,12 +7,7 @@
       </div>
 
       <div class="actions-bar">
-        <input
-          type="text"
-          v-model="searchQuery"
-          placeholder="Buscar por nombre o cédula..."
-          class="search-input"
-        />
+        <input type="text" v-model="searchQuery" placeholder="Buscar por nombre o cédula..." class="search-input" />
         <button @click="openModal()" class="btn-primary">+ Nuevo Usuario</button>
       </div>
 
@@ -34,11 +29,7 @@
             <template v-if="loading">
               <tr>
                 <td colspan="7" class="p-0">
-                  <div
-                    v-for="i in 5"
-                    :key="i"
-                    class="flex items-center p-4 gap-4 border-b border-[var(--border)]"
-                  >
+                  <div v-for="i in 5" :key="i" class="flex items-center p-4 gap-4 border-b border-[var(--border)]">
                     <BaseSkeleton width="150px" height="24px" radius="6px" />
                     <BaseSkeleton width="100px" height="24px" radius="6px" />
                     <BaseSkeleton width="50px" height="24px" radius="6px" />
@@ -74,10 +65,8 @@
                   <button @click="openPuntosModal(usuario)" class="btn btn-info">
                     Puntos
                   </button>
-                  <button
-                    @click="toggleStatus(usuario)"
-                    :class="['btn', usuario.activo ? 'btn-danger' : 'btn-success']"
-                  >
+                  <button @click="toggleStatus(usuario)"
+                    :class="['btn', usuario.activo ? 'btn-danger' : 'btn-success']">
                     {{ usuario.activo ? 'Desactivar' : 'Activar' }}
                   </button>
                   <button @click="deleteUsuario(usuario)" class="btn btn-danger">
@@ -91,25 +80,29 @@
             <template v-else>
               <tr>
                 <td colspan="7">
-                  <EmptyState
-                    icon="mdi:account-search-outline"
-                    title="No se encontraron usuarios"
-                    message="Prueba con otro término de búsqueda o crea un nuevo usuario."
-                  />
+                  <EmptyState icon="mdi:account-search-outline" title="No se encontraron usuarios"
+                    message="Prueba con otro término de búsqueda o crea un nuevo usuario." />
                 </td>
               </tr>
             </template>
           </tbody>
+
         </table>
+        <div v-if="!loading && totalPages > 1" class="pagination-controls">
+          <button @click="prevPage" :disabled="currentPage === 1" class="btn btn-secondary">
+            Anterior
+          </button>
+          <span>Página {{ currentPage }} de {{ totalPages }}</span>
+          <button @click="nextPage" :disabled="currentPage === totalPages" class="btn btn-secondary">
+            Siguiente
+          </button>
+        </div>
       </div>
+
     </div>
 
     <!-- Modal Usuario -->
-    <BaseModal
-      :show="showModal"
-      :title="isEditMode ? 'Editar Usuario' : 'Crear Usuario'"
-      @close="closeModal"
-    >
+    <BaseModal :show="showModal" :title="isEditMode ? 'Editar Usuario' : 'Crear Usuario'" @close="closeModal">
       <form id="usuarioForm" @submit.prevent="saveUsuario">
         <div class="form-grid">
           <div class="form-group">
@@ -118,12 +111,7 @@
           </div>
           <div class="form-group">
             <label>Cédula</label>
-            <input
-              v-model="form.cedula"
-              type="text"
-              :disabled="isEditMode"
-              required
-            />
+            <input v-model="form.cedula" type="text" :disabled="isEditMode" required />
           </div>
           <div class="form-group">
             <label>Email</label>
@@ -157,11 +145,7 @@
             <label>Centro de Costos</label>
             <select v-model.number="form.centroDeCostosId" required>
               <option disabled value="">Selecciona un centro</option>
-              <option
-                v-for="centro in centrosDeCostos"
-                :key="centro.id"
-                :value="centro.id"
-              >
+              <option v-for="centro in centrosDeCostos" :key="centro.id" :value="centro.id">
                 {{ centro.nombre }}
               </option>
             </select>
@@ -180,38 +164,22 @@
     </BaseModal>
 
     <!-- Modal Puntos -->
-    <BaseModal
-      :show="showPuntosModal"
-      :title="`Ajustar Puntos a ${formPuntos.nombreCompleto}`"
-      @close="closePuntosModal"
-      width="500px"
-    >
+    <BaseModal :show="showPuntosModal" :title="`Ajustar Puntos a ${formPuntos.nombreCompleto}`"
+      @close="closePuntosModal" width="500px">
       <form id="puntosForm" @submit.prevent="savePuntos">
         <div class="form-group">
           <label>Puntos a Añadir/Quitar</label>
-          <input
-            v-model.number="formPuntos.puntos"
-            type="number"
-            required
-            placeholder="Ej: 100 para añadir, -50 para quitar"
-          />
+          <input v-model.number="formPuntos.puntos" type="number" required
+            placeholder="Ej: 100 para añadir, -50 para quitar" />
         </div>
         <div class="form-group">
           <label>Motivo del Ajuste</label>
-          <textarea
-            v-model="formPuntos.descripcion"
-            required
-            placeholder="Ej: Bono por desempeño Q3"
-          />
+          <textarea v-model="formPuntos.descripcion" required placeholder="Ej: Bono por desempeño Q3" />
         </div>
       </form>
 
       <template #actions>
-        <button
-          type="button"
-          @click="closePuntosModal"
-          class="btn btn-secondary"
-        >
+        <button type="button" @click="closePuntosModal" class="btn btn-secondary">
           Cancelar
         </button>
         <button type="submit" form="puntosForm" class="btn btn-primary">
@@ -243,6 +211,12 @@ const formPuntos = ref({});
 const cargos = ref([]);
 const centrosDeCostos = ref([]);
 
+const currentPage = ref(1);
+const totalUsers = ref(0);
+const usersPerPage = ref(10); // Debe coincidir con el 'limit' del backend
+
+const totalPages = computed(() => Math.ceil(totalUsers.value / usersPerPage.value));
+
 const getAuthHeaders = () => ({
   headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` },
 });
@@ -250,23 +224,51 @@ const getAuthHeaders = () => ({
 const fetchData = async () => {
   loading.value = true;
   try {
-    const [usuariosRes, cargosRes, centrosRes] = await Promise.all([
-      axios.get(API_URL, getAuthHeaders()),
+    // Añadimos los parámetros a la URL
+    const params = new URLSearchParams({
+      page: currentPage.value,
+      limit: usersPerPage.value,
+    });
+    const usuariosRes = await axios.get(`${API_URL}?${params.toString()}`, getAuthHeaders());
+
+    // Actualizamos las refs con los datos de la respuesta
+    usuarios.value = usuariosRes.data.usuarios;
+    totalUsers.value = usuariosRes.data.total;
+
+    // ... (el resto de las peticiones pueden quedar igual si no necesitan pag
+    // inación)
+    const [cargosRes, centrosRes] = await Promise.all([
       axios.get(`${ADMIN_DATA_URL}/cargos`, getAuthHeaders()),
       axios.get(`${ADMIN_DATA_URL}/centros-de-costos`, getAuthHeaders()),
     ]);
-    usuarios.value = usuariosRes.data;
     cargos.value = cargosRes.data;
     centrosDeCostos.value = centrosRes.data;
+
   } catch (error) {
     console.error("Error al cargar datos iniciales:", error);
-    Swal.fire(
-      "Error",
-      "No se pudieron cargar los datos necesarios para la página.",
-      "error"
-    );
+    Swal.fire("Error", "No se pudieron cargar los datos necesarios.", "error");
   } finally {
     loading.value = false;
+  }
+};
+
+const goToPage = (page) => {
+  if (page < 1 || page > totalPages.value) return;
+  currentPage.value = page;
+  fetchData();
+};
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+    fetchData();
+  }
+};
+
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+    fetchData();
   }
 };
 
@@ -317,12 +319,28 @@ const saveUsuario = async () => {
     }
     closeModal();
     fetchData();
-  } catch (error) {
-    Swal.fire(
-      "Error",
-      error.response?.data?.message || "No se pudo guardar el usuario.",
-      "error"
-    );
+   } catch (error) {
+    // --- INICIO DE LA MEJORA ---
+    let errorHtml = 'No se pudo guardar el usuario. Por favor, intenta de nuevo.';
+
+    // Verificamos si la respuesta contiene nuestro array de errores de validación
+    if (error.response && error.response.data && Array.isArray(error.response.data.errors)) {
+      // Creamos una lista HTML con los errores detallados
+      errorHtml = '<ul style="text-align: left; list-style-position: inside;">';
+      error.response.data.errors.forEach(err => {
+        errorHtml += `<li><b>${err.field}:</b> ${err.message}</li>`;
+      });
+      errorHtml += '</ul>';
+    } else if (error.response && error.response.data.message) {
+      errorHtml = error.response.data.message;
+    }
+
+    Swal.fire({
+      icon: "error",
+      title: "Error de Validación",
+      html: errorHtml, // Usamos 'html' para renderizar la lista
+    });
+    // --- FIN DE LA MEJORA ---
   }
 };
 
@@ -366,9 +384,8 @@ const savePuntos = async () => {
 const toggleStatus = async (usuario) => {
   const result = await Swal.fire({
     title: "¿Confirmar cambio?",
-    text: `¿Estás seguro de que quieres ${
-      usuario.activo ? "desactivar" : "activar"
-    } a ${usuario.nombreCompleto}?`,
+    text: `¿Estás seguro de que quieres ${usuario.activo ? "desactivar" : "activar"
+      } a ${usuario.nombreCompleto}?`,
     icon: "warning",
     showCancelButton: true,
     confirmButtonText: "Sí, cambiar",
@@ -405,6 +422,10 @@ const deleteUsuario = async (usuario) => {
     try {
       await axios.delete(`${API_URL}/${usuario.id}`, getAuthHeaders());
       Swal.fire("Eliminado", "Usuario eliminado con éxito.", "success");
+      if (usuarios.value.length === 1 && currentPage.value > 1) {
+        currentPage.value--;
+      }
+
       fetchData();
     } catch (error) {
       Swal.fire(
@@ -426,31 +447,37 @@ const deleteUsuario = async (usuario) => {
   padding: 2rem;
   justify-content: flex-start;
 }
+
 .max-w-7xl {
   max-width: 80rem;
   width: 100%;
   margin-left: auto;
   margin-right: auto;
 }
+
 .page-header {
   text-align: center;
   margin-bottom: 1.5rem;
 }
+
 .page-title {
   font-size: 1.8rem;
   font-weight: 600;
   color: var(--text);
 }
+
 .page-subtitle {
   color: var(--text-muted);
   margin-top: 0.25rem;
 }
+
 .actions-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
 }
+
 .search-input {
   padding: 0.6rem 1rem;
   border: 1px solid var(--border);
@@ -459,31 +486,37 @@ const deleteUsuario = async (usuario) => {
   background-color: var(--surface-2);
   color: var(--text);
 }
+
 .table-container {
   overflow-x: auto;
   background: var(--surface);
   border-radius: 8px;
   border: 1px solid var(--border);
 }
+
 table {
   width: 100%;
   border-collapse: collapse;
   color: var(--text);
 }
+
 th,
 td {
   padding: 12px 15px;
   text-align: left;
   border-bottom: 1px solid var(--border);
 }
+
 th {
   background-color: var(--table-header);
   color: white;
   text-align: center;
 }
+
 td {
   text-align: center;
 }
+
 .btn {
   padding: 0.5rem 1rem;
   border: none;
@@ -492,64 +525,78 @@ td {
   font-weight: 500;
   transition: background-color 0.2s;
 }
+
 .btn-primary {
   background-color: var(--primary);
   color: var(--primary-contrast);
 }
+
 .btn-secondary {
   background-color: var(--surface-2);
   color: var(--text);
   border: 1px solid var(--border);
 }
+
 .btn-edit {
   background-color: #f59e0b;
   color: white;
 }
+
 .btn-danger {
   background-color: #ef4444;
   color: white;
 }
+
 .btn-success {
   background-color: #22c55e;
   color: white;
 }
+
 .btn-info {
   background-color: #3b82f6;
   color: white;
 }
+
 .actions-cell {
   display: flex;
   justify-content: center;
   gap: 0.5rem;
 }
+
 .badge {
   padding: 4px 10px;
   border-radius: 12px;
   font-size: 0.8em;
   font-weight: 600;
 }
+
 .badge.success {
   background-color: rgba(34, 197, 94, 0.2);
   color: #22c55e;
 }
+
 .badge.danger {
   background-color: rgba(239, 68, 68, 0.2);
   color: #ef4444;
 }
+
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
 }
+
 .form-group {
   display: flex;
   flex-direction: column;
 }
+
 .form-group label {
   margin-bottom: 0.5rem;
   font-weight: 500;
   color: var(--text);
 }
+
 .form-group input,
 .form-group select,
 .form-group textarea {
@@ -560,8 +607,23 @@ td {
   background-color: var(--surface-2);
   color: var(--text);
 }
+
 .form-group textarea {
   min-height: 80px;
   resize: vertical;
+}
+
+/* ... (al final de tus estilos existentes) ... */
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.pagination-controls span {
+  font-weight: 500;
+  color: var(--text-muted);
 }
 </style>

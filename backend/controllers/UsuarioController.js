@@ -4,21 +4,18 @@ const bcrypt = require('bcryptjs');
 
 exports.getAllUsuarios = async (req, res) => {
   const adminId = req.usuario.userId;
+  // 1. Obtenemos los parámetros de paginación de la URL (query string)
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10; // Límite por defecto de 10 usuarios
+  const skip = (page - 1) * limit;
 
   try {
+    // 2. Usamos 'skip' y 'take' de Prisma para la paginación
     const usuarios = await prisma.usuario.findMany({
       where: {
         AND: [
-          {
-            id: {
-              not: adminId
-            }
-          },
-          {
-            rol: {
-              not: 'Administrador'
-            }
-          }
+          { id: { not: adminId } },
+          { rol: { not: 'Administrador' } }
         ]
       },
       select: {
@@ -33,11 +30,27 @@ exports.getAllUsuarios = async (req, res) => {
         cargos: { select: { id: true, nombre: true } },
         centroDeCostos: { select: { id: true, nombre: true } },
       },
-      orderBy: {
-        nombreCompleto: 'asc'
+      orderBy: { nombreCompleto: 'asc' },
+      skip: skip,
+      take: limit,
+    });
+
+    const totalUsuarios = await prisma.usuario.count({
+      where: {
+        AND: [
+          { id: { not: adminId } },
+          { rol: { not: 'Administrador' } }
+        ]
       }
     });
-    res.json(usuarios);
+
+    res.json({
+      usuarios,
+      total: totalUsuarios,
+      page,
+      limit
+    });
+
   } catch (error) {
     console.error("Error al obtener usuarios:", error);
     res.status(500).json({ message: 'Error interno del servidor.' });
@@ -46,9 +59,6 @@ exports.getAllUsuarios = async (req, res) => {
 
 exports.createUsuario = async (req, res) => {
     const { cedula, nombreCompleto, email, contrasena, rol, sede, cargoId, centroDeCostosId } = req.body;
-    if (!cedula || !nombreCompleto || !email || !contrasena || !rol || !sede || !cargoId || !centroDeCostosId) {
-        return res.status(400).json({ message: 'Todos los campos son requeridos.' });
-    }
 
     try {
         const hashedPassword = await bcrypt.hash(contrasena, 10);
@@ -60,8 +70,8 @@ exports.createUsuario = async (req, res) => {
                 contrasena: hashedPassword,
                 rol,
                 sede,
-                cargoId: parseInt(cargoId),
-                centroDeCostosId: parseInt(centroDeCostosId),
+                cargoId,
+                centroDeCostosId,
                 activo: true,
             },
         });
