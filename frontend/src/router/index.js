@@ -20,6 +20,7 @@ import MiPerfil from "../components/employee/MiPerfil.vue";
 import Carrito from "../components/employee/Carrito.vue";
 import Productos from "../components/productos/Productos.vue";
 import MisPedidos from "../components/employee/MisPedidos.vue";
+import DashboardHome from "../components/admin/DashboardHome.vue";
 
 const routes = [
   // --- RUTAS PÚBLICAS ---
@@ -85,7 +86,7 @@ const routes = [
     component: Dashboard,
     meta: { requiresAuth: true, requiresAdmin: true },
     children: [
-      { path: "", redirect: "/dashboard/usuarios" },
+      { path: "", name: "DashboardHome", component: DashboardHome }, // Ruta raíz
       { path: "usuarios", name: "GestionUsuarios", component: GestionUsuarios },
       { path: "categorias", name: "Categorias", component: Categorias },
 

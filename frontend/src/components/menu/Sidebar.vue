@@ -7,6 +7,12 @@
     </div>
 
     <ul class="menu">
+      <router-link to="/dashboard" custom v-slot="{ navigate, isActive }">
+        <li :class="{ active: isActive }" @click="navigate">
+          <span class="iconify" data-icon="mdi:view-dashboard"></span>
+          <span v-if="!isCollapsed">Dashboard</span>
+        </li>
+      </router-link>
       <router-link to="/dashboard/usuarios" custom v-slot="{ navigate, isActive }">
         <li :class="{ active: isActive }" @click="navigate">
           <span class="iconify" data-icon="mdi:account-group"></span>

@@ -17,6 +17,7 @@ const CarritoRouter = require('./routes/CarritoRouter');
 const PerfilRouter = require('./routes/PerfilRouter');
 const HistorialRouter = require('./routes/HistorialRouter');
 const AdminDataRouter = require('./routes/AdminDataRouter');
+const DashboardRouter = require('./routes/DashboardRouter');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -41,6 +42,7 @@ app.use('/api/notificaciones', NotificacionRouter);
 app.use('/api/carrito', CarritoRouter);
 app.use('/api/historial', HistorialRouter);
 app.use('/api/admin-data', AdminDataRouter);
+app.use('/api/dashboard', DashboardRouter);
 
 
 // --- INICIO DEL SERVIDOR ---
