@@ -6,51 +6,101 @@
         <p class="page-subtitle">Administra los usuarios del sistema.</p>
       </div>
 
-      <div class="actions-bar">
-        <input type="text" v-model="searchQuery" placeholder="Buscar por nombre o cédula..." class="search-input" />
-        <button @click="openModal()" class="btn-primary">+ Nuevo Usuario</button>
+      <div class="w-full flex justify-center mb-6">
+        <div class="flex flex-col md:flex-row items-center gap-3 w-full max-w-3xl">
+          <input v-model="searchQuery" type="text" placeholder="Buscar por nombre o cédula..."
+            class="w-64 md:flex-1 px-3 py-2 border border-yellow-400 rounded-lg text-blue-800 bg-blue-50
+                  focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-200
+                  text-sm shadow-sm transition-all duration-200" />
+
+          <button @click="openModal()"
+            class="px-5 py-2 bg-[#FFB93B] text-black rounded-lg font-semibold shadow-md
+                  hover:bg-[#74B9E7] transition-all duration-200 hover:shadow-lg">
+            + Nuevo Usuario
+          </button>
+        </div>
       </div>
 
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Nombre Completo</th>
-              <th>Cédula</th>
-              <th>Email</th>
-              <th>Rol</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="loading">
-              <td colspan="6" class="text-center py-8">Cargando...</td>
-            </tr>
-            <tr v-for="usuario in filteredUsuarios" :key="usuario.id">
-              <td>{{ usuario.nombreCompleto }}</td>
-              <td>{{ usuario.cedula }}</td>
-              <td>{{ usuario.email }}</td>
-              <td>{{ usuario.rol }}</td>
-              <td>
-                <span :class="['badge', usuario.activo ? 'success' : 'danger']">
-                  {{ usuario.activo ? 'Activo' : 'Inactivo' }}
-                </span>
-              </td>
-              <td class="actions-cell">
-                <button @click="openModal(usuario)" class="btn btn-edit">Editar</button>
-                <button @click="toggleStatus(usuario)"
-                  :class="['btn', usuario.activo ? 'btn-danger' : 'btn-success']">{{ usuario.activo ? 'Desactivar' :
-                  'Activar' }}</button>
-                <button @click="deleteUsuario(usuario)" class="btn btn-danger">Eliminar</button>
-              </td>
-            </tr>
-            <tr v-if="!loading && filteredUsuarios.length === 0">
-              <td colspan="6" class="text-center py-8">No se encontraron usuarios.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+     <div class="rounded-xl border border-gray-200 shadow-sm mb-2 w-full max-w-7xl mx-auto overflow-hidden">
+  <div>
+    <table class="w-full border-collapse">
+      <thead class="bg-[#74B9E7] text-black">
+        <tr>
+          <th class="px-3 py-3 text-center font-semibold">Nombre Completo</th>
+          <th class="px-3 py-3 text-center font-semibold">Cédula</th>
+          <th class="px-3 py-3 text-center font-semibold">Email</th>
+          <th class="px-3 py-3 text-center font-semibold">Rol</th>
+          <th class="px-3 py-3 text-center font-semibold">Estado</th>
+          <th class="px-3 py-3 text-center font-semibold">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-if="loading">
+          <td colspan="6" class="text-center py-8">Cargando...</td>
+        </tr>
+
+        <tr v-for="(usuario, index) in filteredUsuarios" :key="usuario.id"
+          :class="index % 2 === 0 ? 'bg-gray-50' : 'bg-white'"
+          class="border-b border-gray-100 hover:bg-[#fac8012f] transition-colors duration-150">
+
+          <!-- Nombre -->
+          <td class="px-3 py-3 text-gray-800 font-medium text-center">
+            {{ usuario.nombreCompleto }}
+          </td>
+
+          <!-- Cédula -->
+          <td class="px-3 py-3 text-gray-600 text-center">
+            {{ usuario.cedula }}
+          </td>
+
+          <!-- Email -->
+          <td class="px-3 py-3 text-gray-600 text-center">
+            {{ usuario.email }}
+          </td>
+
+          <!-- Rol -->
+          <td class="px-3 py-3 text-gray-700 font-semibold text-center">
+            {{ usuario.rol }}
+          </td>
+
+          <!-- Estado -->
+          <td class="px-3 py-3 text-center">
+            <span :class="usuario.activo
+              ? 'bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium'
+              : 'bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-medium'">
+              {{ usuario.activo ? 'Activo' : 'Inactivo' }}
+            </span>
+          </td>
+
+          <!-- Acciones -->
+          <td class="px-3 py-3">
+            <div class="flex items-center justify-center gap-2">
+              <button @click="openModal(usuario)"
+                class="bg-blue-100 text-black hover:bg-blue-200 px-3 py-1 rounded-md text-sm font-medium transition-colors duration-150">
+                Editar
+              </button>
+              <button @click="toggleStatus(usuario)"
+                :class="[usuario.activo
+                  ? 'bg-red-100 hover:bg-red-200'
+                  : 'bg-green-100 hover:bg-green-200',
+                  'text-black px-3 py-1 rounded-md text-sm font-medium transition-colors duration-150']">
+                {{ usuario.activo ? 'Desactivar' : 'Activar' }}
+              </button>
+              <button @click="deleteUsuario(usuario)"
+                class="bg-red-100 text-black hover:bg-red-200 px-3 py-1 rounded-md text-sm font-medium transition-colors duration-150">
+                Eliminar
+              </button>
+            </div>
+          </td>
+        </tr>
+
+        <tr v-if="!loading && filteredUsuarios.length === 0">
+          <td colspan="6" class="text-center py-8">No se encontraron usuarios.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
     </div>
 
     <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
@@ -163,13 +213,15 @@ onMounted(fetchUsuarios);
 </script>
 
 <style scoped>
-/* --- ESTILOS UNIFICADOS CON VARIABLES DE TEMA --- */
+
 .page-container {
   display: flex;
   flex-direction: column;
-  height: 100%; /* <-- Esta es la línea que faltaba */
+  min-height: 100vh;   /* ocupa toda la ventana */
   padding: 2rem;
   justify-content: flex-start;
+  overflow-x: hidden;  /* quita scroll horizontal */
+  overflow-y: hidden;  /* quita scroll vertical */
 }
 
 .max-w-7xl {
@@ -179,6 +231,7 @@ onMounted(fetchUsuarios);
   margin-right: auto;
 }
 
+/* ---- Header ---- */
 .page-header {
   text-align: center;
   margin-bottom: 1.5rem;
@@ -187,95 +240,170 @@ onMounted(fetchUsuarios);
 .page-title {
   font-size: 1.8rem;
   font-weight: 600;
-  color: var(--text);
+  color: #1f2937;
 }
 
 .page-subtitle {
-  color: var(--text-muted);
+  color: #6b7280;
   margin-top: 0.25rem;
 }
 
-.actions-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-}
+/* ---- Barra de acciones ---- */
 
-.search-input {
-  padding: 0.6rem 1rem;
-  border: 1px solid var(--border);
+.btn-primary {
+  background-color: #fbbf24;
+  color: #111827;
+  padding: 0.6rem 1.2rem;
   border-radius: 6px;
-  width: 300px;
-  background-color: var(--surface-2);
-  color: var(--text);
+  font-weight: 600;
+  cursor: pointer;
+  border: none; 
+  transition: 0.2s;
+  box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
 }
 
-/* Tabla */
+.btn-primary:hover {
+  background-color: #f59e0b;
+}
+
+/* ---- Tabla ---- */
 .table-container {
   overflow-x: auto;
-  background: var(--surface);
-  border-radius: 8px;
-  border: 1px solid var(--border);
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  color: var(--text);
 }
 
 th,
 td {
   padding: 12px 15px;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
+  text-align: center;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 th {
-  background-color: var(--table-header);
-  color: white;
-  text-align: center;
+  background-color: #74B9E7;
+  color: black;
+  font-weight: 600;
+  font-size: 0.95rem;
 }
 
-td {
-  text-align: center;
+tbody tr:hover {
+  background-color: #f9fafb;
 }
 
-/* Botones y Badges */
+/* --- Tarjetas responsivas para móvil --- */
+@media (max-width: 768px) {
+  table, thead, tbody, th, td, tr {
+    display: block;
+    width: 100%;
+  }
+
+  thead {
+    display: none;
+  }
+
+  tr {
+    margin-bottom: 0.8rem; /* menos espacio entre tarjetas */
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px; /* menos redondeo */
+    padding: 0.8rem 0.9rem; /* menos padding */
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    text-align: center;
+    font-size: 0.9rem; /* texto un poco más pequeño */
+  }
+
+  td {
+    display: block;
+    padding: 0.4rem 0;
+    border: none;
+    font-size: 0.9rem;
+    text-align: center;
+  }
+
+  td::before {
+    content: attr(data-label);
+    display: block;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.2rem;
+    font-size: 0.85rem; /* títulos más pequeños */
+    text-align: center;
+  }
+
+  /* Estado */
+  td span {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 9999px;
+    display: inline-block;
+    margin-top: 0.2rem;
+  }
+
+  /* Acciones */
+  td:last-child {
+    margin-top: 0.5rem;
+  }
+
+  .flex.items-center.justify-center.gap-2 {
+    flex-direction: column;
+    gap: 0.3rem; /* menos espacio entre botones */
+    align-items: center;
+  }
+
+  button {
+    width: 85%; /* menos ancho */
+    max-width: 220px;
+    padding: 0.4rem 0.6rem; /* más compacto */
+    font-size: 0.8rem;
+    border-radius: 8px !important;
+    font-weight: 600;
+    text-align: center;
+  }
+}
+
+/* ---- Botones ---- */
 .btn {
-  padding: 0.5rem 1rem;
+  padding: 0.4rem 0.8rem;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   font-weight: 500;
+  font-size: 0.85rem;
   transition: background-color 0.2s;
 }
 
-.btn-primary {
-  background-color: var(--primary);
-  color: var(--primary-contrast);
-}
-
-.btn-secondary {
-  background-color: var(--surface-2);
-  color: var(--text);
-  border: 1px solid var(--border);
-}
-
 .btn-edit {
-  background-color: #f59e0b;
-  color: white;
+  background-color: #bfdbfe;
+  color: #1e40af;
+}
+
+.btn-edit:hover {
+  background-color: #93c5fd;
 }
 
 .btn-danger {
-  background-color: #ef4444;
-  color: white;
+  background-color: #fecaca;
+  color: #b91c1c;
+}
+
+.btn-danger:hover {
+  background-color: #fca5a5;
 }
 
 .btn-success {
-  background-color: #22c55e;
-  color: white;
+  background-color: #bbf7d0;
+  color: #166534;
+}
+
+.btn-success:hover {
+  background-color: #86efac;
 }
 
 .actions-cell {
@@ -284,6 +412,7 @@ td {
   gap: 0.5rem;
 }
 
+/* ---- Badges ---- */
 .badge {
   padding: 4px 10px;
   border-radius: 12px;
@@ -292,20 +421,20 @@ td {
 }
 
 .badge.success {
-  background-color: rgba(34, 197, 94, 0.2);
-  color: #22c55e;
+  background-color: #d1fae5;
+  color: #10b981;
 }
 
 .badge.danger {
-  background-color: rgba(239, 68, 68, 0.2);
+  background-color: #fee2e2;
   color: #ef4444;
 }
 
-/* Modal */
+/* ---- Modal ---- */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -313,12 +442,13 @@ td {
 }
 
 .modal-content {
-  background: var(--surface);
+  background: white;
   padding: 2rem;
-  border-radius: 8px;
+  border-radius: 12px;
   width: 90%;
   max-width: 600px;
-  border: 1px solid var(--border);
+  border: 1px solid #e5e7eb;
+  box-shadow: 0px 5px 15px rgba(0,0,0,0.2);
 }
 
 .modal-title {
@@ -326,7 +456,7 @@ td {
   font-weight: 600;
   margin-bottom: 1.5rem;
   text-align: center;
-  color: var(--text);
+  color: #1f2937;
 }
 
 .form-grid {
@@ -343,17 +473,17 @@ td {
 .form-group label {
   margin-bottom: 0.5rem;
   font-weight: 500;
-  color: var(--text);
+  color: #374151;
 }
 
 .form-group input,
 .form-group select {
   width: 100%;
   padding: 0.6rem;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background-color: var(--surface-2);
-  color: var(--text);
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background-color: #f9fafb;
+  color: #111827;
 }
 
 .modal-actions {
@@ -361,5 +491,11 @@ td {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
+}
+
+.btn-secondary {
+  background-color: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
 }
 </style>

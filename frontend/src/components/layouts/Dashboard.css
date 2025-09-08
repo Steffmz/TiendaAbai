@@ -15,16 +15,13 @@
 .main-content {
   position: relative;
   height: 100%;
-  /* La transición en padding es aceptable, pero para movimientos,
-     prefiere transform. */
-  transition: padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Curva de aceleración más suave */
+  transition: padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
   padding-left: var(--sidebar-width);
 
-  /* Si en el futuro animaras su posición, añade esto para promoverlo a una capa de GPU */
   will-change: padding-left;
 }
 
-.main-content.collapsed {
+.main-content.collapsed { 
   padding-left: var(--sidebar-width-collapsed);
 }
 
@@ -35,8 +32,25 @@
   background-color: var(--background-color);
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 768px) {
   .main-content {
-    padding-left: 0; 
+    padding-left: 0 !important; /* el contenido no queda corrido */
   }
+
+  .main-content.sidebar-open {
+    position: fixed; /* para que no se desplace */
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* bloquea scroll detrás del sidebar */
+  }
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 900; /* debajo del sidebar */
 }

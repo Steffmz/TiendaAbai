@@ -1,8 +1,8 @@
 <template>
   <div class="topbar">
-    <div class="menu-icon" @click="$emit('toggle')">
-      <Icon icon="mdi:menu" />
-    </div>
+    <div class="menu-icon" @click="$emit('toggleSidebar')">
+  <span class="iconify" data-icon="mdi:menu"></span>
+</div>
 
     <div class="logo">
       <img 
@@ -36,7 +36,7 @@ import { useRouter } from 'vue-router';
 import logoNormal from "../../assets/img/abai-logo.png";
 import logoBlanco from "../../assets/img/Logo-blanco.png";
 
-const emit = defineEmits(['toggle', 'open-profile', 'toggle-notifications']); // <-- Añade el nuevo evento
+const emit = defineEmits(['toggle', 'open-profile', 'toggle-notifications']);
 
 const router = useRouter();
 const { isDark, toggle } = useTheme();
@@ -49,7 +49,7 @@ function showHelp() { console.log("Mostrar ayuda"); }
 function showProfile() { 
   emit('open-profile');
 }
-// Función para avisar al Dashboard que abra/cierre el panel
+
 function showNotifications() { 
   emit('toggle-notifications'); 
 }
