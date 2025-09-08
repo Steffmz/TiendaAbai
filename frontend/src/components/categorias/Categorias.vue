@@ -10,16 +10,25 @@
       <!-- Barra de Búsqueda y Botón -->
       <div class="w-full flex justify-center mb-6">
         <div class="flex flex-col md:flex-row items-center gap-3 w-full max-w-3xl">
-          <input v-model="filtro" type="text" placeholder="Buscar Categoria..." class="w-64 md:flex-1 px-3 py-2 border border-yellow-400 rounded-lg text-blue-800 bg-blue-50
+          <input
+            v-model="filtro"
+            type="text"
+            placeholder="Buscar Categoria..."
+            class="w-64 md:flex-1 px-3 py-2 border border-yellow-400 rounded-lg text-blue-800 bg-blue-50
                    focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-200
-                   text-sm shadow-sm transition-all duration-200" />
+                   text-sm shadow-sm transition-all duration-200"
+          />
 
-          <button @click="abrirModalNueva" class="px-5 py-2 bg-[#FFB93B] text-black rounded-lg font-semibold shadow-md
-                   hover:bg-[#74B9E7] transition-all duration-200 hover:shadow-lg">
+          <button
+            @click="abrirModalNueva"
+            class="px-5 py-2 bg-[#FFB93B] text-black rounded-lg font-semibold shadow-md
+                   hover:bg-[#74B9E7] transition-all duration-200 hover:shadow-lg"
+          >
             + Nueva Categoria
           </button>
         </div>
       </div>
+
       <!-- Tabla de Categorías -->
       <div class="rounded-xl border border-gray-200 shadow-sm mb-2 w-full max-w-7xl mx-auto overflow-hidden">
         <table class="w-full border-collapse">
@@ -32,33 +41,60 @@
               <th>Acciones</th>
             </tr>
           </thead>
+
           <tbody>
-            <tr v-if="loading">
-              <td colspan="5" class="text-center py-8">Cargando categorías...</td>
-            </tr>
-            <tr v-else-if="categoriasPaginadas.length === 0">
-              <td colspan="5" class="text-center py-8">No se encontraron categorías.</td>
-            </tr>
-            <tr v-else v-for="categoria in categoriasPaginadas" :key="categoria.id">
-              <td class="flex justify-center py-2">
-                <div class="w-14 h-14 rounded-lg overflow-hidden border image-border">
-                  <img :src="categoria.imagenUrl ? `${API_BASE_URL}${categoria.imagenUrl}` : placeholder"
-                    class="w-full h-full object-cover" alt="Foto" />
-                </div>
-              </td>
-              <td class="text-center">{{ categoria.nombre }}</td>
-              <td class="text-center">
-                <button @click="mostrarDescripcion = categoria.descripcion" class="btn-secondary text-xs">Ver</button>
-              </td>
-              <td class="text-center">
-                <Switch :modelValue="categoria.activo" @update:modelValue="cambioEstado(categoria)" />
-              </td>
-              <td class="actions-cell">
-                <button @click="abrirModalEditar(categoria)" class="btn btn-edit">Editar</button>
-                <button @click="irAProductos(categoria.id)" class="btn btn-success">Catálogo</button>
-                <button @click="confirmarEliminar(categoria)" class="btn btn-danger">Eliminar</button>
-              </td>
-            </tr>
+            <!-- Loading -->
+            <template v-if="loading">
+              <tr>
+                <td colspan="5" class="text-center py-8">Cargando categorías...</td>
+              </tr>
+            </template>
+
+            <!-- Sin datos -->
+            <template v-else-if="categoriasPaginadas.length === 0">
+              <tr>
+                <td colspan="5" class="text-center py-8">No se encontraron categorías.</td>
+              </tr>
+            </template>
+
+            <!-- Listado -->
+            <template v-else>
+              <tr v-for="categoria in categoriasPaginadas" :key="categoria.id">
+                <td class="flex justify-center py-2">
+                  <div class="w-14 h-14 rounded-lg overflow-hidden border image-border">
+                    <img
+                      :src="categoria.imagenUrl ? `${API_BASE_URL}${categoria.imagenUrl}` : placeholder"
+                      class="w-full h-full object-cover"
+                      alt="Foto"
+                    />
+                  </div>
+                </td>
+
+                <td class="text-center">{{ categoria.nombre }}</td>
+
+                <td class="text-center">
+                  <button
+                    @click="mostrarDescripcion = categoria.descripcion"
+                    class="btn-secondary text-xs"
+                  >
+                    Ver
+                  </button>
+                </td>
+
+                <td class="text-center">
+                  <Switch
+                    :modelValue="categoria.activo"
+                    @update:modelValue="cambioEstado(categoria)"
+                  />
+                </td>
+
+                <td class="actions-cell">
+                  <button @click="abrirModalEditar(categoria)" class="btn btn-edit">Editar</button>
+                  <button @click="irAProductos(categoria.id)" class="btn btn-success">Catálogo</button>
+                  <button @click="confirmarEliminar(categoria)" class="btn btn-danger">Eliminar</button>
+                </td>
+              </tr>
+            </template>
           </tbody>
         </table>
       </div>
@@ -69,10 +105,18 @@
 
         <div v-if="!loading && totalPaginas > 1">
           <button @click="paginaAnterior" :disabled="paginaActual === 1">←</button>
+
           <template v-for="(pagina, index) in paginasVisibles" :key="index">
             <span v-if="pagina === '...'" class="pagination-ellipsis">&hellip;</span>
-            <button v-else @click="irAPagina(pagina)" :class="{ active: paginaActual === pagina }">{{ pagina }}</button>
+            <button
+              v-else
+              @click="irAPagina(pagina)"
+              :class="{ active: paginaActual === pagina }"
+            >
+              {{ pagina }}
+            </button>
           </template>
+
           <button @click="paginaSiguiente" :disabled="paginaActual === totalPaginas">→</button>
         </div>
       </div>
@@ -82,15 +126,18 @@
     <div v-if="mostrarModal" class="modal-overlay" @click.self="cerrarModal">
       <div class="modal-content">
         <h2 class="modal-title">{{ editando ? 'Editar Categoría' : 'Nueva Categoría' }}</h2>
+
         <form @submit.prevent="guardarCategoria" class="space-y-5">
           <div class="form-group">
             <label>Nombre</label>
             <input v-model="form.nombre" type="text" required placeholder="Nombre de la categoría" />
           </div>
+
           <div class="form-group">
             <label>Descripción</label>
             <textarea v-model="form.descripcion" rows="3" placeholder="Descripción de la categoría"></textarea>
           </div>
+
           <div class="form-group">
             <label>Imagen</label>
             <input type="file" @change="handleImageUpload" accept="image/*" class="file-input" />
@@ -98,6 +145,7 @@
               <img :src="previewImage" class="w-24 h-24 rounded-lg object-cover border image-border" alt="Preview" />
             </div>
           </div>
+
           <div class="modal-actions">
             <button type="button" @click="cerrarModal" class="btn btn-secondary">Cancelar</button>
             <button type="submit" class="btn btn-primary">{{ editando ? 'Actualizar' : 'Crear' }}</button>
@@ -124,6 +172,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import useCategorias from './useCategorias';
 import Switch from './Switch.vue';
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const router = useRouter();
 const mostrarDescripcion = ref(null);
@@ -404,3 +453,4 @@ th {
   justify-content: center;
 }
 </style>
+  
