@@ -1,20 +1,18 @@
-import { ref, computed, getCurrentInstance } from "vue";
+import { ref, computed } from "vue";
 import axios from "axios";
 import Swal from "sweetalert2";
-import { useNotifications } from "./useNotifications";
 
 const API_URL = `${import.meta.env.VITE_API_BASE_URL}/api/carrito`;
+const PEDIDOS_URL = `${import.meta.env.VITE_API_BASE_URL}/api/pedidos`;
 
 const getAuthHeaders = () => ({
   headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` },
 });
 
-// Estado reactivo del carrito (compartido en toda la app)
 const carrito = ref([]);
 const loading = ref(false);
 
 export function useCarrito() {
-  const instance = getCurrentInstance();
   const totalItems = computed(() =>
     carrito.value.reduce((total, item) => total + item.cantidad, 0)
   );
@@ -38,14 +36,47 @@ export function useCarrito() {
     }
   };
 
-  const agregarAlCarrito = async (productoId, cantidad = 1) => {
+  const agregarAlCarrito = async (productoId, event, cantidad = 1) => {
+    if (event) {
+      const button = event.currentTarget;
+      const productCard = button.closest('.product-card, .bg-white');
+      const productImage = productCard ? productCard.querySelector('img') : null;
+      const cartIcon = document.getElementById('cart-icon');
+
+      if (productImage && cartIcon) {
+        const imgClone = productImage.cloneNode(true);
+        const startRect = productImage.getBoundingClientRect();
+        const endRect = cartIcon.getBoundingClientRect();
+
+        imgClone.classList.add('fly-to-cart-clone');
+        document.body.appendChild(imgClone);
+
+        imgClone.style.left = `${startRect.left}px`;
+        imgClone.style.top = `${startRect.top}px`;
+        imgClone.style.width = `${startRect.width}px`;
+        imgClone.style.height = `${startRect.height}px`;
+
+        imgClone.getBoundingClientRect();
+
+        imgClone.style.left = `${endRect.left + endRect.width / 2}px`;
+        imgClone.style.top = `${endRect.top + endRect.height / 2}px`;
+        imgClone.style.width = '0px';
+        imgClone.style.height = '0px';
+        imgClone.style.opacity = '0';
+
+        setTimeout(() => {
+          imgClone.remove();
+        }, 1000);
+      }
+    }
+
     try {
       const response = await axios.post(
         API_URL,
         { productoId, cantidad },
         getAuthHeaders()
       );
-      await fetchCarrito(); // Recargar el carrito para tener los datos actualizados
+      await fetchCarrito();
       Swal.fire({
         icon: "success",
         title: "¡Agregado!",
@@ -53,7 +84,7 @@ export function useCarrito() {
         toast: true,
         position: "top-end",
         showConfirmButton: false,
-        timer: 3000,
+        timer: 2000,
         timerProgressBar: true,
       });
     } catch (error) {
@@ -92,17 +123,13 @@ export function useCarrito() {
 
   const procesarCanje = async () => {
     if (carrito.value.length === 0) {
-      Swal.fire(
-        "Carrito Vacío",
-        "Agrega productos a tu carrito antes de canjear.",
-        "info"
-      );
-      return;
+      Swal.fire("Carrito Vacío", "Agrega productos antes de canjear.", "info");
+      return false;
     }
 
     const { isConfirmed } = await Swal.fire({
       title: "¿Confirmar Canje?",
-      html: `Se canjearán <strong>${totalItems.value} productos</strong> por un total de <strong>${totalPuntos.value} puntos</strong>.`,
+      html: `Se canjearán <strong>${totalItems.value} productos</strong> por <strong>${totalPuntos.value} puntos</strong>.`,
       icon: "question",
       showCancelButton: true,
       confirmButtonText: "Sí, ¡canjear!",
@@ -112,36 +139,18 @@ export function useCarrito() {
     if (isConfirmed) {
       loading.value = true;
       try {
-        await axios.post(
-          `${import.meta.env.VITE_API_BASE_URL}/api/pedidos/desde-carrito`,
-          {},
-          getAuthHeaders()
-        );
-
-        await fetchCarrito();
-
-        const { fetchUnreadCount } = useNotifications();
-        await fetchUnreadCount();
-
-        if (instance) {
-          instance.emit("redemption-successful");
-        }
-
-        Swal.fire(
-          "¡Canje Exitoso!",
-          "Tu pedido ha sido procesado y está pendiente de aprobación.",
-          "success"
-        );
+        await axios.post(`${PEDIDOS_URL}/desde-carrito`, {}, getAuthHeaders());
+        await fetchCarrito(); // Limpiamos el estado local del carrito
+        Swal.fire("¡Canje Exitoso!", "Tu pedido ha sido procesado.", "success");
+        return true; // Devolvemos true en caso de éxito
       } catch (error) {
-        Swal.fire(
-          "Error en el Canje",
-          error.response?.data?.message || "No se pudo procesar tu pedido.",
-          "error"
-        );
+        Swal.fire("Error en el Canje", error.response?.data?.message || "No se pudo procesar tu pedido.", "error");
+        return false; // Devolvemos false en caso de error
       } finally {
         loading.value = false;
       }
     }
+    return false;
   };
 
   return {

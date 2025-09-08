@@ -1,6 +1,7 @@
 import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import { PAGINATION } from '../../config';
 
 const API_URL = `${import.meta.env.VITE_API_BASE_URL}/api/categorias`;
 
@@ -24,7 +25,7 @@ export default function useCategorias() {
   const editando = ref(false);
   const filtro = ref('');
   const paginaActual = ref(1);
-  const categoriasPorPagina = 5;
+  const categoriasPorPagina = PAGINATION.CATEGORIES;
   const previewImage = ref(null);
 
   const form = ref({

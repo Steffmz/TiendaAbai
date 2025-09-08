@@ -14,11 +14,8 @@
           <span v-if="userData.nombreCompleto">Hola, {{ userData.nombreCompleto.split(' ')[0] }}</span>
           <span class="points-badge">{{ userData.puntosTotales }} Puntos</span>
 
-          <router-link to="/tienda/carrito" class="cart-button" title="Carrito">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-              <path fill="currentColor"
-                d="M17 18c-1.11 0-2 .89-2 2s.89 2 2 2s2-.89 2-2s-.89-2-2-2M7 18c-1.11 0-2 .89-2 2s.89 2 2 2s2-.89 2-2s-.89-2-2-2m.16-8l1.1-2H16.1c.45 0 .81-.32.96-.73l3.58-6.47c.17-.31 0-.69-.33-.69H5.21l-.94-2H1v2h2l3.6 7.59l-1.35 2.44C4.52 15.37 5.48 17 7 17h12v-2H7.42c-.28 0-.5-.22-.5-.5s.22-.5.5-.5z" />
-            </svg>
+          <router-link to="/tienda/carrito" class="cart-button" title="Carrito" id="cart-icon">
+            <svg></svg>
             <span v-if="totalItems > 0" class="cart-badge">{{ totalItems }}</span>
           </router-link>
 

@@ -282,10 +282,6 @@ html.dark h1, html.dark h2, html.dark h3, html.dark h4, html.dark h5, html.dark 
     color: var(--text) !important;
 }
 
-/*html.dark p, html.dark span, html.dark div {
-    color: var(--text);
-} */
-
 html.dark .text-muted,
 html.dark .muted {
     color: var(--text-muted) !important;
@@ -369,4 +365,13 @@ html.dark .categories-table {
   border-radius: 8px !important;
   padding: 0.6rem 1.2rem !important;
   font-weight: 600 !important;
+}
+
+.fly-to-cart-clone {
+  position: fixed;
+  z-index: 9999;
+  border-radius: 50%;
+  opacity: 0.8;
+  transition: all 1s cubic-bezier(0.55, -0.44, 0.95, 0.73);
+  object-fit: cover;
 }

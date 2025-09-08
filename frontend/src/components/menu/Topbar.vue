@@ -21,12 +21,15 @@
       />
 
       <Icon icon="mdi:account-circle" title="Perfil" @click="showProfile" />
-      <Icon icon="mdi:bell-outline" title="Notificaciones" @click="showNotifications" />
+      
+      <div class="notification-icon-wrapper">
+        <Icon icon="mdi:bell-outline" title="Notificaciones" @click="showNotifications" />
+        <span v-if="unreadCount > 0" class="topbar-badge">{{ unreadCount }}</span>
+      </div>
+
       <Icon icon="mdi:help-circle-outline" title="Ayuda" @click="showHelp" />
+
       <Icon icon="mdi:logout" title="Cerrar Sesión" @click="logout" />
-      <div class="notification-icon-wrapper"> <Icon icon="mdi:bell-outline" title="Notificaciones" @click="showNotifications" />
-      <span v-if="unreadCount > 0" class="topbar-badge">{{ unreadCount }}</span>
-    </div>
     </div>
   </div>
 </template>
@@ -36,39 +39,58 @@ import { Icon } from "@iconify/vue";
 import { useTheme } from '../../theme.js';
 import { useRouter } from 'vue-router';
 import { onMounted } from "vue";
+import Swal from 'sweetalert2';
 import logoNormal from "../../assets/img/abai-logo.png";
 import logoBlanco from "../../assets/img/Logo-blanco.png";
 import { useNotifications } from '../../composables/useNotifications';
 
-const emit = defineEmits(['toggle', 'open-profile', 'toggle-notifications']); // <-- Añade el nuevo evento
+const emit = defineEmits(['toggle', 'open-profile', 'toggle-notifications']);
 
 const router = useRouter();
 const { isDark, toggle } = useTheme();
 const { unreadCount, fetchUnreadCount, markAllAsRead } = useNotifications();
+
 function toggleDarkMode() {
   toggle();
 }
 
-function showHelp() { console.log("Mostrar ayuda"); }
+function showHelp() { 
+  Swal.fire('Ayuda', 'Esta sección está en desarrollo.', 'info');
+}
+
 function showProfile() { 
   emit('open-profile');
 }
-// Función para avisar al Dashboard que abra/cierre el panel
+
 function showNotifications() { 
   emit('toggle-notifications');
-  markAllAsRead(); // Marcar como leídas al abrir
+  markAllAsRead();
 }
 
 function logout() { 
-  if (confirm("¿Estás seguro de que quieres cerrar sesión?")) { 
-    localStorage.removeItem('authToken');
-    router.push('/login');
-  } 
+  Swal.fire({
+    title: '¿Estás seguro?',
+    text: "¿Quieres cerrar la sesión?",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Sí, ¡cerrar sesión!',
+    cancelButtonText: 'Cancelar'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      localStorage.removeItem('authToken');
+      router.push('/login');
+    }
+  })
 }
+
 onMounted(fetchUnreadCount);
 </script>
+
+<style src="./Topbar.css"></style>
 <style>
-/* ... */
+/* Estilos para el badge de notificaciones */
 .notification-icon-wrapper {
   position: relative;
   display: flex;
@@ -86,4 +108,3 @@ onMounted(fetchUnreadCount);
   font-weight: bold;
 }
 </style>
-<style src="./Topbar.css"></style>

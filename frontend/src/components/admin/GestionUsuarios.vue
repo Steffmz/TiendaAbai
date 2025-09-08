@@ -205,7 +205,7 @@ const saveUsuario = async () => {
       Swal.fire('Éxito', 'Usuario creado con éxito.', 'success');
     }
     closeModal();
-    fetchData(); // Recargamos todos los datos
+    fetchData();
   } catch (error) {
     Swal.fire('Error', error.response?.data?.message || 'No se pudo guardar el usuario.', 'error');
   }
@@ -233,7 +233,7 @@ const savePuntos = async () => {
     
     Swal.fire('Éxito', 'Puntos ajustados correctamente.', 'success');
     closePuntosModal();
-    fetchData(); // Recargamos todos los datos
+    fetchData();
   } catch (error) {
     Swal.fire('Error', error.response?.data?.message || 'No se pudo ajustar los puntos.', 'error');
   }
@@ -324,4 +324,4 @@ td { text-align: center; }
 .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.6rem; border: 1px solid var(--border); border-radius: 4px; background-color: var(--surface-2); color: var(--text); }
 .modal-actions { margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 1rem; }
 .form-group textarea { min-height: 80px; resize: vertical; }
-</style>
+</style>  

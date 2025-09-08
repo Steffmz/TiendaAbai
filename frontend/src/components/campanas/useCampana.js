@@ -1,6 +1,7 @@
 import { ref, computed, onMounted } from "vue";
 import axios from "axios";
 import Swal from "sweetalert2";
+import { PAGINATION } from "../../config";
 
 const API_URL = `${import.meta.env.VITE_API_BASE_URL}/api/campanas`;
 const API_PRODUCTOS = `${import.meta.env.VITE_API_BASE_URL}/api/productos`;
@@ -29,7 +30,7 @@ export default function useCampana() {
 
   // Paginación
   const paginaActual = ref(1);
-  const elementosPorPagina = 6;
+  const elementosPorPagina = PAGINATION.CAMPAIGNS;;
   const totalPaginas = computed(() =>
     Math.ceil(campanasFiltradas.value.length / elementosPorPagina)
   );
