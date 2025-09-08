@@ -8,6 +8,7 @@
         <nav class="nav-links">
           <router-link to="/tienda">Tienda</router-link>
           <router-link to="/tienda/carrito">Mi Carrito</router-link>
+          <router-link to="/tienda/mis-pedidos">Mis Pedidos</router-link>
           <router-link to="/tienda/mi-perfil">Mi Perfil</router-link>
         </nav>
         <div class="user-info">

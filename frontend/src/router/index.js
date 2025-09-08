@@ -19,6 +19,7 @@ import GestionPedidos from "../components/admin/GestionPedidos.vue";
 import MiPerfil from "../components/employee/MiPerfil.vue";
 import Carrito from "../components/employee/Carrito.vue";
 import Productos from "../components/productos/Productos.vue";
+import MisPedidos from "../components/employee/MisPedidos.vue";
 
 const routes = [
   // --- RUTAS PÚBLICAS ---
@@ -70,6 +71,11 @@ const routes = [
         component: Carrito,
       },
       { path: "mi-perfil", name: "MiPerfil", component: MiPerfil },
+      {
+        path: "mis-pedidos",
+        name: "MisPedidos",
+        component: MisPedidos,
+      },
     ],
   },
 
