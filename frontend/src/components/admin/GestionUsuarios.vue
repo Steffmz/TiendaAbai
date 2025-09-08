@@ -26,9 +26,20 @@
           </thead>
           <tbody>
             <tr v-if="loading">
-              <td colspan="7" class="text-center py-8">Cargando...</td>
+              <td colspan="7" class="p-0">
+                <div v-for="i in 5" :key="i" class="flex items-center p-4 gap-4 border-b border-[var(--border)]">
+                  <BaseSkeleton width="64px" height="24px" />
+                  <BaseSkeleton width="80px" height="24px" />
+                  <BaseSkeleton width="40px" height="24px" />
+                  <BaseSkeleton width="120px" height="24px" />
+                  <BaseSkeleton width="60px" height="24px" />
+                  <BaseSkeleton width="60px" height="24px" />
+                  <BaseSkeleton width="200px" height="24px" />
+                </div>
+              </td>
             </tr>
-            <tr v-for="usuario in filteredUsuarios" :key="usuario.id">
+
+            <tr v-else v-for="usuario in filteredUsuarios" :key="usuario.id">
               <td>{{ usuario.nombreCompleto }}</td>
               <td>{{ usuario.cedula }}</td>
               <td>{{ usuario.puntosTotales }}</td>
@@ -44,12 +55,15 @@
                 <button @click="openPuntosModal(usuario)" class="btn btn-info">Puntos</button>
                 <button @click="toggleStatus(usuario)"
                   :class="['btn', usuario.activo ? 'btn-danger' : 'btn-success']">{{ usuario.activo ? 'Desactivar' :
-                  'Activar' }}</button>
+                    'Activar' }}</button>
                 <button @click="deleteUsuario(usuario)" class="btn btn-danger">Eliminar</button>
               </td>
             </tr>
             <tr v-if="!loading && filteredUsuarios.length === 0">
-              <td colspan="7" class="text-center py-8">No se encontraron usuarios.</td>
+               <td colspan="7">
+                <EmptyState icon="mdi:account-search-outline" title="No se encontraron usuarios"
+                  message="Prueba con otro término de búsqueda o crea un nuevo usuario." />
+              </td>
             </tr>
           </tbody>
         </table>
@@ -57,53 +71,57 @@
     </div>
 
     <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
-        <div class="modal-content">
-            <h2 class="modal-title">{{ isEditMode ? 'Editar Usuario' : 'Crear Usuario' }}</h2>
-            <form @submit.prevent="saveUsuario">
-                <div class="form-grid">
-                    <div class="form-group"><label>Nombre Completo</label><input v-model="form.nombreCompleto" type="text" required /></div>
-                    <div class="form-group"><label>Cédula</label><input v-model="form.cedula" type="text" :disabled="isEditMode" required /></div>
-                    <div class="form-group"><label>Email</label><input v-model="form.email" type="email" required /></div>
-                    <div class="form-group"><label>Sede</label><input v-model="form.sede" type="text" required /></div>
-                    <div class="form-group" v-if="!isEditMode"><label>Contraseña</label><input v-model="form.contrasena" type="password" required /></div>
-                    <div class="form-group"><label>Rol</label><select v-model="form.rol" required>
-                        <option value="Empleado">Empleado</option>
-                        <option value="Administrador">Administrador</option>
-                    </select></div>
-                    <div class="form-group">
-                        <label>Cargo</label>
-                        <select v-model.number="form.cargoId" required>
-                            <option disabled value="">Selecciona un cargo</option>
-                            <option v-for="cargo in cargos" :key="cargo.id" :value="cargo.id">
-                                {{ cargo.nombre }}
-                            </option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Centro de Costos</label>
-                        <select v-model.number="form.centroDeCostosId" required>
-                            <option disabled value="">Selecciona un centro</option>
-                            <option v-for="centro in centrosDeCostos" :key="centro.id" :value="centro.id">
-                                {{ centro.nombre }}
-                            </option>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" @click="closeModal" class="btn btn-secondary">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Guardar</button>
-                </div>
-            </form>
-        </div>
+      <div class="modal-content">
+        <h2 class="modal-title">{{ isEditMode ? 'Editar Usuario' : 'Crear Usuario' }}</h2>
+        <form @submit.prevent="saveUsuario">
+          <div class="form-grid">
+            <div class="form-group"><label>Nombre Completo</label><input v-model="form.nombreCompleto" type="text"
+                required /></div>
+            <div class="form-group"><label>Cédula</label><input v-model="form.cedula" type="text" :disabled="isEditMode"
+                required /></div>
+            <div class="form-group"><label>Email</label><input v-model="form.email" type="email" required /></div>
+            <div class="form-group"><label>Sede</label><input v-model="form.sede" type="text" required /></div>
+            <div class="form-group" v-if="!isEditMode"><label>Contraseña</label><input v-model="form.contrasena"
+                type="password" required /></div>
+            <div class="form-group"><label>Rol</label><select v-model="form.rol" required>
+                <option value="Empleado">Empleado</option>
+                <option value="Administrador">Administrador</option>
+              </select></div>
+            <div class="form-group">
+              <label>Cargo</label>
+              <select v-model.number="form.cargoId" required>
+                <option disabled value="">Selecciona un cargo</option>
+                <option v-for="cargo in cargos" :key="cargo.id" :value="cargo.id">
+                  {{ cargo.nombre }}
+                </option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Centro de Costos</label>
+              <select v-model.number="form.centroDeCostosId" required>
+                <option disabled value="">Selecciona un centro</option>
+                <option v-for="centro in centrosDeCostos" :key="centro.id" :value="centro.id">
+                  {{ centro.nombre }}
+                </option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-actions">
+            <button type="button" @click="closeModal" class="btn btn-secondary">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+          </div>
+        </form>
+      </div>
     </div>
-    
+
     <div v-if="showPuntosModal" class="modal-overlay" @click.self="closePuntosModal">
       <div class="modal-content">
         <h2 class="modal-title">Ajustar Puntos a {{ formPuntos.nombreCompleto }}</h2>
         <form @submit.prevent="savePuntos">
           <div class="form-group">
             <label>Puntos a Añadir/Quitar</label>
-            <input v-model.number="formPuntos.puntos" type="number" required placeholder="Ej: 100 para añadir, -50 para quitar" />
+            <input v-model.number="formPuntos.puntos" type="number" required
+              placeholder="Ej: 100 para añadir, -50 para quitar" />
           </div>
           <div class="form-group">
             <label>Motivo del Ajuste</label>
@@ -123,6 +141,8 @@
 import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import BaseSkeleton from '../shared/BaseSkeleton.vue';
+import EmptyState from '../shared/EmptyState.vue';
 
 const usuarios = ref([]);
 const loading = ref(true);
@@ -153,8 +173,8 @@ const fetchData = async () => {
     usuarios.value = usuariosRes.data;
     cargos.value = cargosRes.data;
     centrosDeCostos.value = centrosRes.data;
-  } catch (error) { 
-    console.error("Error al cargar datos iniciales:", error); 
+  } catch (error) {
+    console.error("Error al cargar datos iniciales:", error);
     Swal.fire('Error', 'No se pudieron cargar los datos necesarios para la página.', 'error');
   }
   finally { loading.value = false; }
@@ -176,18 +196,18 @@ const filteredUsuarios = computed(() => {
 const openModal = (usuario = null) => {
   if (usuario) {
     isEditMode.value = true;
-    form.value = { 
-      ...usuario, 
-      cargoId: usuario.cargos?.id, 
-      centroDeCostosId: usuario.centroDeCostos?.id 
+    form.value = {
+      ...usuario,
+      cargoId: usuario.cargos?.id,
+      centroDeCostosId: usuario.centroDeCostos?.id
     };
   } else {
     isEditMode.value = false;
-    form.value = { 
-      rol: 'Empleado', 
-      activo: true, 
-      cargoId: '', 
-      centroDeCostosId: '' 
+    form.value = {
+      rol: 'Empleado',
+      activo: true,
+      cargoId: '',
+      centroDeCostosId: ''
     };
   }
   showModal.value = true;
@@ -213,11 +233,11 @@ const saveUsuario = async () => {
 
 // --- Lógica del Modal de Puntos ---
 const openPuntosModal = (usuario) => {
-  formPuntos.value = { 
-    id: usuario.id, 
-    nombreCompleto: usuario.nombreCompleto, 
-    puntos: '', 
-    descripcion: '' 
+  formPuntos.value = {
+    id: usuario.id,
+    nombreCompleto: usuario.nombreCompleto,
+    puntos: '',
+    descripcion: ''
   };
   showPuntosModal.value = true;
 };
@@ -230,7 +250,7 @@ const savePuntos = async () => {
       puntos: formPuntos.value.puntos,
       descripcion: formPuntos.value.descripcion
     }, getAuthHeaders());
-    
+
     Swal.fire('Éxito', 'Puntos ajustados correctamente.', 'success');
     closePuntosModal();
     fetchData();
@@ -242,44 +262,44 @@ const savePuntos = async () => {
 // --- Lógica de Acciones de la Tabla ---
 const toggleStatus = async (usuario) => {
   const result = await Swal.fire({
-      title: '¿Confirmar cambio?',
-      text: `¿Estás seguro de que quieres ${usuario.activo ? 'desactivar' : 'activar'} a ${usuario.nombreCompleto}?`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Sí, cambiar',
-      cancelButtonText: 'Cancelar'
+    title: '¿Confirmar cambio?',
+    text: `¿Estás seguro de que quieres ${usuario.activo ? 'desactivar' : 'activar'} a ${usuario.nombreCompleto}?`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, cambiar',
+    cancelButtonText: 'Cancelar'
   });
 
   if (result.isConfirmed) {
-      try {
-        await axios.patch(`${API_URL}/${usuario.id}/toggle-status`, {}, getAuthHeaders());
-        Swal.fire('Éxito', 'Estado del usuario actualizado.', 'success');
-        fetchData();
-      } catch (error) { 
-        Swal.fire('Error', 'No se pudo actualizar el estado.', 'error');
-      }
+    try {
+      await axios.patch(`${API_URL}/${usuario.id}/toggle-status`, {}, getAuthHeaders());
+      Swal.fire('Éxito', 'Estado del usuario actualizado.', 'success');
+      fetchData();
+    } catch (error) {
+      Swal.fire('Error', 'No se pudo actualizar el estado.', 'error');
+    }
   }
 };
 
 const deleteUsuario = async (usuario) => {
   const result = await Swal.fire({
-      title: '¿ELIMINAR PERMANENTEMENTE?',
-      text: `Esta acción no se puede deshacer. Se eliminará a ${usuario.nombreCompleto}.`,
-      icon: 'error',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
+    title: '¿ELIMINAR PERMANENTEMENTE?',
+    text: `Esta acción no se puede deshacer. Se eliminará a ${usuario.nombreCompleto}.`,
+    icon: 'error',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar'
   });
 
   if (result.isConfirmed) {
-      try {
-        await axios.delete(`${API_URL}/${usuario.id}`, getAuthHeaders());
-        Swal.fire('Eliminado', 'Usuario eliminado con éxito.', 'success');
-        fetchData();
-      } catch (error) { 
-        Swal.fire('Error', error.response?.data?.message || 'No se pudo eliminar el usuario.', 'error');
-      }
+    try {
+      await axios.delete(`${API_URL}/${usuario.id}`, getAuthHeaders());
+      Swal.fire('Eliminado', 'Usuario eliminado con éxito.', 'success');
+      fetchData();
+    } catch (error) {
+      Swal.fire('Error', error.response?.data?.message || 'No se pudo eliminar el usuario.', 'error');
+    }
   }
 };
 </script>
@@ -293,35 +313,203 @@ const deleteUsuario = async (usuario) => {
   padding: 2rem;
   justify-content: flex-start;
 }
-.max-w-7xl { max-width: 80rem; width: 100%; margin-left: auto; margin-right: auto; }
-.page-header { text-align: center; margin-bottom: 1.5rem; }
-.page-title { font-size: 1.8rem; font-weight: 600; color: var(--text); }
-.page-subtitle { color: var(--text-muted); margin-top: 0.25rem; }
-.actions-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-.search-input { padding: 0.6rem 1rem; border: 1px solid var(--border); border-radius: 6px; width: 300px; background-color: var(--surface-2); color: var(--text); }
-.table-container { overflow-x: auto; background: var(--surface); border-radius: 8px; border: 1px solid var(--border); }
-table { width: 100%; border-collapse: collapse; color: var(--text); }
-th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border); }
-th { background-color: var(--table-header); color: white; text-align: center; }
-td { text-align: center; }
-.btn { padding: 0.5rem 1rem; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; transition: background-color 0.2s; }
-.btn-primary { background-color: var(--primary); color: var(--primary-contrast); }
-.btn-secondary { background-color: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
-.btn-edit { background-color: #f59e0b; color: white; }
-.btn-danger { background-color: #ef4444; color: white; }
-.btn-success { background-color: #22c55e; color: white; }
-.btn-info { background-color: #3b82f6; color: white; }
-.actions-cell { display: flex; justify-content: center; gap: 0.5rem; }
-.badge { padding: 4px 10px; border-radius: 12px; font-size: 0.8em; font-weight: 600; }
-.badge.success { background-color: rgba(34, 197, 94, 0.2); color: #22c55e; }
-.badge.danger { background-color: rgba(239, 68, 68, 0.2); color: #ef4444; }
-.modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-.modal-content { background: var(--surface); padding: 2rem; border-radius: 8px; width: 90%; max-width: 600px; border: 1px solid var(--border); }
-.modal-title { font-size: 1.5rem; font-weight: 600; margin-bottom: 1.5rem; text-align: center; color: var(--text); }
-.form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
-.form-group { display: flex; flex-direction: column; }
-.form-group label { margin-bottom: 0.5rem; font-weight: 500; color: var(--text); }
-.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.6rem; border: 1px solid var(--border); border-radius: 4px; background-color: var(--surface-2); color: var(--text); }
-.modal-actions { margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 1rem; }
-.form-group textarea { min-height: 80px; resize: vertical; }
-</style>  
+
+.max-w-7xl {
+  max-width: 80rem;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.page-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.page-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.page-subtitle {
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+.actions-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.search-input {
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  width: 300px;
+  background-color: var(--surface-2);
+  color: var(--text);
+}
+
+.table-container {
+  overflow-x: auto;
+  background: var(--surface);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--text);
+}
+
+th,
+td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+th {
+  background-color: var(--table-header);
+  color: white;
+  text-align: center;
+}
+
+td {
+  text-align: center;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: var(--primary-contrast);
+}
+
+.btn-secondary {
+  background-color: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn-edit {
+  background-color: #f59e0b;
+  color: white;
+}
+
+.btn-danger {
+  background-color: #ef4444;
+  color: white;
+}
+
+.btn-success {
+  background-color: #22c55e;
+  color: white;
+}
+
+.btn-info {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.actions-cell {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.8em;
+  font-weight: 600;
+}
+
+.badge.success {
+  background-color: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+}
+
+.badge.danger {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: var(--surface);
+  padding: 2rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  border: 1px solid var(--border);
+}
+
+.modal-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: var(--text);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background-color: var(--surface-2);
+  color: var(--text);
+}
+
+.modal-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.form-group textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+</style>

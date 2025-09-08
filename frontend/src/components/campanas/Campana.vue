@@ -208,16 +208,13 @@
               <input type="file" @change="manejarSubidaImagen" accept="image/*" />
             </div>
 
-          <div v-if="previewImage" class="form-group col-span-2">
-            <label class="block font-semibold mb-2">Vista Previa</label>
-            <div class="flex justify-center">
-              <img 
-                :src="previewImage" 
-                alt="Preview" 
-                class="max-w-[120px] max-h-[120px] object-contain rounded-md border shadow"
-              />
+            <div v-if="previewImage" class="form-group col-span-2">
+              <label class="block font-semibold mb-2">Vista Previa</label>
+              <div class="flex justify-center">
+                <img :src="previewImage" alt="Preview"
+                  class="max-w-[120px] max-h-[120px] object-contain rounded-md border shadow" />
+              </div>
             </div>
-          </div>
 
             <div class="form-group grid-col-span-2">
               <label>Productos</label>
@@ -243,43 +240,36 @@
     </div>
 
     <!-- Modal Selección de productos (formulario) -->
-          <div v-if="modalSeleccionProductos"
-        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-xl p-4 w-full max-w-lg">
-          <h2 class="text-lg font-bold mb-3">Seleccionar Productos</h2>
-          <table class="w-full border">
-            <thead>
-              <tr class="bg-gray-100">
-                <th class="p-2">✔</th>
-                <th class="p-2">Nombre</th>
-                <th class="p-2">Puntos</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="p in productos" :key="p.id" class="border-t">
-                <td class="text-center">
-                  <input
-                    type="checkbox"
-                    :checked="isProductoSeleccionado(p)"
-                    @change="toggleProductoSeleccionado(p)"
-                  />
-                </td>
-                <td class="p-2">{{ p.nombre }}</td>
-                <td class="p-2">{{ p.precioPuntos }} pts</td>
-              </tr>
-            </tbody>
-          </table>
+    <div v-if="modalSeleccionProductos"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-xl p-4 w-full max-w-lg">
+        <h2 class="text-lg font-bold mb-3">Seleccionar Productos</h2>
+        <table class="w-full border">
+          <thead>
+            <tr class="bg-gray-100">
+              <th class="p-2">✔</th>
+              <th class="p-2">Nombre</th>
+              <th class="p-2">Puntos</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="p in productos" :key="p.id" class="border-t">
+              <td class="text-center">
+                <input type="checkbox" :checked="isProductoSeleccionado(p)" @change="toggleProductoSeleccionado(p)" />
+              </td>
+              <td class="p-2">{{ p.nombre }}</td>
+              <td class="p-2">{{ p.precioPuntos }} pts</td>
+            </tr>
+          </tbody>
+        </table>
 
-          <div class="flex justify-end mt-3">
-            <button
-              class="bg-gray-500 text-white px-3 py-1 rounded"
-              @click="modalSeleccionProductos = false"
-            >
-              Cerrar
-            </button>
-          </div>
+        <div class="flex justify-end mt-3">
+          <button class="bg-gray-500 text-white px-3 py-1 rounded" @click="modalSeleccionProductos = false">
+            Cerrar
+          </button>
         </div>
       </div>
+    </div>
 
 
     <!-- Modal Ver productos (tabla) -->
@@ -290,11 +280,7 @@
         </h2>
 
         <ul v-if="campanaActual?.productos?.length" class="divide-y">
-          <li
-            v-for="prod in campanaActual.productos"
-            :key="prod.id"
-            class="flex justify-between items-center py-2"
-          >
+          <li v-for="prod in campanaActual.productos" :key="prod.id" class="flex justify-between items-center py-2">
             <!-- Nombre -->
             <span class="flex-1">{{ prod.nombre }}</span>
 
@@ -315,10 +301,8 @@
         </p>
 
         <div class="mt-4 text-right">
-          <button
-            @click="modalVerProductos = false"
-            class="bg-[#74B9E7] hover:bg-[#FFB93B] text-white px-4 py-2 rounded transition"
-          >
+          <button @click="modalVerProductos = false"
+            class="bg-[#74B9E7] hover:bg-[#FFB93B] text-white px-4 py-2 rounded transition">
             Cerrar
           </button>
         </div>
@@ -327,28 +311,15 @@
 
 
     <!-- Paginación -->
-    <div class="flex flex-col items-center justify-center mt-4">
-      <p class="text-gray-700">
-        Existen <span class="text-blue-500 font-semibold">{{ totalCampanas }}</span> campañas
-      </p>
-
-      <div class="flex items-center mt-2 space-x-1">
-        <button @click="paginaAnterior" :disabled="paginaActual === 1"
-          class="w-8 h-8 flex items-center justify-center rounded-md bg-[#fffef9] border border-gray-200 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
-          ←
-        </button>
-        <button v-for="pagina in paginasVisibles" :key="pagina" @click="irAPagina(pagina)" :class="[
-          'w-8 h-8 flex items-center justify-center rounded-md border font-medium',
-          paginaActual === pagina
-            ? 'bg-blue-500 text-white border-blue-500'
-            : 'bg-[#fffef9] border-gray-200 text-gray-600 hover:bg-gray-100'
-        ]">
-          {{ pagina }}
-        </button>
-        <button @click="paginaSiguiente" :disabled="paginaActual === totalPaginas"
-          class="w-8 h-8 flex items-center justify-center rounded-md bg-[#fffef9] border border-gray-200 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
-          →
-        </button>
+    <div v-if="!loading && totalPaginas > 1" class="pagination-container">
+      <p>Existen {{ totalCategorias }} categorías</p>
+      <div>
+        <button @click="paginaAnterior" :disabled="paginaActual === 1">←</button>
+        <template v-for="(pagina, index) in paginasVisibles" :key="index">
+          <span v-if="pagina === '...'" class="pagination-ellipsis">&hellip;</span>
+          <button v-else @click="irAPagina(pagina)" :class="{ active: paginaActual === pagina }">{{ pagina }}</button>
+        </template>
+        <button @click="paginaSiguiente" :disabled="paginaActual === totalPaginas">→</button>
       </div>
     </div>
   </div>
@@ -392,7 +363,6 @@ const {
 } = useCampana()
 </script>
 <style scoped>
-
 .modal-content {
   width: 95%;
   max-width: 800px;
@@ -460,6 +430,7 @@ const {
   cursor: pointer;
   width: fit-content;
 }
+
 .btn-secondary:hover {
   background-color: #d1d5db;
 }
@@ -489,7 +460,42 @@ const {
   cursor: pointer;
   transition: background-color 0.2s;
 }
+
 .btn-submit:hover {
   background-color: #FFB93B;
+}
+
+.pagination-button {
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background-color: var(--surface-2);
+  color: var(--text);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.pagination-button.active {
+  background-color: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-contrast);
+}
+
+.pagination-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-ellipsis {
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
 }
 </style>
