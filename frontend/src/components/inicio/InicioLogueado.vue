@@ -28,7 +28,7 @@
         </div>
         <div v-for="producto in productosPaginados" :key="producto.id"
           class="bg-white rounded-xl shadow p-4 hover:shadow-lg transition">
-          <button @click="agregarAlCarrito(producto.id, $event)"
+          <button @click="cartStore.agregarAlCarrito(producto.id, $event)"
             class="px-5 py-2 bg-[#74B9E7] text-black font-medium rounded-lg hover:bg-[#FFB93B] transition mt-4 w-full">
             Agregar al Carrito
           </button>
@@ -72,7 +72,7 @@ import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import axios from 'axios';
 import Swal from "sweetalert2";
-import { useCarrito } from '../../composables/useCarrito';
+import { useCartStore } from '../../stores/cartStore';
 import { PAGINATION } from '../../config';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -140,5 +140,6 @@ const verCampana = (campana) => {
 };
 
 const formatearFecha = (f) => new Date(f).toLocaleDateString('es-CO');
-const { agregarAlCarrito } = useCarrito();
+const cartStore = useCartStore();
+
 </script>

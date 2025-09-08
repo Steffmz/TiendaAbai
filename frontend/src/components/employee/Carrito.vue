@@ -40,26 +40,24 @@
 </template>
 
 <script setup>
+// En <script setup> de Carrito.vue
 import { onMounted, defineEmits } from 'vue';
-import { useCarrito } from '../../composables/useCarrito';
+import { useCartStore } from '../../stores/cartStore';
+import { storeToRefs } from 'pinia';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const emit = defineEmits(['redemption-successful']);
 
-const {
-  carrito,
-  loading,
-  totalItems,
-  totalPuntos,
-  fetchCarrito,
-  eliminarDelCarrito,
-  procesarCanje,
-} = useCarrito();
+// Instanciamos el store
+const cartStore = useCartStore();
+
+// Usamos storeToRefs para mantener la reactividad al desestructurar
+const { items: carrito, loading, totalItems, totalPuntos } = storeToRefs(cartStore);
+const { eliminarDelCarrito, procesarCanje, fetchCarrito } = cartStore;
 
 const handleProcesarCanje = async () => {
   const exito = await procesarCanje();
   if (exito) {
-    // Si el canje fue exitoso, emitimos la señal
     emit('redemption-successful');
   }
 };

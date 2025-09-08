@@ -17,7 +17,7 @@
 
           <router-link to="/tienda/carrito" class="cart-button" title="Carrito" id="cart-icon">
             <svg></svg>
-            <span v-if="totalItems > 0" class="cart-badge">{{ totalItems }}</span>
+            <span v-if="cartStore.totalItems > 0" class="cart-badge">{{ cartStore.totalItems }}</span>
           </router-link>
 
           <button @click="toggleNotifications" class="notification-button" title="Notificaciones">
@@ -51,8 +51,8 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import NotificationsPanel from '../shared/NotificationsPanel.vue';
-import { useCarrito } from '../../composables/useCarrito';
 import { useNotifications } from '../../composables/useNotifications';
+import { useCartStore } from '../../stores/cartStore'; 
 
 const router = useRouter();
 const userData = ref({
@@ -60,8 +60,7 @@ const userData = ref({
   puntosTotales: 0
 });
 const showNotifications = ref(false);
-
-const { totalItems, fetchCarrito } = useCarrito();
+const cartStore = useCartStore();
 
 const getAuthHeaders = () => ({
   headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
@@ -72,7 +71,7 @@ const fetchUserData = async () => {
   try {
     const { data } = await axios.get('http://localhost:3000/api/perfil', getAuthHeaders());
     userData.value = data;
-    await fetchCarrito();
+    await cartStore.fetchCarrito();
   } catch (error) {
     console.error("Error al cargar datos del usuario en el layout:", error);
     logout(); // Si falla, cerramos sesión para evitar inconsistencias
