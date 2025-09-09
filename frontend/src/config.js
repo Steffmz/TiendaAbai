@@ -6,7 +6,7 @@
 
 export const PAGINATION = {
   CATEGORIES: 5,
-  PRODUCTS: 9,
+  PRODUCTS: 6,
   CAMPAIGNS: 6,
-  USERS: 10, // Un valor razonable para la tabla de usuarios
+  USERS: 6, // Un valor razonable para la tabla de usuarios
 };

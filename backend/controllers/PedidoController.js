@@ -4,7 +4,7 @@ const prisma = new PrismaClient();
 // Obtener todos los pedidos con paginación
 const getAllPedidos = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
+  const limit = parseInt(req.query.limit) || 6;
   const skip = (page - 1) * limit;
 
   try {

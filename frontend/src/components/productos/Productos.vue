@@ -316,7 +316,7 @@ const eliminarProducto = async (producto) => {
 .hidden { display: none; }
 @media (min-width: 768px) { .md\:table { display: table; } .md\:hidden { display: none; } }
 table { width: 100%; border-collapse: collapse; }
-th, td { padding: 1rem; text-align: center; vertical-align: middle; }
+th, td { padding: 8px 15px; text-align: center; vertical-align: middle; }
 th { background-color: var(--table-header); color: white; font-weight: 600; }
 .table-row { border-bottom: 1px solid var(--border); }
 .table-image { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; margin: 0 auto; }

@@ -107,7 +107,7 @@ const selectedPedido = ref(null);
 const API_URL = `${import.meta.env.VITE_API_BASE_URL}/api/pedidos`;
 const currentPage = ref(1);
 const totalPedidos = ref(0);
-const pedidosPorPagina = ref(10);
+const pedidosPorPagina = ref(6);
 const totalPages = computed(() => Math.ceil(totalPedidos.value / pedidosPorPagina.value));
 const getAuthHeaders = () => ({ headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }});
 
@@ -162,7 +162,7 @@ onMounted(fetchPedidos);
 .hidden { display: none; }
 @media (min-width: 768px) { .md\:table { display: table; } .md\:hidden { display: none; } }
 table { width: 100%; border-collapse: collapse; }
-th, td { padding: 1rem; text-align: center; vertical-align: middle; }
+th, td { padding: 8px 15px; text-align: center; vertical-align: middle; }
 th { background-color: var(--table-header); color: white; font-weight: 600; }
 .table-row { border-bottom: 1px solid var(--border); }
 .cards-container { padding: 1rem; display: grid; gap: 1rem; }

@@ -6,7 +6,7 @@ exports.getAllUsuarios = async (req, res) => {
   const adminId = req.usuario.userId;
   // 1. Obtenemos los parámetros de paginación de la URL (query string)
   const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10; // Límite por defecto de 10 usuarios
+  const limit = parseInt(req.query.limit) || 6; // Límite por defecto de 10 usuarios
   const skip = (page - 1) * limit;
 
   try {

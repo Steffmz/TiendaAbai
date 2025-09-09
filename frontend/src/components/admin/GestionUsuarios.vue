@@ -276,7 +276,7 @@ const deleteUsuario = async (usuario) => {
 .search-input { padding: 0.6rem 1rem; border: 1px solid var(--border); border-radius: 6px; width: 300px; }
 .table-container { overflow-x: auto; background: var(--surface); border-radius: 8px; border: 1px solid var(--border); }
 table { width: 100%; border-collapse: collapse; }
-th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border); text-align: center; }
+th, td { padding: 8px 15px; text-align: left; border-bottom: 1px solid var(--border); text-align: center; }
 th { background-color: var(--table-header); color: white; }
 .badge { padding: 4px 10px; border-radius: 12px; font-size: 0.8em; font-weight: 600; }
 .badge.success { background-color: rgba(34, 197, 94, 0.2); color: #22c55e; }
