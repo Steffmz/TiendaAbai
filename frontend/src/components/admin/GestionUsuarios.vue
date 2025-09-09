@@ -250,7 +250,16 @@ const toggleStatus = async (usuario) => {
 };
 
 const deleteUsuario = async (usuario) => {
-  const result = await Swal.fire({ title: '¿ELIMINAR PERMANENTEMENTE?', text: `Esta acción no se puede deshacer para ${usuario.nombreCompleto}.`, icon: 'error', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Sí', eliminar', cancelButtonText: 'Cancelar' });
+  const result = await Swal.fire({
+    title: '¿ELIMINAR PERMANENTEMENTE?',
+    text: `Esta acción no se puede deshacer para ${usuario.nombreCompleto}.`,
+    icon: 'error',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    // 👇 LÍNEA CORREGIDA
+    confirmButtonText: 'Sí, eliminar', 
+    cancelButtonText: 'Cancelar'
+  });
   if (result.isConfirmed) {
     try {
       await axios.delete(`${API_URL}/${usuario.id}`, getAuthHeaders());

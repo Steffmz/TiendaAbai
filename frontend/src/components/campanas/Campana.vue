@@ -217,8 +217,8 @@ const {
 .page-header { text-align: center; margin-bottom: 1.5rem; }
 .page-title { font-size: 1.8rem; font-weight: 700; }
 .page-subtitle { color: var(--text-muted); }
-.actions-bar { display: flex; flex-direction: column; md:flex-direction: row; justify-content: center; align-items: center; margin-bottom: 1.5rem; gap: 0.75rem; }
-.search-input { padding: 0.6rem 1rem; border: 1px solid var(--border); border-radius: 6px; width: 100%; md:w-80; }
+.actions-bar { display: flex; flex-direction: column; justify-content: center; align-items: center; margin-bottom: 1.5rem; gap: 0.75rem; }
+.search-input { padding: 0.6rem 1rem; border: 1px solid var(--border); border-radius: 6px; width: 100%; }
 .table-container { overflow-x: auto; background: var(--surface); border-radius: 8px; border: 1px solid var(--border); }
 table { width: 100%; border-collapse: collapse; }
 th, td { padding: 8px 12px; text-align: center; border-bottom: 1px solid var(--border); }
@@ -227,6 +227,16 @@ th { background-color: var(--table-header); color: white; font-weight: 600; }
 .image-wrapper { width: 56px; height: 56px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
 .table-image { width: 100%; height: 100%; object-fit: cover; }
 .actions-cell { display: flex; justify-content: center; gap: 0.5rem; }
+
+/* 👇 BLOQUE CORREGIDO CON MEDIA QUERIES */
+@media (min-width: 768px) {
+  .actions-bar {
+    flex-direction: row;
+  }
+  .search-input {
+    width: 320px; /* Ancho fijo para pantallas medianas y grandes */
+  }
+}
 
 /* Estilos para tarjetas móviles (de Gaviota) */
 .mobile-card {
