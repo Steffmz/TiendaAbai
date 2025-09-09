@@ -6,6 +6,8 @@ CREATE TABLE `usuarios` (
     `sede` VARCHAR(191) NOT NULL,
     `email` VARCHAR(191) NOT NULL,
     `contrasena` VARCHAR(191) NOT NULL,
+    `passwordResetToken` VARCHAR(191) NULL,
+    `passwordResetExpires` DATETIME(3) NULL,
     `rol` ENUM('Empleado', 'Administrador') NOT NULL DEFAULT 'Empleado',
     `puntosTotales` INTEGER NOT NULL DEFAULT 0,
     `activo` BOOLEAN NOT NULL DEFAULT true,
@@ -15,6 +17,7 @@ CREATE TABLE `usuarios` (
 
     UNIQUE INDEX `usuarios_cedula_key`(`cedula`),
     UNIQUE INDEX `usuarios_email_key`(`email`),
+    UNIQUE INDEX `usuarios_passwordResetToken_key`(`passwordResetToken`),
     INDEX `usuarios_cargoId_fkey`(`cargoId`),
     INDEX `usuarios_centroDeCostosId_fkey`(`centroDeCostosId`),
     PRIMARY KEY (`id`)

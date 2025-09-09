@@ -37,8 +37,6 @@ const checkDarkMode = () => {
 };
 
 // --- Funciones de Validación ---
-
-// Validar que solo sean números en cédula
 const onCedulaInput = (event, isRegistro = false) => {
   const value = event.target.value.replace(/\D/g, ''); // Solo números
   const limitedValue = value.slice(0, 15); // Máximo 15 caracteres
@@ -52,7 +50,6 @@ const onCedulaInput = (event, isRegistro = false) => {
   event.target.value = limitedValue;
 };
 
-// Validar longitud máxima de contraseña
 const onPasswordInput = (event, isRegistro = false) => {
   const limitedValue = event.target.value.slice(0, 18); // Máximo 18 caracteres
   
@@ -65,7 +62,6 @@ const onPasswordInput = (event, isRegistro = false) => {
   event.target.value = limitedValue;
 };
 
-// Alternar visibilidad de contraseña
 const togglePasswordVisibility = (isRegistro = false) => {
   if (isRegistro) {
     showPasswordReg.value = !showPasswordReg.value;
@@ -78,7 +74,8 @@ const togglePasswordVisibility = (isRegistro = false) => {
 const login = async () => {
   errorMessage.value = '';
   try {
-    const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, {
+    // URL CORRECTA (de tu rama)
+    const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/login`, {
       cedula: cedula.value,
       contrasena: password.value,
     });
@@ -107,7 +104,7 @@ const login = async () => {
 const register = async () => {
   errorMessage.value = '';
   try {
-    await axios.post(`${import.meta.env.VITE_API_BASE_URL}/usuarios`, registro.value);
+    await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/register`, registro.value);
 
     alert('¡Registro exitoso! Ahora puedes iniciar sesión.');
     closeModal();
@@ -124,23 +121,19 @@ const register = async () => {
 
 const openModal = () => {
   showModal.value = true;
-  errorMessage.value = ''; // Limpiar errores al abrir el modal
+  errorMessage.value = '';
 };
 
 const closeModal = () => {
   showModal.value = false;
-  errorMessage.value = ''; // Limpiar errores al cerrar el modal
-  // Reset password visibility
+  errorMessage.value = '';
   showPasswordReg.value = false;
 };
 
 // --- Animación del Canvas (Optimizada) ---
-
 onMounted(() => {
-  // Detectar modo oscuro inicial
   checkDarkMode();
   
-  // Observer para detectar cambios en modo oscuro
   const observer = new MutationObserver(() => {
     checkDarkMode();
   });
@@ -253,7 +246,6 @@ onMounted(() => {
       <div class="login-right">
         <div class="login-card">
           <div class="logo-container">
-            <!-- Logo que cambia según el modo oscuro/claro -->
             <img 
               v-if="isDarkMode" 
               src="../../assets/img/Logo-blanco.png" 
@@ -268,7 +260,6 @@ onMounted(() => {
             />
           </div>
           <h2 class="title">BIENVENIDOS</h2>
-          <!-- Error solo se muestra cuando NO está el modal abierto -->
           <p v-if="errorMessage && !showModal" class="error-text">{{ errorMessage }}</p>
           <form @submit.prevent="login">
             <div class="input-group">
@@ -314,24 +305,21 @@ onMounted(() => {
                 </button>
               </div>
             </div>
-            <a href="#" class="forgot-link">¿Olvidaste tu contraseña?</a>
+            <router-link to="/forgot-password" class="forgot-link">¿Olvidaste tu contraseña?</router-link>
             <button type="submit" class="btn-login">Iniciar Sesión</button>
           </form>
           <div class="register-link">
             ¿No tienes cuenta?
-            <!-- Cambiado para usar la nueva función openModal -->
             <a href="#" @click.prevent="openModal">Regístrate aquí</a>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Modal de registro -->
     <div class="modal" v-show="showModal" @click.self="closeModal">
       <div class="modal-content">
         <span class="close" @click="closeModal">&times;</span>
         <h2 class="tituloCrear">Crear Cuenta</h2>
-        <!-- Error solo se muestra cuando SÍ está el modal abierto -->
         <p v-if="errorMessage && showModal" class="error-text">{{ errorMessage }}</p>
         <br />
         <form @submit.prevent="register">
@@ -339,28 +327,23 @@ onMounted(() => {
             <label for="nombre">Nombre Completo</label>
             <input type="text" id="nombre" v-model="registro.nombreCompleto" placeholder="Ingresa tu nombre" required />
           </div>
-
           <div class="input-group">
             <label for="cargo-reg">Cargo</label>
             <input type="text" id="cargo-reg" v-model="registro.cargo" placeholder="Ingresa tu cargo" required />
           </div>
-          
           <div class="input-group">
             <label for="sede-reg">Sede</label>
             <input type="text" id="sede-reg" v-model="registro.sede" placeholder="Ingresa tu sede" required />
           </div>
-
           <div class="input-group">
             <label for="centro-costos-reg">Centro de Costos</label>
             <input type="text" id="centro-costos-reg" v-model="registro.centroDeCostosNombre"
               placeholder="Ej: Marketing, Operaciones" required />
           </div>
-
           <div class="input-group">
             <label for="email">Correo Electrónico</label>
             <input type="email" id="email" v-model="registro.email" placeholder="Ingresa tu correo" required />
           </div>
-          
           <div class="input-group">
             <label for="cedula-reg">Cédula</label>
             <input 
@@ -375,7 +358,6 @@ onMounted(() => {
               required 
             />
           </div>
-          
           <div class="input-group">
             <label for="password-reg">Contraseña</label>
             <div class="password-container">
@@ -405,7 +387,6 @@ onMounted(() => {
               </button>
             </div>
           </div>
-          
           <button type="submit" class="btn-login">Registrarse</button>
         </form>
       </div>

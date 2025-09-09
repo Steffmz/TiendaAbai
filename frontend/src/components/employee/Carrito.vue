@@ -9,7 +9,7 @@
     <div v-else class="cart-content">
       <div class="cart-items">
         <div v-for="item in carrito" :key="item.id" class="cart-item">
-          <img :src="`${API_BASE_URL}${item.producto.imagenUrl}`" :alt="item.producto.nombre" class="item-image"/>
+          <img :src="`${API_BASE_URL}${item.producto.imagenUrl}`" :alt="item.producto.nombre" class="item-image" />
           <div class="item-details">
             <h3>{{ item.producto.nombre }}</h3>
             <p>{{ item.producto.precioPuntos }} puntos</p>
@@ -33,30 +33,34 @@
           <span>Total en puntos:</span>
           <span>{{ totalPuntos }}</span>
         </div>
-        <button @click="procesarCanje" class="btn-checkout">Confirmar Canje</button>
+        <button @click="handleProcesarCanje" class="btn-checkout">Confirmar Canje</button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
-import { useCarrito } from '../../composables/useCarrito';
-import { useRouter } from 'vue-router';
+// En <script setup> de Carrito.vue
+import { onMounted, defineEmits } from 'vue';
+import { useCartStore } from '../../stores/cartStore';
+import { storeToRefs } from 'pinia';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const emit = defineEmits(['redemption-successful']);
 
+// Instanciamos el store
+const cartStore = useCartStore();
 
-const router = useRouter();
-const {
-  carrito,
-  loading,
-  totalItems,
-  totalPuntos,
-  fetchCarrito,
-  eliminarDelCarrito,
-  procesarCanje,
-} = useCarrito();
+// Usamos storeToRefs para mantener la reactividad al desestructurar
+const { items: carrito, loading, totalItems, totalPuntos } = storeToRefs(cartStore);
+const { eliminarDelCarrito, procesarCanje, fetchCarrito } = cartStore;
+
+const handleProcesarCanje = async () => {
+  const exito = await procesarCanje();
+  if (exito) {
+    emit('redemption-successful');
+  }
+};
 
 onMounted(fetchCarrito);
 </script>
@@ -67,17 +71,20 @@ onMounted(fetchCarrito);
   margin: auto;
   padding: 2rem;
 }
+
 h1 {
   font-size: 2rem;
   font-weight: bold;
   margin-bottom: 2rem;
   text-align: center;
 }
+
 .cart-content {
   display: grid;
   grid-template-columns: 3fr 1fr;
   gap: 2rem;
 }
+
 .cart-item {
   display: flex;
   align-items: center;
@@ -87,28 +94,35 @@ h1 {
   border-radius: 8px;
   margin-bottom: 1rem;
 }
+
 .item-image {
   width: 80px;
   height: 80px;
   object-fit: cover;
   border-radius: 4px;
 }
-.item-details { flex-grow: 1; }
-.btn-remove {
-    background: #ef4444;
-    color: white;
-    border: none;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    cursor: pointer;
+
+.item-details {
+  flex-grow: 1;
 }
+
+.btn-remove {
+  background: #ef4444;
+  color: white;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
 .cart-summary {
   background: white;
   padding: 1.5rem;
   border-radius: 8px;
   height: fit-content;
 }
+
 .btn-checkout {
   width: 100%;
   padding: 1rem;

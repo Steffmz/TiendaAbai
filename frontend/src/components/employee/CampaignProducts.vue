@@ -19,7 +19,7 @@
           <div class="product-info">
             <h3>{{ product.nombre }}</h3>
             <p class="points">{{ product.precioPuntos }} Puntos</p>
-            <button @click="agregarAlCarrito(product.id)" class="btn-redeem" :disabled="product.stock <= 0">
+            <button @click="cartStore.agregarAlCarrito(product.id, $event)" class="btn-redeem" :disabled="product.stock <= 0">
               {{ product.stock > 0 ? 'Agregar al Carrito' : 'Agotado' }}
             </button>
           </div>
@@ -37,7 +37,7 @@ import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
 import Swal from 'sweetalert2';
-import { useCarrito } from '../../composables/useCarrito';
+import { useCartStore } from '../../stores/cartStore';
 
 // CORRECCIÓN AQUÍ: Definimos la constante
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -64,7 +64,7 @@ const fetchCampaignProducts = async () => {
   }
 };
 
-const { agregarAlCarrito } = useCarrito();
+const cartStore = useCartStore();
 
 onMounted(fetchCampaignProducts);
 </script>
