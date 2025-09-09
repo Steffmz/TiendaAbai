@@ -53,6 +53,7 @@ import axios from 'axios';
 import NotificationsPanel from '../shared/NotificationsPanel.vue';
 import { useNotifications } from '../../composables/useNotifications';
 import { useCartStore } from '../../stores/cartStore'; 
+import Topbar from '../menu/Topbar.vue';
 
 const router = useRouter();
 const userData = ref({
@@ -102,9 +103,13 @@ onMounted(() => {
 <style scoped>
 /* Tus estilos existentes se mantienen igual */
 .employee-layout {
-  background-color: #f4f7fa;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
   min-height: 100vh;
+  background-color: var(--background);
 }
+
 
 .navbar {
   background: linear-gradient(135deg, #74B9E7 0%, #2B7FFF 100%);
@@ -176,9 +181,9 @@ onMounted(() => {
 }
 
 .main-content {
-  padding: 2rem;
-  max-width: 1280px;
-  margin: auto;
+  flex-grow: 1;
+  width: 100%;
+  padding-top: 80px; /* Ajusta este valor si la altura de tu Topbar es diferente */
 }
 
 /* Tus estilos existentes... */
