@@ -119,7 +119,7 @@
 </template>
 
 <script setup>
-// El script no necesita cambios
+// El script que ya tenías en tu rama, que es el más completo.
 import { ref, onMounted, computed } from "vue";
 import axios from "axios";
 import Swal from "sweetalert2";
@@ -141,7 +141,7 @@ const cargos = ref([]);
 const centrosDeCostos = ref([]);
 const currentPage = ref(1);
 const totalUsers = ref(0);
-const usersPerPage = ref(10);
+const usersPerPage = ref(10); // Puedes ajustar este número si quieres menos items por página
 const totalPages = computed(() => Math.ceil(totalUsers.value / usersPerPage.value));
 const getAuthHeaders = () => ({ headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` }});
 
@@ -250,7 +250,7 @@ const toggleStatus = async (usuario) => {
 };
 
 const deleteUsuario = async (usuario) => {
-  const result = await Swal.fire({ title: '¿ELIMINAR PERMANENTEMENTE?', text: `Esta acción no se puede deshacer para ${usuario.nombreCompleto}.`, icon: 'error', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Sí, eliminar', cancelButtonText: 'Cancelar' });
+  const result = await Swal.fire({ title: '¿ELIMINAR PERMANENTEMENTE?', text: `Esta acción no se puede deshacer para ${usuario.nombreCompleto}.`, icon: 'error', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Sí', eliminar', cancelButtonText: 'Cancelar' });
   if (result.isConfirmed) {
     try {
       await axios.delete(`${API_URL}/${usuario.id}`, getAuthHeaders());
@@ -267,7 +267,7 @@ const deleteUsuario = async (usuario) => {
 </script>
 
 <style scoped>
-/* Eliminamos el .page-container y dejamos que .page-content del layout se encargue */
+/* Los estilos de tu rama, que son más consistentes con el resto de la app */
 .max-w-7xl { max-width: 80rem; width: 100%; margin: 0 auto; }
 .page-header { text-align: center; margin-bottom: 1.5rem; }
 .page-title { font-size: 1.8rem; font-weight: 600; color: var(--text); }
@@ -276,7 +276,7 @@ const deleteUsuario = async (usuario) => {
 .search-input { padding: 0.6rem 1rem; border: 1px solid var(--border); border-radius: 6px; width: 300px; }
 .table-container { overflow-x: auto; background: var(--surface); border-radius: 8px; border: 1px solid var(--border); }
 table { width: 100%; border-collapse: collapse; }
-th, td { padding: 8px 15px; text-align: left; border-bottom: 1px solid var(--border); text-align: center; }
+th, td { padding: 8px 15px; text-align: center; border-bottom: 1px solid var(--border); }
 th { background-color: var(--table-header); color: white; }
 .badge { padding: 4px 10px; border-radius: 12px; font-size: 0.8em; font-weight: 600; }
 .badge.success { background-color: rgba(34, 197, 94, 0.2); color: #22c55e; }

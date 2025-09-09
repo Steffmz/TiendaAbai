@@ -13,6 +13,13 @@ const password = ref("");
 const showModal = ref(false);
 const errorMessage = ref("");
 
+// Estados para mostrar/ocultar contraseñas
+const showPassword = ref(false);
+const showPasswordReg = ref(false);
+
+// Estado para detectar modo oscuro
+const isDarkMode = ref(false);
+
 const registro = ref({
   nombreCompleto: "",
   cargo: "",
@@ -24,11 +31,51 @@ const registro = ref({
   rol: 'Empleado'
 });
 
+// --- Función para detectar modo oscuro ---
+const checkDarkMode = () => {
+  isDarkMode.value = document.documentElement.classList.contains('dark');
+};
+
+// --- Funciones de Validación ---
+const onCedulaInput = (event, isRegistro = false) => {
+  const value = event.target.value.replace(/\D/g, ''); // Solo números
+  const limitedValue = value.slice(0, 15); // Máximo 15 caracteres
+  
+  if (isRegistro) {
+    registro.value.cedula = limitedValue;
+  } else {
+    cedula.value = limitedValue;
+  }
+  
+  event.target.value = limitedValue;
+};
+
+const onPasswordInput = (event, isRegistro = false) => {
+  const limitedValue = event.target.value.slice(0, 18); // Máximo 18 caracteres
+  
+  if (isRegistro) {
+    registro.value.contrasena = limitedValue;
+  } else {
+    password.value = limitedValue;
+  }
+  
+  event.target.value = limitedValue;
+};
+
+const togglePasswordVisibility = (isRegistro = false) => {
+  if (isRegistro) {
+    showPasswordReg.value = !showPasswordReg.value;
+  } else {
+    showPassword.value = !showPassword.value;
+  }
+};
+
 // --- Lógica de Login ---
 const login = async () => {
   errorMessage.value = '';
   try {
-    const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/login`, { //...
+    // URL CORRECTA (de tu rama)
+    const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/login`, {
       cedula: cedula.value,
       contrasena: password.value,
     });
@@ -72,14 +119,30 @@ const register = async () => {
   }
 };
 
-const closeModal = () => {
-  showModal.value = false;
+const openModal = () => {
+  showModal.value = true;
   errorMessage.value = '';
 };
 
-// --- Animación del Canvas (Optimizada) ---
+const closeModal = () => {
+  showModal.value = false;
+  errorMessage.value = '';
+  showPasswordReg.value = false;
+};
 
+// --- Animación del Canvas (Optimizada) ---
 onMounted(() => {
+  checkDarkMode();
+  
+  const observer = new MutationObserver(() => {
+    checkDarkMode();
+  });
+  
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['class']
+  });
+
   const canvas = document.getElementById("magneticCanvas");
   if (!canvas) return;
 
@@ -162,6 +225,7 @@ onMounted(() => {
   window.addEventListener("resize", handleResize);
 
   onBeforeUnmount(() => {
+    observer.disconnect();
     cancelAnimationFrame(animationFrameId);
     window.removeEventListener("resize", handleResize);
   });
@@ -182,25 +246,71 @@ onMounted(() => {
       <div class="login-right">
         <div class="login-card">
           <div class="logo-container">
-            <img src="../../assets/img/abai-logo.png" alt="Logo Abai" class="logo-abai" />
+            <img 
+              v-if="isDarkMode" 
+              src="../../assets/img/Logo-blanco.png" 
+              alt="Logo Abai Dark" 
+              class="logo-abai" 
+            />
+            <img 
+              v-else 
+              src="../../assets/img/abai-logo.png" 
+              alt="Logo Abai Light" 
+              class="logo-abai" 
+            />
           </div>
           <h2 class="title">BIENVENIDOS</h2>
           <p v-if="errorMessage && !showModal" class="error-text">{{ errorMessage }}</p>
           <form @submit.prevent="login">
             <div class="input-group">
               <label for="cedula">Cédula</label>
-              <input type="text" id="cedula" v-model="cedula" placeholder="Ingresa tu cédula" required />
+              <input 
+                type="text" 
+                id="cedula" 
+                v-model="cedula" 
+                @input="onCedulaInput"
+                placeholder="Ingresa tu cédula" 
+                maxlength="15"
+                pattern="[0-9]*"
+                inputmode="numeric"
+                required 
+              />
             </div>
             <div class="input-group">
               <label for="password">Contraseña</label>
-              <input type="password" id="password" v-model="password" placeholder="Ingresa tu contraseña" required />
+              <div class="password-container">
+                <input 
+                  :type="showPassword ? 'text' : 'password'" 
+                  id="password" 
+                  v-model="password" 
+                  @input="onPasswordInput"
+                  placeholder="Ingresa tu contraseña" 
+                  maxlength="18"
+                  required 
+                />
+                <button 
+                  type="button" 
+                  class="password-toggle"
+                  @click="togglePasswordVisibility(false)"
+                  tabindex="-1"
+                >
+                  <svg v-if="showPassword" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                  </svg>
+                  <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                </button>
+              </div>
             </div>
             <router-link to="/forgot-password" class="forgot-link">¿Olvidaste tu contraseña?</router-link>
             <button type="submit" class="btn-login">Iniciar Sesión</button>
           </form>
           <div class="register-link">
             ¿No tienes cuenta?
-            <a href="#" @click.prevent="showModal = true">Regístrate aquí</a>
+            <a href="#" @click.prevent="openModal">Regístrate aquí</a>
           </div>
         </div>
       </div>
@@ -217,7 +327,6 @@ onMounted(() => {
             <label for="nombre">Nombre Completo</label>
             <input type="text" id="nombre" v-model="registro.nombreCompleto" placeholder="Ingresa tu nombre" required />
           </div>
-
           <div class="input-group">
             <label for="cargo-reg">Cargo</label>
             <input type="text" id="cargo-reg" v-model="registro.cargo" placeholder="Ingresa tu cargo" required />
@@ -226,25 +335,57 @@ onMounted(() => {
             <label for="sede-reg">Sede</label>
             <input type="text" id="sede-reg" v-model="registro.sede" placeholder="Ingresa tu sede" required />
           </div>
-
           <div class="input-group">
             <label for="centro-costos-reg">Centro de Costos</label>
             <input type="text" id="centro-costos-reg" v-model="registro.centroDeCostosNombre"
               placeholder="Ej: Marketing, Operaciones" required />
           </div>
-
           <div class="input-group">
             <label for="email">Correo Electrónico</label>
             <input type="email" id="email" v-model="registro.email" placeholder="Ingresa tu correo" required />
           </div>
           <div class="input-group">
             <label for="cedula-reg">Cédula</label>
-            <input type="text" id="cedula-reg" v-model="registro.cedula" placeholder="Ingresa tu cédula" required />
+            <input 
+              type="text" 
+              id="cedula-reg" 
+              v-model="registro.cedula" 
+              @input="onCedulaInput($event, true)"
+              placeholder="Ingresa tu cédula" 
+              maxlength="15"
+              pattern="[0-9]*"
+              inputmode="numeric"
+              required 
+            />
           </div>
           <div class="input-group">
             <label for="password-reg">Contraseña</label>
-            <input type="password" id="password-reg" v-model="registro.contrasena" placeholder="Crea una contraseña"
-              required />
+            <div class="password-container">
+              <input 
+                :type="showPasswordReg ? 'text' : 'password'" 
+                id="password-reg" 
+                v-model="registro.contrasena" 
+                @input="onPasswordInput($event, true)"
+                placeholder="Crea una contraseña"
+                maxlength="18"
+                required 
+              />
+              <button 
+                type="button" 
+                class="password-toggle"
+                @click="togglePasswordVisibility(true)"
+                tabindex="-1"
+              >
+                <svg v-if="showPasswordReg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                  <line x1="1" y1="1" x2="23" y2="23"/>
+                </svg>
+                <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
           </div>
           <button type="submit" class="btn-login">Registrarse</button>
         </form>

@@ -1,8 +1,8 @@
 <template>
   <div class="topbar">
-    <div class="menu-icon" @click="$emit('toggle')">
-      <Icon icon="mdi:menu" />
-    </div>
+    <div class="menu-icon" @click="$emit('toggleSidebar')">
+  <span class="iconify" data-icon="mdi:menu"></span>
+</div>
 
     <div class="logo">
       <img 

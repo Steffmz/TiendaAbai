@@ -7,37 +7,57 @@
 }
 
 .dashboard-layout {
-  display: flex; /* Usamos flex para el layout principal */
+  display: flex;
   width: 100vw;
   height: 100vh;
-  overflow: hidden; /* Evita el scroll en el contenedor principal */
+  overflow: hidden; /* Evita el scroll en el contenedor principal (de tu rama) */
 }
 
 .main-content {
   position: relative;
-  flex-grow: 1; /* El contenido principal ocupa el espacio restante */
+  flex-grow: 1; /* Ocupa el espacio restante (de tu rama) */
   display: flex;
-  flex-direction: column; /* Apila el Topbar sobre el page-content */
+  flex-direction: column; /* Apila el Topbar sobre el page-content (de tu rama) */
   transition: padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   padding-left: var(--sidebar-width);
-  height: 100vh; /* Ocupa toda la altura de la ventana */
-  overflow: hidden; /* Evita que este contenedor tenga scroll */
+  height: 100vh; /* Ocupa toda la altura de la ventana (de tu rama) */
+  overflow: hidden; /* Evita que este contenedor tenga scroll (de tu rama) */
 }
 
 .main-content.collapsed {
   padding-left: var(--sidebar-width-collapsed);
 }
 
-/* El área de contenido es la que debe tener scroll */
+/* El área de contenido es la que debe tener scroll (de tu rama) */
 .page-content {
-  flex-grow: 1; /* Ocupa todo el espacio vertical disponible */
-  overflow-y: auto; /* AÑADE EL SCROLL AQUÍ cuando sea necesario */
+  flex-grow: 1;
+  overflow-y: auto;
   padding: 2rem;
   background-color: var(--background-color);
 }
 
-@media (max-width: 1024px) {
+/* Media query unificada */
+@media (max-width: 768px) {
   .main-content {
-    padding-left: 0;
+    padding-left: 0; /* Unifica la regla de ambas ramas */
   }
+
+  /* Mejora para bloquear el scroll detrás del sidebar en móvil (de Gaviota) */
+  .main-content.sidebar-open {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+}
+
+/* Overlay para el sidebar en móvil (de Gaviota) */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 900; /* Se asegura que esté debajo del sidebar */
 }
