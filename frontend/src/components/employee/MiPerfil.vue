@@ -1,5 +1,5 @@
 <template>
-  <div class="profile-container">
+  <div class="profile-container max-w-7xl w-full mx-auto"ÑÑ>
     <div class="profile-header">
       <h1>Mi Perfil</h1>
       <div v-if="userInfo" class="user-details">
