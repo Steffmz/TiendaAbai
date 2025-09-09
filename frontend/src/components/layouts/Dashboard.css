@@ -1,42 +1,43 @@
 :root {
   --sidebar-width: 280px;
   --sidebar-width-collapsed: 80px;
-  --topbar-height: 80px;
-  --background-color: #f4f7fa;
+  --topbar-height: 80px; /* Asegúrate que coincida con la altura real de tu Topbar */
+  --background-color: var(--bg, #f4f7fa);
   --transition: all 0.3s ease-in-out;
 }
 
 .dashboard-layout {
+  display: flex; /* Usamos flex para el layout principal */
   width: 100vw;
   height: 100vh;
-  overflow-x: hidden; 
+  overflow: hidden; /* Evita el scroll en el contenedor principal */
 }
 
 .main-content {
   position: relative;
-  height: 100%;
-  /* La transición en padding es aceptable, pero para movimientos,
-     prefiere transform. */
-  transition: padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Curva de aceleración más suave */
+  flex-grow: 1; /* El contenido principal ocupa el espacio restante */
+  display: flex;
+  flex-direction: column; /* Apila el Topbar sobre el page-content */
+  transition: padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   padding-left: var(--sidebar-width);
-
-  /* Si en el futuro animaras su posición, añade esto para promoverlo a una capa de GPU */
-  will-change: padding-left;
+  height: 100vh; /* Ocupa toda la altura de la ventana */
+  overflow: hidden; /* Evita que este contenedor tenga scroll */
 }
 
 .main-content.collapsed {
   padding-left: var(--sidebar-width-collapsed);
 }
 
+/* El área de contenido es la que debe tener scroll */
 .page-content {
-  height: calc(100vh - var(--topbar-height));
-  overflow-y: auto;
+  flex-grow: 1; /* Ocupa todo el espacio vertical disponible */
+  overflow-y: auto; /* AÑADE EL SCROLL AQUÍ cuando sea necesario */
   padding: 2rem;
   background-color: var(--background-color);
 }
 
 @media (max-width: 1024px) {
   .main-content {
-    padding-left: 0; 
+    padding-left: 0;
   }
 }

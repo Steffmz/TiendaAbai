@@ -6,7 +6,7 @@ exports.getAllUsuarios = async (req, res) => {
   const adminId = req.usuario.userId;
   // 1. Obtenemos los parámetros de paginación de la URL (query string)
   const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10; // Límite por defecto de 10 usuarios
+  const limit = parseInt(req.query.limit) || 6; // Límite por defecto de 10 usuarios
   const skip = (page - 1) * limit;
 
   try {
@@ -243,20 +243,20 @@ exports.ajustarPuntos = async (req, res) => {
   }
 };
 exports.getMiPerfil = async (req, res) => {
-  const userId = req.usuario.userId;
-  try {
-    const usuario = await prisma.usuario.findUnique({
-      where: { id: userId },
-      select: {
-        nombreCompleto: true,
-        email: true,
-        cedula: true,
-        puntosTotales: true, // Asegúrate de incluir los puntos
-      }
-    });
-    if (!usuario) return res.status(404).json({ message: 'Usuario no encontrado.' });
-    res.json(usuario);
-  } catch (error) {
-    res.status(500).json({ message: 'Error al obtener el perfil.' });
-  }
+  const userId = req.usuario.userId;
+  try {
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: userId },
+      select: {
+        nombreCompleto: true,
+        email: true,
+        cedula: true,
+        puntosTotales: true, // Asegúrate de incluir los puntos
+      }
+    });
+    if (!usuario) return res.status(404).json({ message: 'Usuario no encontrado.' });
+    res.json(usuario);
+  } catch (error) {
+    res.status(500).json({ message: 'Error al obtener el perfil.' });
+  }
 };

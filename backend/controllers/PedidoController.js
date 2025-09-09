@@ -1,34 +1,38 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-// Obtener todos los pedidos
+// Obtener todos los pedidos con paginación
 const getAllPedidos = async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 6;
+  const skip = (page - 1) * limit;
+
   try {
-    const pedidos = await prisma.pedido.findMany({
-      orderBy: { fecha: 'desc' },
-      include: {
-        usuario: {
-          select: {
-            nombreCompleto: true,
-          }
-        },
-        detalles: {
-          include: {
-            producto: {
-              select: {
-                nombre: true,
-              }
-            }
-          }
+    const [pedidos, totalPedidos] = await prisma.$transaction([
+      prisma.pedido.findMany({
+        orderBy: { fecha: 'desc' },
+        skip: skip,
+        take: limit,
+        include: {
+          usuario: { select: { nombreCompleto: true } },
+          detalles: { include: { producto: { select: { nombre: true } } } }
         }
-      }
+      }),
+      prisma.pedido.count()
+    ]);
+
+    res.json({
+      pedidos,
+      total: totalPedidos,
+      page,
+      limit
     });
-    res.json(pedidos);
   } catch (error) {
     console.error("Error al obtener pedidos:", error);
     res.status(500).json({ message: 'Error interno del servidor.' });
   }
 };
+
 
 // Actualizar el estado de un pedido
 const updateEstadoPedido = async (req, res) => {
@@ -54,15 +58,12 @@ const updateEstadoPedido = async (req, res) => {
 
       const estadoAnterior = pedido.estado;
       
-      // --- LÓGICA DE DEVOLUCIÓN DE PUNTOS Y STOCK ---
       if (['Cancelado', 'Rechazado'].includes(estado) && !['Cancelado', 'Rechazado'].includes(estadoAnterior)) {
-        // Devolver puntos al usuario
         await tx.usuario.update({
           where: { id: pedido.usuarioId },
           data: { puntosTotales: { increment: pedido.totalPuntos } }
         });
 
-        // Devolver stock a los productos
         for (const detalle of pedido.detalles) {
           await tx.producto.update({
             where: { id: detalle.productoId },
@@ -70,10 +71,9 @@ const updateEstadoPedido = async (req, res) => {
           });
         }
         
-        // Registrar la devolución en el historial
         await tx.historialPuntos.create({
           data: {
-            puntos: pedido.totalPuntos, // Positivo porque es una devolución
+            puntos: pedido.totalPuntos,
             tipo: 'AJUSTE',
             descripcion: `Devolución por pedido #${pedido.id} ${estado.toLowerCase()}`,
             beneficiarioId: pedido.usuarioId,
@@ -82,7 +82,6 @@ const updateEstadoPedido = async (req, res) => {
         });
       }
 
-      // Actualizar el estado del pedido
       const dataToUpdate = { estado };
       if (['Aprobado', 'Rechazado', 'Cancelado'].includes(estado)) {
         dataToUpdate.aprobadoPorAdminId = adminId;
@@ -94,7 +93,6 @@ const updateEstadoPedido = async (req, res) => {
         data: dataToUpdate,
       });
 
-      // Lógica de notificación (existente)
       if (['Aprobado', 'Enviado', 'Rechazado', 'Cancelado'].includes(estado)) {
         let titulo = `Tu pedido #${pedido.id} ha sido ${estado.toLowerCase()}.`;
         let mensaje = `Tu canje ha sido actualizado al estado: ${estado}.`;
@@ -134,19 +132,16 @@ const createPedido = async (req, res) => {
         throw new Error("No tienes suficientes puntos para realizar este canje.");
       }
 
-      // 1. Restar puntos al usuario
       await tx.usuario.update({
         where: { id: usuarioId },
         data: { puntosTotales: { decrement: costoTotalPuntos } },
       });
 
-      // 2. Restar stock al producto
       await tx.producto.update({
         where: { id: parseInt(productoId) },
         data: { stock: { decrement: cantidad } },
       });
 
-      // 3. Crear el pedido
       const nuevoPedido = await tx.pedido.create({
         data: {
           usuarioId: usuarioId,
@@ -162,6 +157,7 @@ const createPedido = async (req, res) => {
         },
       });
 
+      const admins = await tx.usuario.findMany({ where: { rol: 'Administrador' } });
       const notificacionesAdmin = admins.map(admin => tx.notificacion.create({
         data: {
           titulo: 'Nuevo Pedido Recibido',
@@ -170,17 +166,15 @@ const createPedido = async (req, res) => {
           pedidoId: nuevoPedido.id
         }
       }));
-
       await Promise.all(notificacionesAdmin);
 
-      // 4. --- AÑADIMOS EL REGISTRO EN EL HISTORIAL ---
       await tx.historialPuntos.create({
         data: {
-          puntos: -costoTotalPuntos, // Guardamos como un número negativo porque es un gasto
+          puntos: -costoTotalPuntos,
           tipo: 'CANJE',
           descripcion: `Canje de ${cantidad} x ${producto.nombre}`,
           beneficiarioId: usuarioId,
-          origenId: nuevoPedido.id, // Opcional: guardamos el ID del pedido como referencia
+          origenId: nuevoPedido.id,
         }
       });
 
@@ -196,7 +190,7 @@ const createPedido = async (req, res) => {
 };
 
 const getMisPedidos = async (req, res) => {
-  const usuarioId = req.usuario.userId; // Obtenemos el ID del token
+  const usuarioId = req.usuario.userId;
   try {
     const pedidos = await prisma.pedido.findMany({
       where: { usuarioId: usuarioId },
@@ -220,12 +214,11 @@ const getMisPedidos = async (req, res) => {
     res.status(500).json({ message: 'Error interno del servidor.' });
   }
 };
+
 const crearPedidoDesdeCarrito = async (req, res) => {
   const usuarioId = req.usuario.userId;
-
   try {
     const resultado = await prisma.$transaction(async (tx) => {
-      // 1. Obtener todos los items del carrito del usuario
       const carritoItems = await tx.carrito.findMany({
         where: { usuarioId },
         include: { producto: true },
@@ -235,7 +228,6 @@ const crearPedidoDesdeCarrito = async (req, res) => {
         throw new Error("Tu carrito está vacío.");
       }
 
-      // 2. Calcular el costo total y verificar el stock
       let costoTotalPuntos = 0;
       for (const item of carritoItems) {
         if (item.producto.stock < item.cantidad) {
@@ -249,7 +241,6 @@ const crearPedidoDesdeCarrito = async (req, res) => {
         throw new Error("No tienes suficientes puntos para realizar este canje.");
       }
 
-      // 3. Actualizar puntos del usuario y stock de productos
       await tx.usuario.update({
         where: { id: usuarioId },
         data: { puntosTotales: { decrement: costoTotalPuntos } },
@@ -262,7 +253,6 @@ const crearPedidoDesdeCarrito = async (req, res) => {
         });
       }
 
-      // 4. Crear el pedido con sus detalles
       const nuevoPedido = await tx.pedido.create({
         data: {
           usuarioId,
@@ -278,7 +268,6 @@ const crearPedidoDesdeCarrito = async (req, res) => {
         },
       });
       
-      // 5. Crear un único registro en el historial para todo el canje
       await tx.historialPuntos.create({
           data: {
               puntos: -costoTotalPuntos,
@@ -289,7 +278,6 @@ const crearPedidoDesdeCarrito = async (req, res) => {
           }
       });
       
-      // 6. Vaciar el carrito del usuario
       await tx.carrito.deleteMany({ where: { usuarioId } });
 
       return nuevoPedido;
