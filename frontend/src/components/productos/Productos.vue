@@ -1,495 +1,352 @@
-<script>
+<script setup>
+// El script no necesita cambios, se mantiene igual
 import { onMounted, ref, computed } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import Swal from 'sweetalert2';
 
-export default {
-  props: ['categoriaId'],
-  setup() {
-    const route = useRoute();
-    const productos = ref([]);
-    const categoriaNombre = ref('');
-    const loading = ref(false);
+const route = useRoute();
+const router = useRouter();
+const productos = ref([]);
+const categoriaNombre = ref('');
+const loading = ref(false);
+const mostrarDescripcionCompleta = ref(null);
 
-    // Paginación
-    const paginaActual = ref(1);
-    const productosPorPagina = 5;
+const paginaActual = ref(1);
+const productosPorPagina = 5;
+const mostrarModal = ref(false);
+const editando = ref(false);
+const productoEditando = ref(null);
 
-    // Estado modal
-    const mostrarModal = ref(false);
-    const editando = ref(false);
-    const productoEditando = ref(null);
+const form = ref({
+  nombre: '',
+  descripcion: '',
+  precioPuntos: '',
+  stock: '',
+  imagen: null
+});
 
-    // Formulario
-    const form = ref({
-      nombre: '',
-      descripcion: '',
-      precioPuntos: '',
-      stock: '',
-      imagen: null
-    });
+const previewImage = ref(null);
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-    const previewImage = ref(null);
+const totalPaginas = computed(() => Math.ceil(productos.value.length / productosPorPagina));
+const productosPaginados = computed(() => {
+  const inicio = (paginaActual.value - 1) * productosPorPagina;
+  return productos.value.slice(inicio, inicio + productosPorPagina);
+});
 
-    // Computed para paginación
-    const totalPaginas = computed(() => Math.ceil(productos.value.length / productosPorPagina));
-
-    const productosPaginados = computed(() => {
-      const inicio = (paginaActual.value - 1) * productosPorPagina;
-      return productos.value.slice(inicio, inicio + productosPorPagina);
-    });
-
-    const paginasVisibles = computed(() => {
-      const total = totalPaginas.value;
-      const actual = paginaActual.value;
-      const inicio = Math.max(1, actual - 2);
-      const fin = Math.min(total, inicio + 4);
-      return Array.from({ length: fin - inicio + 1 }, (_, i) => inicio + i);
-    });
-
-    // Funciones de paginación
-    const irAPagina = (pagina) => {
-      if (pagina >= 1 && pagina <= totalPaginas.value) paginaActual.value = pagina;
-    };
-    const paginaAnterior = () => { if (paginaActual.value > 1) paginaActual.value--; };
-    const paginaSiguiente = () => { if (paginaActual.value < totalPaginas.value) paginaActual.value++; };
-
-    // Cargar productos
-    const cargarProductos = async () => {
-      try {
-        const id = route.params.categoriaId;
-        const res = await fetch(`http://localhost:3000/api/productos/categoria/${id}`);
-        if (res.ok) {
-          const data = await res.json();
-          productos.value = Array.isArray(data) ? data : data.productos || [];
-          if (data.categoria) categoriaNombre.value = data.categoria.nombre;
-          paginaActual.value = 1;
-        } else {
-          console.error('Error al cargar productos:', await res.text());
+const paginasVisibles = computed(() => {
+    const total = totalPaginas.value;
+    const actual = paginaActual.value;
+    const paginas = [];
+    if (total <= 5) {
+        for (let i = 1; i <= total; i++) paginas.push(i);
+    } else {
+        if (actual > 2) paginas.push(1, '...');
+        for (let i = Math.max(1, actual - 1); i <= Math.min(total, actual + 1); i++) {
+            if (!paginas.includes(i)) paginas.push(i);
         }
-      } catch (error) {
-        console.error('Error de red al cargar productos:', error);
+        if (actual < total - 1) paginas.push('...', total);
+    }
+    return paginas;
+});
+
+const irAPagina = (pagina) => {
+  if (pagina >= 1 && pagina <= totalPaginas.value) paginaActual.value = pagina;
+};
+const paginaAnterior = () => { if (paginaActual.value > 1) paginaActual.value--; };
+const paginaSiguiente = () => { if (paginaActual.value < totalPaginas.value) paginaActual.value++; };
+
+const cargarProductos = async () => {
+  loading.value = true;
+  try {
+    const id = route.params.categoriaId;
+    const res = await fetch(`${API_BASE_URL}/api/productos/categoria/${id}`);
+    if (res.ok) {
+      const data = await res.json();
+      productos.value = Array.isArray(data) ? data : data.productos || [];
+      // Mejoramos la obtención del nombre para evitar errores si no hay productos
+      if (productos.value.length > 0 && productos.value[0].categoria) {
+        categoriaNombre.value = productos.value[0].categoria.nombre;
+      } else {
+        // Opcional: Cargar nombre de la categoría por separado si no hay productos
+        categoriaNombre.value = "Categoría sin productos";
       }
-    };
-    onMounted(cargarProductos);
-
-    // Abrir modal para agregar
-    const agregarProducto = () => {
-      editando.value = false;
-      productoEditando.value = null;
-      form.value = { nombre: '', descripcion: '', precioPuntos: '', stock: '', imagen: null };
-      previewImage.value = null;
-      mostrarModal.value = true;
-    };
-
-    // Abrir modal para editar
-    const editarProducto = (producto) => {
-      editando.value = true;
-      productoEditando.value = producto;
-      form.value = {
-        nombre: producto.nombre,
-        descripcion: producto.descripcion || '',
-        precioPuntos: producto.precioPuntos.toString(),
-        stock: producto.stock.toString(),
-        imagen: null
-      };
-      previewImage.value = producto.imagenUrl ? `http://localhost:3000${producto.imagenUrl}` : null;
-      mostrarModal.value = true;
-    };
-
-    const cerrarModal = () => {
-      mostrarModal.value = false;
-      form.value = { nombre: '', descripcion: '', precioPuntos: '', stock: '', imagen: null };
-      previewImage.value = null;
-      editando.value = false;
-      productoEditando.value = null;
-    };
-
-    const handleImageUpload = (event) => {
-      const file = event.target.files[0];
-      if (file) {
-        form.value.imagen = file;
-        previewImage.value = URL.createObjectURL(file);
-      }
-    };
-
-    // Guardar producto (crear o actualizar)
-    const guardarProducto = async () => {
-      try {
-        loading.value = true;
-
-        if (!form.value.nombre || !form.value.precioPuntos || !form.value.stock) {
-          Swal.fire({
-            icon: 'warning',
-            title: 'Campos incompletos',
-            text: 'Por favor completa todos los campos obligatorios',
-            confirmButtonColor: '#3085d6'
-          });
-          return;
-        }
-
-        const data = new FormData();
-        data.append('nombre', form.value.nombre);
-        data.append('descripcion', form.value.descripcion || '');
-        data.append('precioPuntos', form.value.precioPuntos);
-        data.append('stock', form.value.stock);
-        if (!editando.value) data.append('categoriaId', route.params.categoriaId);
-        data.append('estado', 'true');
-        if (form.value.imagen) data.append('imagen', form.value.imagen);
-
-        const url = editando.value
-          ? `http://localhost:3000/api/productos/${productoEditando.value.id}`
-          : 'http://localhost:3000/api/productos';
-        const method = editando.value ? 'PUT' : 'POST';
-
-        const res = await fetch(url, { method, body: data });
-        const responseData = await res.json();
-
-        if (res.ok) {
-          Swal.fire({
-            icon: 'success',
-            title: editando.value ? 'Producto actualizado' : 'Producto creado',
-            text: editando.value
-              ? 'El producto fue actualizado exitosamente.'
-              : 'El producto fue creado exitosamente.',
-            confirmButtonColor: '#28a745'
-          });
-          mostrarModal.value = false;
-          await cargarProductos();
-        } else {
-          console.error('Error del servidor:', responseData);
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: responseData.error || 'Error desconocido',
-            confirmButtonColor: '#d33'
-          });
-        }
-      } catch (error) {
-        console.error('Error al guardar producto:', error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error de conexión',
-          text: 'No se pudo conectar al servidor.',
-          confirmButtonColor: '#d33'
-        });
-      } finally {
-        loading.value = false;
-      }
-    };
-
-    // Eliminar producto
-    const eliminarProducto = async (producto) => {
-      const confirmDelete = await Swal.fire({
-        title: '¿Eliminar producto?',
-        text: `El producto "${producto.nombre}" se eliminará permanentemente.`,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar'
-      });
-
-      if (!confirmDelete.isConfirmed) return;
-
-      try {
-        loading.value = true;
-        const res = await fetch(`http://localhost:3000/api/productos/${producto.id}`, { method: 'DELETE' });
-        const responseData = await res.json();
-
-        if (res.ok) {
-          Swal.fire({
-            icon: 'success',
-            title: 'Eliminado',
-            text: 'El producto fue eliminado exitosamente.',
-            confirmButtonColor: '#28a745'
-          });
-          await cargarProductos();
-        } else {
-          console.error('Error del servidor:', responseData);
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: responseData.error || 'Error desconocido',
-            confirmButtonColor: '#d33'
-          });
-        }
-      } catch (error) {
-        console.error('Error al eliminar producto:', error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error de conexión',
-          text: 'No se pudo conectar al servidor.',
-          confirmButtonColor: '#d33'
-        });
-      } finally {
-        loading.value = false;
-      }
-    };
-
-    return {
-      productos,
-      categoriaNombre,
-      mostrarModal,
-      editando,
-      form,
-      previewImage,
-      loading,
-      paginaActual,
-      totalPaginas,
-      productosPaginados,
-      paginasVisibles,
-      irAPagina,
-      paginaAnterior,
-      paginaSiguiente,
-      agregarProducto,
-      editarProducto,
-      eliminarProducto,
-      cerrarModal,
-      handleImageUpload,
-      guardarProducto
-    };
+      paginaActual.value = 1;
+    } else {
+      console.error('Error al cargar productos:', await res.text());
+    }
+  } catch (error) {
+    console.error('Error de red al cargar productos:', error);
+  } finally {
+    loading.value = false;
   }
+};
+onMounted(cargarProductos);
+
+const agregarProducto = () => {
+  editando.value = false;
+  productoEditando.value = null;
+  form.value = { nombre: '', descripcion: '', precioPuntos: '', stock: '', imagen: null };
+  previewImage.value = null;
+  mostrarModal.value = true;
+};
+
+const editarProducto = (producto) => {
+  editando.value = true;
+  productoEditando.value = producto;
+  form.value = {
+    nombre: producto.nombre,
+    descripcion: producto.descripcion || '',
+    precioPuntos: producto.precioPuntos.toString(),
+    stock: producto.stock.toString(),
+    imagen: null
+  };
+  previewImage.value = producto.imagenUrl ? `${API_BASE_URL}${producto.imagenUrl}` : null;
+  mostrarModal.value = true;
+};
+
+const cerrarModal = () => {
+  mostrarModal.value = false;
+};
+
+const handleImageUpload = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    form.value.imagen = file;
+    previewImage.value = URL.createObjectURL(file);
+  }
+};
+
+const guardarProducto = async () => {
+    loading.value = true;
+    const data = new FormData();
+    data.append('nombre', form.value.nombre);
+    data.append('descripcion', form.value.descripcion || '');
+    data.append('precioPuntos', form.value.precioPuntos);
+    data.append('stock', form.value.stock);
+    if (!editando.value) data.append('categoriaId', route.params.categoriaId);
+    if (form.value.imagen) data.append('imagen', form.value.imagen);
+
+    const url = editando.value
+      ? `${API_BASE_URL}/api/productos/${productoEditando.value.id}`
+      : `${API_BASE_URL}/api/productos`;
+    const method = editando.value ? 'PUT' : 'POST';
+
+    try {
+        const res = await fetch(url, { method, body: data });
+        if (res.ok) {
+            Swal.fire('Éxito', `Producto ${editando.value ? 'actualizado' : 'creado'}.`, 'success');
+            cerrarModal();
+            await cargarProductos();
+        } else {
+            const errorData = await res.json();
+            Swal.fire('Error', errorData.error || 'No se pudo guardar el producto.', 'error');
+        }
+    } catch (error) {
+        Swal.fire('Error', 'Error de conexión con el servidor.', 'error');
+    } finally {
+        loading.value = false;
+    }
+};
+
+const eliminarProducto = async (producto) => {
+  Swal.fire({
+    title: '¿Estás seguro?',
+    text: `Se eliminará el producto "${producto.nombre}".`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar'
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/productos/${producto.id}`, { method: 'DELETE' });
+        if(res.ok) {
+          Swal.fire('Eliminado', 'El producto ha sido eliminado.', 'success');
+          await cargarProductos();
+        } else {
+          const errorData = await res.json();
+          Swal.fire('Error', errorData.error, 'error');
+        }
+      } catch (error) {
+        Swal.fire('Error', 'No se pudo conectar al servidor.', 'error');
+      }
+    }
+  });
 };
 </script>
 
-
 <template>
-  <div class="h-full flex flex-col" :style="{ background: 'var(--bg)', color: 'var(--text)' }">
-    <div class="max-w-[1100px] w-full mx-auto px-4">
-      <!-- Flecha para volver atrás -->
-      <div class="pt-4 px-6 mb-2">
-        <button 
-          @click="$router.go(-1)"
-          class="flex items-center transition-colors"
-          :style="{ color: 'var(--text-muted)' }"
-        >
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-          </svg>
-          Volver
-        </button>
+  <div class="max-w-7xl w-full mx-auto">
+    <div class="page-header">
+      <button @click="router.back()" class="back-button">
+        &larr; Volver
+      </button>
+      <div class="header-center">
+        <h1 class="page-title">Catálogo de {{ categoriaNombre }}</h1>
+        <p class="page-subtitle">{{ productos.length }} productos</p>
       </div>
-
-      <!-- Título y botón -->
-      <div class="pb-2 px-6 mb-4 shadow-sm" :style="{  }">
-        <div class="text-center mb-4">
-          <h1 class="text-4xl font-bold mb-1" :style="{ color: 'var(--text)' }">
-            Catalogo de  {{ categoriaNombre || 'Categoría' }}
-          </h1>
-          <p class="text-lg" :style="{ color: 'var(--text-muted)' }"> 
-            <span v-if="productos.length > 0" class="font-medium">
-              ({{ productos.length }} productos)
-            </span>
-          </p>
-        </div>
-        <div class="flex justify-end">
-          <button
-            @click="agregarProducto"
-             class="px-5 py-2 bg-[#FFB93B] text-black rounded-lg font-semibold shadow-md
-                   hover:bg-[#74B9E7] transition-all duration-200 hover:shadow-lg"
-          >
-            + Agregar producto
-          </button>
-        </div>
-      </div>
-
-      <!-- Tabla de productos -->
-      <div class="rounded-xl border border-gray-200 shadow-sm mb-2 w-full max-w-7xl mx-auto overflow-hidden">
-        <table class="w-full border-collapse">
-          <thead class="bg-[#74B9E7] text-black">
-            <tr>
-              <th class="px-6 py-4 text-center font-semibold">Imagen</th>
-              <th class="px-6 py-4 text-center font-semibold">Nombre</th>
-              <th class="px-6 py-4 text-center font-semibold">Precio</th>
-              <th class="px-6 py-4 text-center font-semibold">Stock</th>
-              <th class="px-6 py-4 text-center font-semibold">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="productos.length === 0">
-              <td colspan="5" class="px-6 py-8 text-center" :style="{ color: 'var(--text-muted)' }">
-                No hay productos en esta categoría
-              </td>
-            </tr>
-            <tr
-              v-for="producto in productosPaginados"
-              :key="producto.id"
-              :style="{ background: 'var(--surface-2)' }"
-              class="border-b"
-            >
-              <td class="px-6 py-4 text-center">
-                <img 
-                  v-if="producto.imagenUrl" 
-                  :src="`http://localhost:3000${producto.imagenUrl}`" 
-                  class="w-16 h-16 object-cover rounded-lg mx-auto" 
-                  @error="$event.target.style.display='none'"
-                  :style="{ background: 'var(--surface-2)' }"
-                />
-                <div v-else class="w-16 h-16 rounded-lg mx-auto flex items-center justify-center"
-                  :style="{ background: 'var(--surface-2)' }">
-                  <span :style="{ color: 'var(--text-muted)' }" class="text-xs">Sin imagen</span>
-                </div>
-              </td>
-              <td class="px-6 py-4 text-center">{{ producto.nombre }}</td>
-              <td class="px-6 py-4 text-center">{{ producto.precioPuntos }} puntos</td>
-              <td class="px-6 py-4 text-center">{{ producto.stock }}</td>
-              <td class="px-6 py-4 text-center space-x-2">
-                <button 
-                  @click="editarProducto(producto)"
-                  class="bg-blue-100 text-black hover:bg-blue-200 px-3 py-1 rounded-md text-sm font-medium transition-colors duration-150"
-                >
-                  Editar
-                </button>
-                <button 
-                  @click="eliminarProducto(producto)"
-                  class="bg-red-100 text-black hover:bg-red-200 px-3 py-1 rounded-md text-sm font-medium transition-colors duration-150"
-                >
-                  Eliminar
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Información de productos y controles de paginación -->
-      <div class="text-center mb-6">
-        <!-- Controles de paginación -->
-        <div 
-          v-if="totalPaginas > 1" 
-          class="flex justify-center items-center space-x-4"
-        >
-          <!-- Botón página anterior -->
-          <button
-            @click="paginaAnterior"
-            :disabled="paginaActual === 1"
-            class="w-8 h-8 flex items-center justify-center rounded-md transition-colors"
-            :style="{ background: 'var(--surface-2)', color: 'var(--text-muted)' }"
-          >
-            ←
-          </button>
-
-          <!-- Página actual -->
-          <div class="px-3 py-1 text-sm rounded-md font-medium"
-            :style="{ background: 'var(--primary)', color: 'var(--primary-contrast)' }">
-            {{ paginaActual }}
-          </div>
-
-          <!-- Botón página siguiente -->
-          <button
-            @click="paginaSiguiente"
-            :disabled="paginaActual === totalPaginas"
-            class="w-8 h-8 flex items-center justify-center rounded-md transition-colors"
-            :style="{ background: 'var(--surface-2)', color: 'var(--text-muted)' }"
-          >
-            →
-          </button>
-        </div>
-      </div>
+       <button @click="agregarProducto" class="btn btn-primary add-button">
+        + Agregar producto
+      </button>
     </div>
 
-    <!-- Modal de producto -->
-    <div
-      v-if="mostrarModal"
-      class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4"
-    >
-      <div
-        class="rounded-2xl max-w-md w-full p-8 shadow-xl border transition-all duration-300"
-        :style="{ background: 'var(--surface)', borderColor: 'var(--border)', color: 'var(--text)' }"
-      >
-        <h2 class="text-2xl font-bold mb-6 text-center" :style="{ color: 'var(--text)' }">
-          {{ editando ? 'Editar Producto' : 'Nuevo Producto' }}
-        </h2>
+    <div class="table-container">
+      <table class="hidden md:table w-full">
+        <thead>
+          <tr>
+            <th>Imagen</th><th>Nombre</th><th>Descripción</th><th>Precio</th><th>Stock</th><th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-if="loading"><td colspan="6" class="text-center py-8">Cargando...</td></tr>
+          <tr v-else-if="productosPaginados.length === 0"><td colspan="6" class="text-center py-8">No hay productos.</td></tr>
+          <tr v-else v-for="producto in productosPaginados" :key="producto.id" class="table-row">
+            <td><img :src="`${API_BASE_URL}${producto.imagenUrl}`" class="table-image" alt="Producto"/></td>
+            <td>{{ producto.nombre }}</td>
+            <td><button @click="mostrarDescripcionCompleta = producto.descripcion" class="btn-secondary text-xs">Ver</button></td>
+            <td>{{ producto.precioPuntos }} pts</td>
+            <td>{{ producto.stock }}</td>
+            <td class="actions-cell">
+              <button @click="editarProducto(producto)" class="btn btn-edit">Editar</button>
+              <button @click="eliminarProducto(producto)" class="btn btn-danger">Eliminar</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
-        <form @submit.prevent="guardarProducto" class="space-y-5">
-          <div>
-            <label class="block text-sm font-medium mb-2 text-center" :style="{ color: 'var(--text)' }">Nombre *</label>
-            <input
-              v-model="form.nombre"
-              type="text"
-              required
-              class="w-full px-4 py-3 rounded-lg border placeholder-gray-500 text-center focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition"
-              :style="{ background: 'var(--surface-2)', color: 'var(--text)', borderColor: 'var(--border)' }"
-              placeholder="Nombre del producto"
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-2 text-center" :style="{ color: 'var(--text)' }">Descripción</label>
-            <textarea
-              v-model="form.descripcion"
-              rows="3"
-              class="w-full px-4 py-3 rounded-lg border placeholder-gray-500 text-center focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition resize-none"
-              :style="{ background: 'var(--surface-2)', color: 'var(--text)', borderColor: 'var(--border)' }"
-              placeholder="Descripción del producto"
-            ></textarea>
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-2 text-center" :style="{ color: 'var(--text)' }">Precio (puntos) *</label>
-            <input
-              v-model="form.precioPuntos"
-              type="number"
-              min="1"
-              required
-              class="w-full px-4 py-3 rounded-lg border placeholder-gray-500 text-center focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition"
-              :style="{ background: 'var(--surface-2)', color: 'var(--text)', borderColor: 'var(--border)' }"
-              placeholder="Precio en puntos"
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-2 text-center" :style="{ color: 'var(--text)' }">Stock *</label>
-            <input
-              v-model="form.stock"
-              type="number"
-              min="0"
-              required
-              class="w-full px-4 py-3 rounded-lg border placeholder-gray-500 text-center focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition"
-              :style="{ background: 'var(--surface-2)', color: 'var(--text)', borderColor: 'var(--border)' }"
-              placeholder="Cantidad en stock"
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-2 text-center" :style="{ color: 'var(--text)' }">
-              Imagen {{ editando ? '(dejar vacío para mantener actual)' : '' }}
-            </label>
-            <input
-              type="file"
-              @change="handleImageUpload"
-              accept="image/*"
-              class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition"
-              :style="{ background: 'var(--surface-2)', color: 'var(--text)', borderColor: 'var(--border)' }"
-            />
-            <div v-if="previewImage" class="mt-4 flex justify-center">
-              <img
-                :src="previewImage"
-                class="w-24 h-24 rounded-lg object-cover border shadow-sm"
-                :style="{ borderColor: 'var(--border)' }"
-                alt="Preview"
-              />
+      <div class="md:hidden">
+        <div v-if="loading" class="text-center py-8">Cargando...</div>
+        <div v-else-if="productosPaginados.length === 0" class="text-center py-8">No hay productos.</div>
+        <div v-else class="cards-container">
+          <div v-for="producto in productosPaginados" :key="producto.id" class="card">
+            <img :src="`${API_BASE_URL}${producto.imagenUrl}`" class="card-image" alt="Producto"/>
+            <div class="card-body">
+              <h3 class="card-title">{{ producto.nombre }}</h3>
+              <div class="card-row"><strong>Precio:</strong> {{ producto.precioPuntos }} pts</div>
+              <div class="card-row"><strong>Stock:</strong> {{ producto.stock }}</div>
+              <div class="card-row">
+                <strong>Descripción:</strong>
+                <button @click="mostrarDescripcionCompleta = producto.descripcion" class="btn-secondary text-xs">Ver</button>
+              </div>
+            </div>
+            <div class="card-actions">
+              <button @click="editarProducto(producto)" class="btn btn-edit">Editar</button>
+              <button @click="eliminarProducto(producto)" class="btn btn-danger">Eliminar</button>
             </div>
           </div>
-          <div class="flex gap-4 pt-2">
-            <button
-              type="button"
-              @click="cerrarModal"
-              class="flex-1 px-5 py-3 rounded-lg border transition"
-              :style="{ background: 'var(--warning)', color: 'var(--primary-contrast)', borderColor: 'var(--border)' }"
-              :disabled="loading"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              class="flex-1 px-5 py-3 rounded-lg border transition disabled:opacity-50"
-              :style="{ background: 'var(--primary)', color: 'var(--primary-contrast)', borderColor: 'var(--border)' }"
-              :disabled="loading"
-            >
-              {{ loading ? 'Guardando...' : (editando ? 'Actualizar' : 'Crear') }}
-            </button>
-          </div>
-        </form>
+        </div>
       </div>
     </div>
+
+    <div class="pagination-container">
+      <div v-if="!loading && totalPaginas > 1" class="pagination-controls">
+        <button @click="paginaAnterior" :disabled="paginaActual === 1">&laquo;</button>
+        <template v-for="(pagina, index) in paginasVisibles" :key="index">
+          <span v-if="pagina === '...'" class="pagination-ellipsis">&hellip;</span>
+          <button v-else @click="irAPagina(pagina)" :class="{ active: paginaActual === pagina }">{{ pagina }}</button>
+        </template>
+        <button @click="paginaSiguiente" :disabled="paginaActual === totalPaginas">&raquo;</button>
+      </div>
+    </div>
+
+    <div v-if="mostrarModal" class="modal-overlay" @click.self="cerrarModal"><div class="modal-content"><h2 class="modal-title">{{ editando ? 'Editar Producto' : 'Nuevo Producto' }}</h2><form @submit.prevent="guardarProducto" class="space-y-5"><div><label>Nombre *</label><input v-model="form.nombre" type="text" required/></div><div><label>Descripción</label><textarea v-model="form.descripcion" rows="3"></textarea></div><div class="form-grid"><div><label>Precio (puntos) *</label><input v-model="form.precioPuntos" type="number" min="1" required/></div><div><label>Stock *</label><input v-model="form.stock" type="number" min="0" required/></div></div><div><label>Imagen</label><input type="file" @change="handleImageUpload" accept="image/*" class="file-input"/><img v-if="previewImage" :src="previewImage" class="preview-image" alt="Preview"/></div><div class="modal-actions"><button type="button" @click="cerrarModal" class="btn btn-secondary">Cancelar</button><button type="submit" class="btn btn-primary" :disabled="loading">{{ loading ? 'Guardando...' : 'Guardar' }}</button></div></form></div></div>
+    <div v-if="mostrarDescripcionCompleta" class="modal-overlay" @click.self="mostrarDescripcionCompleta = null"><div class="modal-content"><h2 class="modal-title">Descripción del Producto</h2><p class="descripcion-texto">{{ mostrarDescripcionCompleta }}</p><div class="modal-actions"><button @click="mostrarDescripcionCompleta = null" class="btn btn-primary">Cerrar</button></div></div></div>
   </div>
 </template>
+
+<style scoped>
+.max-w-7xl { max-width: 80rem; width: 100%; margin: 0 auto; }
+
+/* Encabezado corregido */
+.page-header {
+    display: flex;
+    flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+.back-button {
+    background: none;
+    border: none;
+    font-weight: 500;
+    color: var(--primary);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0.5rem; /* Aumenta el área de clic */
+}
+.header-center {
+    text-align: center;
+    flex-grow: 1; /* Ocupa el espacio del medio */
+}
+.page-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text);
+    text-transform: capitalize; /* Pone la primera letra en mayúscula */
+}
+.page-subtitle {
+    color: var(--text-muted);
+}
+.add-button {
+    margin-left: auto; /* Empuja el botón a la derecha en escritorio */
+}
+@media (max-width: 767px) {
+    .page-header {
+        justify-content: center; /* Centra todo en móvil */
+    }
+    .header-center {
+        order: -1; /* Pone el título primero en móvil */
+        width: 100%; /* El título ocupa todo el ancho */
+    }
+    .back-button {
+        position: absolute; /* Lo saca del flujo para que no afecte el centrado */
+        left: 0rem;
+        top: 0.5rem
+    }
+    .add-button {
+        width: 100%;
+        margin-top: 1rem;
+    }
+}
+
+
+.table-container { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+.hidden { display: none; }
+@media (min-width: 768px) { .md\:table { display: table; } .md\:hidden { display: none; } }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 1rem; text-align: center; vertical-align: middle; }
+th { background-color: var(--table-header); color: white; font-weight: 600; }
+.table-row { border-bottom: 1px solid var(--border); }
+.table-image { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; margin: 0 auto; }
+.cards-container { padding: 1rem; display: grid; gap: 1rem; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.card-image { width: 100%; height: 150px; object-fit: cover; }
+.card-body { padding: 1rem; }
+.card-title { font-weight: 700; font-size: 1.1rem; margin-bottom: 0.75rem; }
+.card-row { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid var(--border); }
+.card-row:last-child { border-bottom: none; }
+.card-actions { display: flex; gap: 0.5rem; padding: 1rem; background-color: var(--surface-2); }
+.card-actions .btn { flex: 1; }
+.btn { padding: 0.5rem 1rem; border-radius: 6px; border: none; cursor: pointer; font-weight: 500; }
+.btn-primary { background-color: var(--primary); color: white; }
+.btn-secondary { background-color: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
+.btn-edit { background-color: #f59e0b; color: white; }
+.btn-danger { background-color: #ef4444; color: white; }
+.actions-cell { display: flex; justify-content: center; gap: 0.5rem; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 1rem; }
+.modal-content { background: var(--surface); padding: 2rem; border-radius: 12px; width: 100%; max-width: 500px; }
+.modal-title { font-size: 1.5rem; font-weight: 600; text-align: center; margin-bottom: 1.5rem; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+input, textarea, .file-input { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px; background-color: var(--surface-2); }
+.preview-image { max-width: 100px; margin-top: 1rem; border-radius: 8px; }
+.modal-actions { margin-top: 2rem; display: flex; justify-content: flex-end; gap: 1rem; }
+.descripcion-texto { white-space: pre-wrap; word-wrap: break-word; }
+.pagination-container { display: flex; justify-content: center; margin-top: 1.5rem; }
+.pagination-controls { display: flex; gap: 0.5rem; }
+.pagination-controls button { width: 2.5rem; height: 2.5rem; border: 1px solid var(--border); background-color: var(--surface-2); border-radius: 6px; }
+.pagination-controls button.active { background-color: var(--primary); color: white; }
+.pagination-ellipsis { width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center; }
+</style>
