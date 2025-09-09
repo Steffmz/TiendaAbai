@@ -2,25 +2,20 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const bcrypt = require('bcryptjs');
 
-// Obtener todos los usuarios (para el admin)
 exports.getAllUsuarios = async (req, res) => {
   const adminId = req.usuario.userId;
+  // 1. Obtenemos los parámetros de paginación de la URL (query string)
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10; // Límite por defecto de 10 usuarios
+  const skip = (page - 1) * limit;
 
   try {
+    // 2. Usamos 'skip' y 'take' de Prisma para la paginación
     const usuarios = await prisma.usuario.findMany({
       where: {
-        // Añadimos una condición AND para que se cumplan ambas reglas
         AND: [
-          {
-            id: {
-              not: adminId // Regla 1: No mostrarse a sí mismo
-            }
-          },
-          {
-            rol: {
-              not: 'Administrador' // Regla 2: No mostrar otros administradores
-            }
-          }
+          { id: { not: adminId } },
+          { rol: { not: 'Administrador' } }
         ]
       },
       select: {
@@ -30,33 +25,40 @@ exports.getAllUsuarios = async (req, res) => {
         email: true,
         rol: true,
         activo: true,
+        puntosTotales: true,
         sede: true,
         cargos: { select: { id: true, nombre: true } },
         centroDeCostos: { select: { id: true, nombre: true } },
       },
-      orderBy: {
-        nombreCompleto: 'asc'
+      orderBy: { nombreCompleto: 'asc' },
+      skip: skip,
+      take: limit,
+    });
+
+    const totalUsuarios = await prisma.usuario.count({
+      where: {
+        AND: [
+          { id: { not: adminId } },
+          { rol: { not: 'Administrador' } }
+        ]
       }
     });
-    res.json(usuarios);
+
+    res.json({
+      usuarios,
+      total: totalUsuarios,
+      page,
+      limit
+    });
+
   } catch (error) {
     console.error("Error al obtener usuarios:", error);
     res.status(500).json({ message: 'Error interno del servidor.' });
   }
 };
-// Crear un nuevo usuario (desde el panel de admin)
-// backend/controllers/UsuarioController.js
-
-// ... (otras funciones) ...
 
 exports.createUsuario = async (req, res) => {
-    // ASEGÚRATE DE QUE 'sede' ESTÉ AQUÍ
     const { cedula, nombreCompleto, email, contrasena, rol, sede, cargoId, centroDeCostosId } = req.body;
-
-    // Y AQUÍ EN LA VALIDACIÓN
-    if (!cedula || !nombreCompleto || !email || !contrasena || !rol || !sede || !cargoId || !centroDeCostosId) {
-        return res.status(400).json({ message: 'Todos los campos son requeridos.' });
-    }
 
     try {
         const hashedPassword = await bcrypt.hash(contrasena, 10);
@@ -67,13 +69,12 @@ exports.createUsuario = async (req, res) => {
                 email,
                 contrasena: hashedPassword,
                 rol,
-                sede, // <-- El campo ya está aquí, que es lo correcto
-                cargoId: parseInt(cargoId),
-                centroDeCostosId: parseInt(centroDeCostosId),
+                sede,
+                cargoId,
+                centroDeCostosId,
                 activo: true,
             },
         });
-        // Por seguridad, no devolvemos la contraseña
         const { contrasena: _, ...usuarioSinContrasena } = nuevoUsuario;
         res.status(201).json(usuarioSinContrasena);
     } catch (error) {
@@ -85,9 +86,6 @@ exports.createUsuario = async (req, res) => {
     }
 };
 
-// ... (resto de funciones) ...
-
-// Actualizar un usuario existente
 exports.updateUsuario = async (req, res) => {
   const { id } = req.params;
   const { nombreCompleto, email, rol, sede, activo, cargoId, centroDeCostosId } = req.body;
@@ -112,7 +110,6 @@ exports.updateUsuario = async (req, res) => {
   }
 };
 
-// Desactivar/Activar un usuario (Soft Delete)
 exports.toggleUsuarioStatus = async (req, res) => {
     const { id } = req.params;
     try {
@@ -134,38 +131,36 @@ exports.toggleUsuarioStatus = async (req, res) => {
 exports.deleteUsuario = async (req, res) => {
   const { id } = req.params;
   try {
-    // Aquí podrías añadir lógica para eliminar relaciones si es necesario
-    // Por ahora, lo eliminaremos directamente.
-    await prisma.usuario.delete({
-      where: { id: parseInt(id) },
+    await prisma.$transaction(async (tx) => {
+      const userId = parseInt(id);
+      await tx.historialPuntos.deleteMany({
+        where: { beneficiarioId: userId },
+      });
+      await tx.historialPuntos.updateMany({
+        where: { adminCreadorId: userId },
+        data: { adminCreadorId: null }
+      });
+      await tx.pedido.updateMany({
+          where: { aprobadoPorAdminId: userId },
+          data: { aprobadoPorAdminId: null }
+      });
+      await tx.usuario.delete({
+        where: { id: userId },
+      });
     });
-    res.status(200).json({ message: 'Usuario eliminado permanentemente.' });
+    
+    res.status(200).json({ message: 'Usuario y su historial asociado eliminados permanentemente.' });
   } catch (error) {
     console.error(`Error al eliminar usuario ${id}:`, error);
+    if (error.code === 'P2003') {
+        return res.status(409).json({ message: 'No se puede eliminar el usuario porque aún tiene pedidos o canjes activos. Primero debe gestionarlos.' });
+    }
     res.status(500).json({ message: 'Error al eliminar el usuario.' });
-  }
-};
-exports.getMiPerfil = async (req, res) => {
-  const userId = req.usuario.userId;
-  try {
-    const usuario = await prisma.usuario.findUnique({
-      where: { id: userId },
-      select: {
-        nombreCompleto: true,
-        email: true,
-        cedula: true,
-      }
-    });
-    if (!usuario) return res.status(404).json({ message: 'Usuario no encontrado.' });
-    res.json(usuario);
-  } catch (error) {
-    res.status(500).json({ message: 'Error al obtener el perfil.' });
   }
 };
 
 exports.updateMiPerfil = async (req, res) => {
   const userId = req.usuario.userId;
-  // Añadimos 'contrasenaActual' a los datos que recibimos
   const { nombreCompleto, email, contrasena, contrasenaActual } = req.body;
 
   try {
@@ -176,22 +171,17 @@ exports.updateMiPerfil = async (req, res) => {
       return res.status(404).json({ message: "Usuario no encontrado." });
     }
 
-    // --- LÓGICA DE ACTUALIZACIÓN DE CONTRASEÑA ---
     if (contrasena && contrasena.trim() !== '') {
-      // 1. Verificamos que nos hayan enviado la contraseña actual
       if (!contrasenaActual || contrasenaActual.trim() === '') {
         return res.status(400).json({ message: 'Para cambiar tu contraseña, debes proporcionar tu contraseña actual.' });
       }
-      // 2. Comparamos la contraseña actual con la de la base de datos
       const esValida = await bcrypt.compare(contrasenaActual, usuario.contrasena);
       if (!esValida) {
         return res.status(401).json({ message: 'La contraseña actual es incorrecta.' });
       }
-      // 3. Si todo es correcto, encriptamos la nueva contraseña
       dataToUpdate.contrasena = await bcrypt.hash(contrasena, 10);
     }
 
-    // Actualizamos nombre y email si se proporcionaron
     if (nombreCompleto && nombreCompleto !== usuario.nombreCompleto) {
       dataToUpdate.nombreCompleto = nombreCompleto;
     }
@@ -217,4 +207,56 @@ exports.updateMiPerfil = async (req, res) => {
     }
     res.status(500).json({ message: 'Error interno del servidor al actualizar el perfil.' });
   }
+};
+exports.ajustarPuntos = async (req, res) => {
+  const { id } = req.params;
+  const { puntos, descripcion } = req.body;
+  const adminId = req.usuario.userId;
+
+  if (typeof puntos !== 'number' || !descripcion) {
+    return res.status(400).json({ message: 'Se requieren puntos (número) y una descripción.' });
+  }
+
+  try {
+    const usuarioActualizado = await prisma.$transaction(async (tx) => {
+      const usuario = await tx.usuario.update({
+        where: { id: parseInt(id) },
+        data: { puntosTotales: { increment: puntos } }
+      });
+
+      await tx.historialPuntos.create({
+        data: {
+          puntos: puntos,
+          tipo: 'ASIGNACION_MANUAL',
+          descripcion: descripcion,
+          beneficiarioId: usuario.id,
+          adminCreadorId: adminId
+        }
+      });
+      return usuario;
+    });
+
+    res.json({ message: 'Puntos ajustados correctamente.', usuario: usuarioActualizado });
+  } catch (error) {
+    console.error(`Error al ajustar puntos para el usuario ${id}:`, error);
+    res.status(500).json({ message: 'Error al ajustar los puntos.' });
+  }
+};
+exports.getMiPerfil = async (req, res) => {
+  const userId = req.usuario.userId;
+  try {
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: userId },
+      select: {
+        nombreCompleto: true,
+        email: true,
+        cedula: true,
+        puntosTotales: true, // Asegúrate de incluir los puntos
+      }
+    });
+    if (!usuario) return res.status(404).json({ message: 'Usuario no encontrado.' });
+    res.json(usuario);
+  } catch (error) {
+    res.status(500).json({ message: 'Error al obtener el perfil.' });
+  }
 };

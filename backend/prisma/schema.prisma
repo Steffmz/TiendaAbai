@@ -20,6 +20,8 @@ model Usuario {
   sede                                                       String
   email                                                      String            @unique
   contrasena                                                 String
+  passwordResetToken                                         String?           @unique
+  passwordResetExpires                                       DateTime?
   rol                                                        Role              @default(Empleado)
   puntosTotales                                              Int               @default(0)
   activo                                                     Boolean           @default(true)

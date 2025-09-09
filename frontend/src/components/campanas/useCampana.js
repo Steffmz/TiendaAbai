@@ -1,6 +1,7 @@
 import { ref, computed, onMounted } from "vue";
 import axios from "axios";
 import Swal from "sweetalert2";
+import { PAGINATION } from "../../config";
 
 const API_URL = `${import.meta.env.VITE_API_BASE_URL}/api/campanas`;
 const API_PRODUCTOS = `${import.meta.env.VITE_API_BASE_URL}/api/productos`;
@@ -29,21 +30,38 @@ export default function useCampana() {
 
   // Paginación
   const paginaActual = ref(1);
-  const elementosPorPagina = 6;
+  const elementosPorPagina = PAGINATION.CAMPAIGNS;;
   const totalPaginas = computed(() =>
     Math.ceil(campanasFiltradas.value.length / elementosPorPagina)
   );
 
-  const paginasVisibles = computed(() => {
-    if (totalPaginas.value === 0) return [1];
+const paginasVisibles = computed(() => {
+    const total = totalPaginas.value;
+    const actual = paginaActual.value;
+    const rango = 1; // Cuántas páginas mostrar a cada lado de la actual
+    const paginas = [];
 
-    const tamañoBloque = 5;
-    const bloqueActual = Math.floor((paginaActual.value - 1) / tamañoBloque);
+    if (total <= 7) { // Si hay 7 o menos páginas, muéstralas todas
+      for (let i = 1; i <= total; i++) {
+        paginas.push(i);
+      }
+      return paginas;
+    }
 
-    const inicio = bloqueActual * tamañoBloque + 1;
-    const fin = Math.min(inicio + tamañoBloque - 1, totalPaginas.value);
+    // Lógica para muchas páginas
+    paginas.push(1);
+    if (actual > rango + 2) {
+      paginas.push('...');
+    }
+    for (let i = Math.max(2, actual - rango); i <= Math.min(total - 1, actual + rango); i++) {
+      paginas.push(i);
+    }
+    if (actual < total - rango - 1) {
+      paginas.push('...');
+    }
+    paginas.push(total);
 
-    return Array.from({ length: fin - inicio + 1 }, (_, i) => inicio + i);
+    return paginas;
   });
 
   const totalCampanas = computed(() => campanas.value.length);
