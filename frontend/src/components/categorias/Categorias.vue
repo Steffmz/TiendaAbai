@@ -128,12 +128,31 @@
       </div>
     </div>
 
-    <div v-if="!loading && totalPaginas > 1" class="pagination-controls flex-shrink-0">
-      <button @click="paginaAnterior" :disabled="paginaActual === 1" class="btn btn-secondary">Anterior</button>
-      <span>Página {{ paginaActual }} de {{ totalPaginas }}</span>
-      <button @click="paginaSiguiente" :disabled="paginaActual === totalPaginas"
-        class="btn btn-secondary">Siguiente</button>
+        <div v-if="!loading && totalPaginas > 1" class="flex flex-col items-center justify-center mt-4">
+        <p class="text-gray-700">
+            Existen <span class="text-blue-500 font-semibold">{{ totalCategorias }}</span> categorías
+        </p>
+        <div class="flex items-center mt-2 space-x-1">
+            <button @click="paginaAnterior" :disabled="paginaActual === 1"
+              class="w-8 h-8 flex items-center justify-center rounded-md bg-[#fffef9] border border-gray-200 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+              ←
+            </button>
+            <button v-for="pagina in paginasVisibles" :key="pagina" @click="irAPagina(pagina)" :class="[
+              'w-8 h-8 flex items-center justify-center rounded-md border font-medium',
+              paginaActual === pagina
+                ? 'bg-blue-500 text-white border-blue-500'
+                : 'bg-[#fffef9] border-gray-200 text-gray-600 hover:bg-gray-100',
+              pagina === '...' ? 'cursor-default' : ''
+            ]">
+              {{ pagina }}
+            </button>
+            <button @click="paginaSiguiente" :disabled="paginaActual === totalPaginas"
+              class="w-8 h-8 flex items-center justify-center rounded-md bg-[#fffef9] border border-gray-200 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+              →
+            </button>
+        </div>
     </div>
+
 
     <div v-if="mostrarModal" class="modal-overlay" @click.self="cerrarModal">
       <div class="modal-content">

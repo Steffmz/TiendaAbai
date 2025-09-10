@@ -172,14 +172,29 @@
         </template>
     </div>
 
-    <div v-if="!loading && totalPages > 1" class="pagination-controls">
-      <button @click="prevPage" :disabled="currentPage === 1" class="btn btn-secondary">
-        Anterior
-      </button>
-      <span>Página {{ currentPage }} de {{ totalPages }}</span>
-      <button @click="nextPage" :disabled="currentPage === totalPages" class="btn btn-secondary">
-        Siguiente
-      </button>
+    <div v-if="!loading && totalPages > 1" class="flex flex-col items-center justify-center mt-4">
+        <p class="text-gray-700">
+            Existen <span class="text-blue-500 font-semibold">{{ totalUsers }}</span> usuarios
+        </p>
+        <div class="flex items-center mt-2 space-x-1">
+            <button @click="prevPage" :disabled="currentPage === 1"
+              class="w-8 h-8 flex items-center justify-center rounded-md bg-[#fffef9] border border-gray-200 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+              ←
+            </button>
+            <button v-for="pagina in paginasVisibles" :key="pagina" @click="goToPage(pagina)" :class="[
+              'w-8 h-8 flex items-center justify-center rounded-md border font-medium',
+              currentPage === pagina
+                ? 'bg-blue-500 text-white border-blue-500'
+                : 'bg-[#fffef9] border-gray-200 text-gray-600 hover:bg-gray-100',
+              pagina === '...' ? 'cursor-default' : ''
+            ]">
+              {{ pagina }}
+            </button>
+            <button @click="nextPage" :disabled="currentPage === totalPages"
+              class="w-8 h-8 flex items-center justify-center rounded-md bg-[#fffef9] border border-gray-200 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+              →
+            </button>
+        </div>
     </div>
 
     <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
@@ -334,6 +349,34 @@ watch(searchQuery, () => {
         fetchData();
     }, 300); 
 });
+const paginasVisibles = computed(() => {
+    const total = totalPages.value;
+    const actual = currentPage.value;
+    const rango = 1;
+    const paginas = [];
+
+    if (total <= 7) {
+      for (let i = 1; i <= total; i++) paginas.push(i);
+      return paginas;
+    }
+
+    paginas.push(1);
+    if (actual > rango + 2) paginas.push('...');
+    for (let i = Math.max(2, actual - rango); i <= Math.min(total - 1, actual + rango); i++) {
+      paginas.push(i);
+    }
+    if (actual < total - rango - 1) paginas.push('...');
+    paginas.push(total);
+
+    return paginas;
+});
+
+const goToPage = (pagina) => {
+    if (typeof pagina === 'number') {
+        currentPage.value = pagina;
+        fetchData();
+    }
+};
 
 onMounted(fetchData);
 
