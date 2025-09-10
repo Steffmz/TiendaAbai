@@ -429,4 +429,4 @@ const deleteUsuario = async (usuario) => {
 };
 </script>
 
-<style src="./Usuarios.css"></style>
+<style src="../../assets/css/AdminGestion.css"></style>

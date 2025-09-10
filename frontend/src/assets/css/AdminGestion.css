@@ -1,0 +1,127 @@
+/* --- Contenedores y Layout --- */
+.page-container {
+  padding: 1.5rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.max-w-7xl { max-width: 80rem; width: 100%; margin: 0 auto; }
+.h-full { height: 100%; }
+
+/* --- Encabezado de Página --- */
+.page-header { text-align: center; margin-bottom: 1.5rem; flex-shrink: 0; }
+.page-title { font-size: 1.8rem; font-weight: 700; color: var(--text); }
+.page-subtitle { color: var(--text-muted); }
+
+/* --- Barra de Acciones y Búsqueda --- */
+.actions-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-shrink: 0;
+}
+@media (min-width: 768px) {
+  .actions-bar {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+.search-input {
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  width: 100%;
+  max-width: 350px;
+  background-color: var(--surface-2);
+}
+
+/* --- Vista de Tabla (Desktop) --- */
+.table-container {
+  display: none;
+  background: var(--surface);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  overflow-x: auto;
+  flex-grow: 1;
+  overflow-y: auto;
+}
+@media (min-width: 768px) {
+  .table-container { display: block; }
+}
+
+table { width: 100%; border-collapse: collapse; } /* 1. Aseguramos que los bordes se colapsen */
+
+th, td {
+  padding: 12px 15px;
+  text-align: center;
+  /* 2. ELIMINAMOS el borde inferior de las celdas */
+  /* border-bottom: 1px solid var(--border); */
+}
+th { background-color: #74b9e7; color: black; font-weight: 600; }
+tbody tr {
+  /* 3. AÑADIMOS el borde inferior a la FILA completa */
+  border-bottom: 1px solid var(--border);
+}
+
+tbody tr:last-child {
+  /* 4. Quitamos el borde de la última fila para que no se vea doble */
+  border-bottom: none;
+}
+tbody tr:hover { background-color: var(--surface-2); }
+.table-image { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; margin: 0 auto; }
+.actions-cell { display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap; }
+
+/* --- Vista de Tarjetas (Móvil) --- */
+.cards-container {
+  display: grid;
+  gap: 1rem;
+  flex-grow: 1;
+  overflow-y: auto;
+  padding-bottom: 1rem;
+}
+@media (min-width: 768px) {
+  .cards-container { display: none; }
+}
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.card-header { display: flex; align-items: center; gap: 1rem; padding: 1rem; border-bottom: 1px solid var(--border); }
+.card-image { width: 64px; height: 64px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
+.card-title-status { flex-grow: 1; }
+.card-title { font-weight: 700; color: var(--text); }
+.card-body { padding: 1rem; }
+.card-row { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+.card-row:last-child { border-bottom: none; }
+.card-actions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; padding: 1rem; background-color: var(--surface-2); }
+.card-actions .btn, .card-actions button { flex: 1; width: 100%; text-align: center; }
+
+/* --- Paginación --- */
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem 0 0 0;
+    flex-shrink: 0;
+}
+
+/* --- Botones de Acción (como en Usuarios) --- */
+.actions-cell button, .card-actions button {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+  font-weight: 500;
+}
+.btn-edit { background: #e0f2fe; color: #0369a1; border-color: #bae6fd; }
+.btn-edit:hover { background: #bae6fd; }
+.btn-danger { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
+.btn-danger:hover { background: #fecaca; }
+
+/* --- Modales --- */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 1rem; }
+.modal-content { background: var(--surface); padding: 2rem; border-radius: 12px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
+.modal-title { font-size: 1.5rem; font-weight: 600; text-align: center; margin-bottom: 1.5rem; }
+.modal-actions { margin-top: 2rem; display: flex; justify-content: flex-end; gap: 1rem; }
