@@ -128,7 +128,7 @@
       </div>
     </div>
 
-        <div v-if="!loading && totalPaginas > 1" class="flex flex-col items-center justify-center mt-4">
+    <div v-if="!loading && totalPaginas > 1" class="flex flex-col items-center justify-center mt-4">
         <p class="text-gray-700">
             Existen <span class="text-blue-500 font-semibold">{{ totalCategorias }}</span> categorías
         </p>
@@ -202,7 +202,10 @@ const {
   cerrarModal,
   guardarCategoria,
   handleImageUpload,
-  confirmarEliminar
+  confirmarEliminar,
+  totalCategorias,
+  paginasVisibles,
+  irAPagina
 } = useCategorias();
 
 const irAProductos = (categoriaId) => {
