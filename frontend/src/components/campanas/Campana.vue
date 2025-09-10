@@ -1,151 +1,127 @@
+// steffmz/tiendaabai/TiendaAbai-Wil/frontend/src/components/campanas/Campana.vue
+
 <template>
-  <div class="h-full flex flex-col">
-    <div class="max-w-7xl w-full mx-auto px-4">
-      <!-- Título -->
-      <div class="pt-4 pb-2 px-6 mb-1 shadow-sm text-center">
+  <div class="max-w-7xl w-full mx-auto flex flex-col h-full">
+    
+    <div class="page-header flex-shrink-0">
         <h1 class="page-title">Gestión de Campañas</h1>
         <p class="page-subtitle">Administra tus campañas promocionales</p>
-      </div>
+    </div>
 
-      <!-- Barra búsqueda y botón -->
-      <div class="w-full flex justify-center mb-6">
-        <div class="flex flex-col md:flex-row items-center gap-3 w-full max-w-3xl">
-          <input v-model="filtro" type="text" placeholder="Buscar campañas..." class="w-64 md:flex-1 px-3 py-2 border border-yellow-400 rounded-lg text-blue-800 bg-blue-50
-                   focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-200
-                   text-sm shadow-sm transition-all duration-200" />
+    <div class="w-full flex justify-center mb-6">
+      <div class="flex flex-col md:flex-row items-center gap-3 w-full max-w-3xl">
+        <input v-model="filtro" type="text" placeholder="Buscar campañas..." class="w-64 md:flex-1 px-3 py-2 border border-yellow-400 rounded-lg text-blue-800 bg-blue-50
+                 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-200
+                 text-sm shadow-sm transition-all duration-200" />
 
-          <button @click="abrirModalNueva" class="px-5 py-2 bg-[#FFB93B] text-black rounded-lg font-semibold shadow-md
-                   hover:bg-[#74B9E7] transition-all duration-200 hover:shadow-lg">
-            + Nueva Campaña
-          </button>
-        </div>
-      </div>
-
-      <!-- TABLA -->
-      <div class="rounded-xl border border-gray-200 shadow-sm mb-2 w-full max-w-7xl mx-auto overflow-hidden">
-        <div>
-          <table class="w-full border-collapse">
-            <thead class="bg-[#74B9E7] text-black">
-              <tr>
-                <th class="px-3 py-3 text-center font-semibold w-24">Imagen</th>
-                <th class="px-3 py-3 text-center font-semibold w-40">Nombre</th>
-                <th class="px-3 py-3 text-center font-semibold w-24">Descripción</th>
-                <th class="px-3 py-3 text-center font-semibold w-28">Puntos</th>
-                <th class="px-3 py-3 text-center font-semibold w-28">Descuento</th>
-                <th class="px-3 py-3 text-center font-semibold w-48">Productos</th>
-                <th class="px-3 py-3 text-center font-semibold w-32">Fecha Inicio</th>
-                <th class="px-3 py-3 text-center font-semibold w-32">Fecha Fin</th>
-                <th class="px-3 py-3 text-center font-semibold w-32">Fecha Creación</th>
-                <th class="px-3 py-3 text-center font-semibold w-28">Estado</th>
-                <th class="px-3 py-3 text-center font-semibold w-36">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(campana, index) in campanasPaginadas" :key="campana.id"
-                :class="index % 2 === 0 ? 'bg-gray-50' : 'bg-white'"
-                class="border-b border-gray-100 hover:bg-[#fac8012f] transition-colors duration-150">
-
-                <!-- Imagen -->
-                <td data-label="Imagen" class="px-3 py-3 text-center">
-                  <div class="w-14 h-14 rounded-lg overflow-hidden border border-gray-200 shadow-sm mx-auto">
-                    <img :src="campana.imagenUrl
-                      ? (campana.imagenUrl.startsWith('http')
-                        ? campana.imagenUrl
-                        : `http://localhost:3000${campana.imagenUrl}`)
-                      : placeholder" alt="Imagen campaña" class="w-full h-full object-cover" />
-                  </div>
-                </td>
-
-                <!-- Nombre -->
-                <td data-label="Nombre" class="px-3 py-3 text-gray-800 font-medium text-center">
-                  <div class="truncate max-w-[160px]" :title="campana.titulo">
-                    {{ campana.titulo }}
-                  </div>
-                </td>
-
-                <!-- Descripción -->
-                <td data-label="Descripción" class="px-3 py-3 text-center">
-                  <button @click="mostrarDescripcion = mostrarDescripcion === campana.id ? null : campana.id"
-                    class="bg-blue-100 hover:bg-blue-200 px-3 py-1 rounded-md text-sm text-blue-700 font-medium transition-colors">
-                    Ver
-                  </button>
-                </td>
-
-                <!-- Puntos -->
-                <td data-label="Puntos" class="px-3 py-3 text-blue-700 font-semibold text-center">
-                  {{ campana.puntos ?? '-' }}
-                </td>
-
-                <!-- Descuento -->
-                <td data-label="Descuento" class="px-3 py-3 text-green-600 font-semibold text-center">
-                  {{ campana.descuento !== null && campana.descuento !== undefined ? campana.descuento + '%' : '-' }}
-                </td>
-
-                <!-- Productos -->
-                <td data-label="Productos" class="px-4 py-2 text-center">
-                  <button @click="abrirModalVerProductos(campana)"
-                    class="bg-blue-100 hover:bg-blue-200 px-3 py-1 rounded-md text-sm text-blue-700 font-medium transition-colors">
-                    Ver
-                  </button>
-                </td>
-
-                <!-- Fechas -->
-                <td data-label="Fecha Inicio" class="px-3 py-3 text-gray-500 text-sm text-center">
-                  {{ new Date(campana.fechaInicio).toLocaleDateString('es-CO') }}
-                </td>
-                <td data-label="Fecha Fin" class="px-3 py-3 text-gray-500 text-sm text-center">
-                  {{ new Date(campana.fechaFin).toLocaleDateString('es-CO') }}
-                </td>
-                <td data-label="Fecha Creación" class="px-3 py-3 text-gray-500 text-sm text-center">
-                  {{ new Date(campana.fechaCreacion).toLocaleDateString('es-CO') }}
-                </td>
-
-                <!-- Estado -->
-                <td data-label="Estado" class="px-3 py-3 text-center">
-                  <span :class="campana.aprobada
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-red-100 text-red-800'"
-                    class="px-2 py-1 rounded-full text-xs font-medium">
-                    {{ campana.aprobada ? 'Activa' : 'Finalizada' }}
-                  </span>
-                </td>
-
-                <!-- Acciones -->
-                <td data-label="Acciones" class="px-3 py-3">
-                  <div class="flex items-center justify-center gap-2">
-                    <button @click="abrirModalEditar(campana)"
-                      class="bg-blue-100 text-black hover:bg-blue-200 px-3 py-1 rounded-md text-sm font-medium transition-colors">
-                      Editar
-                    </button>
-                    <button @click="confirmarEliminar(campana)"
-                      class="bg-red-100 text-black hover:bg-red-200 px-3 py-1 rounded-md text-sm font-medium transition-colors">
-                      Eliminar
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <button @click="abrirModalNueva" class="px-5 py-2 bg-[#FFB93B] text-black rounded-lg font-semibold shadow-md
+                 hover:bg-[#74B9E7] transition-all duration-200 hover:shadow-lg">
+          + Nueva Campaña
+        </button>
       </div>
     </div>
 
-    <!-- Modal de descripción (fuera de la tabla) -->
+    <div class="flex-grow overflow-y-auto pb-4">
+        <div class="table-container">
+            <table class="w-full border-collapse">
+              <thead class="bg-[#74B9E7] text-black">
+                <tr>
+                  <th class="px-3 py-3 text-center font-semibold w-24">Imagen</th>
+                  <th class="px-3 py-3 text-center font-semibold w-40">Nombre</th>
+                  <th class="px-3 py-3 text-center font-semibold w-24">Descripción</th>
+                  <th class="px-3 py-3 text-center font-semibold w-28">Puntos</th>
+                  <th class="px-3 py-3 text-center font-semibold w-28">Descuento</th>
+                  <th class="px-3 py-3 text-center font-semibold w-48">Productos</th>
+                  <th class="px-3 py-3 text-center font-semibold w-32">Fecha Inicio</th>
+                  <th class="px-3 py-3 text-center font-semibold w-32">Fecha Fin</th>
+                  <th class="px-3 py-3 text-center font-semibold w-32">Fecha Creación</th>
+                  <th class="px-3 py-3 text-center font-semibold w-28">Estado</th>
+                  <th class="px-3 py-3 text-center font-semibold w-36">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(campana, index) in campanasPaginadas" :key="campana.id"
+                  :class="index % 2 === 0 ? 'bg-gray-50' : 'bg-white'"
+                  class="border-b border-gray-100 hover:bg-[#fac8012f] transition-colors duration-150">
+
+                  <td data-label="Imagen" class="px-3 py-3 text-center">
+                      <div class="w-14 h-14 rounded-lg overflow-hidden border border-gray-200 shadow-sm mx-auto">
+                        <img :src="campana.imagenUrl
+                          ? (campana.imagenUrl.startsWith('http')
+                            ? campana.imagenUrl
+                            : `http://localhost:3000${campana.imagenUrl}`)
+                          : placeholder" alt="Imagen campaña" class="w-full h-full object-cover" />
+                      </div>
+                    </td>
+                    <td data-label="Nombre" class="px-3 py-3 text-gray-800 font-medium text-center">
+                      <div class="truncate max-w-[160px]" :title="campana.titulo">
+                        {{ campana.titulo }}
+                      </div>
+                    </td>
+                    <td data-label="Descripción" class="px-3 py-3 text-center">
+                      <button @click="mostrarDescripcion = mostrarDescripcion === campana.id ? null : campana.id"
+                        class="bg-blue-100 hover:bg-blue-200 px-3 py-1 rounded-md text-sm text-blue-700 font-medium transition-colors">
+                        Ver
+                      </button>
+                    </td>
+                    <td data-label="Puntos" class="px-3 py-3 text-blue-700 font-semibold text-center">
+                      {{ campana.puntos ?? '-' }}
+                    </td>
+                    <td data-label="Descuento" class="px-3 py-3 text-green-600 font-semibold text-center">
+                      {{ campana.descuento !== null && campana.descuento !== undefined ? campana.descuento + '%' : '-' }}
+                    </td>
+                    <td data-label="Productos" class="px-4 py-2 text-center">
+                      <button @click="abrirModalVerProductos(campana)"
+                        class="bg-blue-100 hover:bg-blue-200 px-3 py-1 rounded-md text-sm text-blue-700 font-medium transition-colors">
+                        Ver
+                      </button>
+                    </td>
+                    <td data-label="Fecha Inicio" class="px-3 py-3 text-gray-500 text-sm text-center">
+                      {{ new Date(campana.fechaInicio).toLocaleDateString('es-CO') }}
+                    </td>
+                    <td data-label="Fecha Fin" class="px-3 py-3 text-gray-500 text-sm text-center">
+                      {{ new Date(campana.fechaFin).toLocaleDateString('es-CO') }}
+                    </td>
+                    <td data-label="Fecha Creación" class="px-3 py-3 text-gray-500 text-sm text-center">
+                      {{ new Date(campana.fechaCreacion).toLocaleDateString('es-CO') }}
+                    </td>
+                    <td data-label="Estado" class="px-3 py-3 text-center">
+                      <span :class="campana.aprobada
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'"
+                        class="px-2 py-1 rounded-full text-xs font-medium">
+                        {{ campana.aprobada ? 'Activa' : 'Finalizada' }}
+                      </span>
+                    </td>
+                    <td data-label="Acciones" class="px-3 py-3">
+                      <div class="flex items-center justify-center gap-2">
+                        <button @click="abrirModalEditar(campana)"
+                          class="bg-blue-100 text-black hover:bg-blue-200 px-3 py-1 rounded-md text-sm font-medium transition-colors">
+                          Editar
+                        </button>
+                        <button @click="confirmarEliminar(campana)"
+                          class="bg-red-100 text-black hover:bg-red-200 px-3 py-1 rounded-md text-sm font-medium transition-colors">
+                          Eliminar
+                        </button>
+                      </div>
+                    </td>
+                </tr>
+              </tbody>
+            </table>
+        </div>
+    </div>
+    
     <div v-if="mostrarDescripcion"
       class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4"
       @click="mostrarDescripcion = null">
       <div
         class="relative bg-[var(--surface)] border border-[var(--border)] rounded-xl shadow-xl p-6 w-full max-w-md mx-auto"
         @click.stop>
-
-        <!-- Contenido -->
         <div class="bg-[var(--surface-2)] rounded-lg p-4">
           <p class="text-base text-[var(--text)] leading-relaxed break-words whitespace-pre-wrap">
             {{campanas.find(c => c.id === mostrarDescripcion)?.descripcion}}
           </p>
         </div>
-
-        <!-- Botón cerrar abajo -->
         <div class="mt-4 text-center">
           <button @click="mostrarDescripcion = null"
             class="px-4 py-2 bg-[#74B9E7] text-black rounded-lg hover:bg-[#FFB93B] transition-colors">
@@ -154,10 +130,7 @@
         </div>
       </div>
     </div>
-
-
     <div v-if="modalAbierto" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <!-- El cambio clave está en la siguiente línea -->
       <div class="modal-content bg-white rounded-xl shadow-lg relative">
         <button 
           @click="cerrarModal"
@@ -168,24 +141,20 @@
          >
           &times;
         </button>
-
         <h2 class="text-xl font-bold text-gray-800 mb-6 text-center">
           {{ editando ? 'Editar Campaña' : 'Nueva Campaña' }}
         </h2>
-
         <form @submit.prevent="guardarCampana">
           <div class="form-grid">
             <div class="form-group grid-col-span-2">
               <label>Nombre de la Campaña *</label>
               <input v-model="formulario.titulo" type="text" required placeholder="Ej: Promo Verano 2024" />
             </div>
-
             <div class="form-group grid-col-span-2">
               <label>Descripción *</label>
               <textarea v-model="formulario.descripcion" required rows="3"
                 placeholder="Describe la campaña..."></textarea>
             </div>
-
             <div class="form-group">
               <label>Fecha Inicio *</label>
               <input type="date" v-model="formulario.fechaInicio" />
@@ -194,7 +163,6 @@
               <label>Fecha Fin *</label>
               <input type="date" v-model="formulario.fechaFin" />
             </div>
-
             <div class="form-group">
               <label>Puntos *</label>
               <input v-model.number="formulario.puntos" type="number" required min="1" placeholder="100" />
@@ -203,7 +171,6 @@
               <label>Descuento (%) *</label>
               <input v-model.number="formulario.descuento" type="number" required min="1" max="100" placeholder="15" />
             </div>
-
             <div class="form-group">
               <label>Estado *</label>
               <select v-model="formulario.aprobada" required>
@@ -211,23 +178,20 @@
                 <option :value="false">Inactiva</option>
               </select>
             </div>
-
             <div class="form-group">
               <label>Imagen</label>
               <input type="file" @change="manejarSubidaImagen" accept="image/*" />
             </div>
-
-          <div v-if="previewImage" class="form-group col-span-2">
-            <label class="block font-semibold mb-2">Vista Previa</label>
-            <div class="flex justify-center">
-              <img 
-                :src="previewImage" 
-                alt="Preview" 
-                class="max-w-[120px] max-h-[120px] object-contain rounded-md border shadow"
-              />
+            <div v-if="previewImage" class="form-group col-span-2">
+                <label class="block font-semibold mb-2">Vista Previa</label>
+                <div class="flex justify-center">
+                  <img 
+                    :src="previewImage" 
+                    alt="Preview" 
+                    class="max-w-[120px] max-h-[120px] object-contain rounded-md border shadow"
+                  />
+                </div>
             </div>
-          </div>
-
             <div class="form-group grid-col-span-2">
               <label>Productos</label>
               <button type="button" class="btn btn-secondary" @click="modalSeleccionProductos = true">
@@ -239,104 +203,85 @@
               </ul>
             </div>
           </div>
-
           <div class="modal-actions">
             <button type="submit" class="btn btn-primary">
               {{ editando ? 'Actualizar Campaña' : 'Crear Campaña' }}
             </button>
           </div>
         </form>
-
-
       </div>
     </div>
-
-   <!-- Modal Selección de productos (formulario) -->
-<div 
-  v-if="modalSeleccionProductos"
-  class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
->
-  <div class="modal-content bg-white relative">
-    <button 
-      class="modal-close-btn" 
-      @click="modalSeleccionProductos = false"
+    <div 
+      v-if="modalSeleccionProductos"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
     >
-      ✖
-    </button>
-
-    <h2 class="text-lg font-bold mb-3">Seleccionar Productos</h2>
-
-    <table class="w-full border product-table">
-      <thead>
-        <tr class="bg-gray-100">
-          <th class="p-2">✔</th>
-          <th class="p-2">Nombre</th>
-          <th class="p-2">Puntos</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr 
-          v-for="p in productos" 
-          :key="p.id" 
-          class="border-t"
+      <div class="modal-content bg-white relative">
+        <button 
+          class="modal-close-btn" 
+          @click="modalSeleccionProductos = false"
         >
-          <td class="text-center" data-label="Seleccionar">
-            <input
-              type="checkbox"
-              :checked="isProductoSeleccionado(p)"
-              @change="toggleProductoSeleccionado(p)"
-            />
-          </td>
-          <td class="p-2" data-label="Nombre">{{ p.nombre }}</td>
-          <td class="p-2" data-label="Puntos">{{ p.precioPuntos }} pts</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <div class="flex justify-end mt-3">
-      <button
-        class="bg-gray-500 text-white px-3 py-1 rounded"
-        @click="modalSeleccionProductos = false"
-      >
-        Cerrar
-      </button>
+          ✖
+        </button>
+        <h2 class="text-lg font-bold mb-3">Seleccionar Productos</h2>
+        <table class="w-full border product-table">
+          <thead>
+            <tr class="bg-gray-100">
+              <th class="p-2">✔</th>
+              <th class="p-2">Nombre</th>
+              <th class="p-2">Puntos</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr 
+              v-for="p in productos" 
+              :key="p.id" 
+              class="border-t"
+            >
+              <td class="text-center" data-label="Seleccionar">
+                <input
+                  type="checkbox"
+                  :checked="isProductoSeleccionado(p)"
+                  @change="toggleProductoSeleccionado(p)"
+                />
+              </td>
+              <td class="p-2" data-label="Nombre">{{ p.nombre }}</td>
+              <td class="p-2" data-label="Puntos">{{ p.precioPuntos }} pts</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="flex justify-end mt-3">
+          <button
+            class="bg-gray-500 text-white px-3 py-1 rounded"
+            @click="modalSeleccionProductos = false"
+          >
+            Cerrar
+          </button>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
-
-
-    <!-- Modal Ver productos (tabla) -->
     <div v-if="modalVerProductos" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
         <h2 class="text-xl font-bold mb-4 text-center">
           Productos de {{ campanaActual?.titulo }}
         </h2>
-
         <ul v-if="campanaActual?.productos?.length" class="divide-y">
           <li
             v-for="prod in campanaActual.productos"
             :key="prod.id"
             class="flex justify-between items-center py-2"
           >
-            <!-- Nombre -->
             <span class="flex-1">{{ prod.nombre }}</span>
-
-            <!-- Puntos -->
             <span class="text-sm text-indigo-600 mr-4">
               {{ prod.precioPuntos }} pts
             </span>
-
-            <!-- Precio (si existe en tu objeto) -->
             <span class="font-semibold text-gray-700">
               {{ prod.precio }} $
             </span>
           </li>
         </ul>
-
         <p v-else class="text-gray-500 text-center">
           No hay productos en esta campaña.
         </p>
-
         <div class="mt-4 text-right">
           <button
             @click="modalVerProductos = false"
@@ -349,8 +294,7 @@
     </div>
 
 
-    <!-- Paginación -->
-    <div class="flex flex-col items-center justify-center mt-4">
+    <div class="pagination-controls flex-shrink-0">
       <p class="text-gray-700">
         Existen <span class="text-blue-500 font-semibold">{{ totalCampanas }}</span> campañas
       </p>
@@ -381,7 +325,7 @@
 import useCampana from './useCampana'
 
 const {
-  BASE,
+  // ... (el script no necesita cambios) ...
   filtro,
   placeholder,
   modalAbierto,
@@ -415,4 +359,4 @@ const {
 } = useCampana()
 </script>
 
-<style src="./Campana.css"></style>
+<style src="../../assets/css/AdminGestion.css"></style>
