@@ -100,6 +100,7 @@
 import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import { PAGINATION } from '../../config';
 
 const pedidos = ref([]);
 const loading = ref(true);
@@ -107,7 +108,7 @@ const selectedPedido = ref(null);
 const API_URL = `${import.meta.env.VITE_API_BASE_URL}/api/pedidos`;
 const currentPage = ref(1);
 const totalPedidos = ref(0);
-const pedidosPorPagina = ref(6);
+const pedidosPorPagina = ref(PAGINATION.PEDIDOS);
 const totalPages = computed(() => Math.ceil(totalPedidos.value / pedidosPorPagina.value));
 const getAuthHeaders = () => ({ headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }});
 

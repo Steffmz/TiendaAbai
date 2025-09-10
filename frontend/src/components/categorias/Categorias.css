@@ -1,0 +1,119 @@
+/* frontend/src/components/categorias/Categorias.css */
+
+/* Estilos base (desktop) */
+.page-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+.page-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.page-subtitle {
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+/* Contenedor de la tabla */
+.table-container {
+  overflow-x: auto;
+  background: var(--surface);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 12px 15px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+
+th {
+  background-color: #74b9e7;
+  color: black;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+tbody tr:hover {
+  background-color: var(--surface-2);
+}
+
+.actions-cell button {
+  margin: 0 4px;
+}
+
+/* --- Responsive: Tarjetas para Móviles (menos de 768px) --- */
+@media (max-width: 768px) {
+  /* Ocultamos la tabla en móviles */
+  .table-container {
+    display: none;
+  }
+
+  /* Mostramos el contenedor de tarjetas */
+  .cards-container {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .card-image {
+    width: 64px; /* 4rem */
+    height: 64px; /* 4rem */
+    object-fit: cover;
+    border-radius: 8px;
+    flex-shrink: 0;
+  }
+
+  .card-title-status {
+    flex-grow: 1;
+  }
+
+  .card-title {
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .card-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .card-actions button {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 0.875rem; /* 14px */
+  }
+}
+
+/* Ocultar tarjetas en desktop */
+@media (min-width: 769px) {
+  .cards-container {
+    display: none;
+  }
+}
