@@ -1,5 +1,5 @@
 <template>
-  <div class="cart-container">
+  <div class="cart-container max-w-7xl w-full mx-auto">
     <h1>Mi Carrito de Canjes</h1>
     <div v-if="loading" class="text-center">Cargando carrito...</div>
     <div v-else-if="carrito.length === 0" class="empty-cart">

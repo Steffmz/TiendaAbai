@@ -1,5 +1,5 @@
 <template>
-  <div class="mis-pedidos-container">
+  <div class="mis-pedidos-container max-w-7xl w-full mx-auto">
 
     <div class="header-section">
       <h1 class="page-title">Mi Historial de Canjes</h1>
