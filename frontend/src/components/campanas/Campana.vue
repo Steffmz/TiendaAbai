@@ -3,8 +3,8 @@
     <div class="max-w-7xl w-full mx-auto px-4">
       <!-- Título -->
       <div class="pt-4 pb-2 px-6 mb-1 shadow-sm text-center">
-        <h1 class="text-4xl font-bold text-gray-800 mb-1">Gestión de Campañas</h1>
-        <p class="text-gray-500 text-lg">Administra tus campañas promocionales</p>
+        <h1 class="page-title">Gestión de Campañas</h1>
+        <p class="page-subtitle">Administra tus campañas promocionales</p>
       </div>
 
       <!-- Barra búsqueda y botón -->
