@@ -3,6 +3,7 @@
 import { onMounted, ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import Swal from 'sweetalert2';
+import { PAGINATION } from '../../config'; 
 
 const route = useRoute();
 const router = useRouter();
@@ -12,7 +13,7 @@ const loading = ref(false);
 const mostrarDescripcionCompleta = ref(null);
 
 const paginaActual = ref(1);
-const productosPorPagina = 5;
+const productosPorPagina = PAGINATION.PRODUCTS;
 const mostrarModal = ref(false);
 const editando = ref(false);
 const productoEditando = ref(null);

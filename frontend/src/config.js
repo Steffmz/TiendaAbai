@@ -5,8 +5,9 @@
 // solo tienes que cambiarlo aquí.
 
 export const PAGINATION = {
-  CATEGORIES: 5,
+  CATEGORIES: 4,
   PRODUCTS: 6,
   CAMPAIGNS: 6,
   USERS: 6, // Un valor razonable para la tabla de usuarios
+  PEDIDOS: 6,
 };

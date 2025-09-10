@@ -256,6 +256,7 @@ import Swal from "sweetalert2";
 import BaseModal from "../shared/BaseModal.vue";
 import BaseSkeleton from "../shared/BaseSkeleton.vue";
 import EmptyState from "../shared/EmptyState.vue";
+import { PAGINATION } from "../../config";
 
 const usuarios = ref([]);
 const loading = ref(true);
@@ -271,7 +272,7 @@ const cargos = ref([]);
 const centrosDeCostos = ref([]);
 const currentPage = ref(1);
 const totalUsers = ref(0);
-const usersPerPage = ref(6);
+const usersPerPage = ref(PAGINATION.USERS);
 const totalPages = computed(() => Math.ceil(totalUsers.value / usersPerPage.value));
 
 const getAuthHeaders = () => ({ headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` } });
