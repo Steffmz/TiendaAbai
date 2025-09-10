@@ -1,7 +1,8 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const { InternalServerError } = require('../utils/ApiError');
 
-exports.getMisNotificaciones = async (req, res) => {
+exports.getMisNotificaciones = async (req, res, next) => {
   const usuarioId = req.usuario.userId;
   try {
     const notificaciones = await prisma.notificacion.findMany({
@@ -11,10 +12,10 @@ exports.getMisNotificaciones = async (req, res) => {
     });
     res.json(notificaciones);
   } catch (error) {
-    res.status(500).json({ message: 'Error al obtener notificaciones.' });
+    next(new InternalServerError('Error al obtener notificaciones.'));
   }
 };
-exports.getUnreadCount = async (req, res) => {
+exports.getUnreadCount = async (req, res, next) => {
   const usuarioId = req.usuario.userId;
   try {
     const count = await prisma.notificacion.count({
@@ -25,12 +26,12 @@ exports.getUnreadCount = async (req, res) => {
     });
     res.json({ count });
   } catch (error) {
-    res.status(500).json({ message: 'Error al obtener el conteo.' });
+    next(new InternalServerError('Error al obtener el conteo.'));
   }
 };
 
 // Marcar todas las notificaciones como leídas
-exports.markAllAsRead = async (req, res) => {
+exports.markAllAsRead = async (req, res, next) => {
   const usuarioId = req.usuario.userId;
   try {
     await prisma.notificacion.updateMany({
@@ -44,6 +45,6 @@ exports.markAllAsRead = async (req, res) => {
     });
     res.status(200).json({ message: 'Notificaciones marcadas como leídas.' });
   } catch (error) {
-    res.status(500).json({ message: 'Error al marcar las notificaciones.' });
+    next(new InternalServerError('Error al marcar las notificaciones.'));
   }
 };

@@ -1,8 +1,12 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const bcrypt = require('bcryptjs');
+const {
+  InternalServerError,
+  ConflictError,
+} = require('../utils/ApiError');
 
-exports.getAllUsuarios = async (req, res) => {
+exports.getAllUsuarios = async (req, res, next) => {
   const adminId = req.usuario.userId;
   // --- LÓGICA DE PAGINACIÓN Y BÚSQUEDA ---
   const page = parseInt(req.query.page) || 1;
@@ -57,12 +61,12 @@ exports.getAllUsuarios = async (req, res) => {
 
   } catch (error) {
     console.error("Error al obtener usuarios:", error);
-    res.status(500).json({ message: 'Error interno del servidor.' });
+    next(new InternalServerError('Error interno del servidor.'));
   }
 };
 
 // ... (El resto de las funciones no cambian)
-exports.createUsuario = async (req, res) => {
+exports.createUsuario = async (req, res, next) => {
     const { cedula, nombreCompleto, email, contrasena, rol, sede, cargoId, centroDeCostosId } = req.body;
 
     try {
@@ -84,14 +88,18 @@ exports.createUsuario = async (req, res) => {
         res.status(201).json(usuarioSinContrasena);
     } catch (error) {
         if (error.code === 'P2002') {
-            return res.status(409).json({ message: `El campo '${error.meta.target[0]}' ya está en uso.` });
+            return next(
+              new ConflictError(
+                `El campo '${error.meta.target[0]}' ya está en uso.`
+              )
+            );
         }
         console.error("Error al crear usuario:", error);
-        res.status(500).json({ message: 'Error interno del servidor.' });
+        next(new InternalServerError('Error interno del servidor.'));
     }
 };
 
-exports.updateUsuario = async (req, res) => {
+exports.updateUsuario = async (req, res, next) => {
   const { id } = req.params;
   const { nombreCompleto, email, rol, sede, activo, cargoId, centroDeCostosId } = req.body;
 
@@ -111,11 +119,11 @@ exports.updateUsuario = async (req, res) => {
     res.json(usuarioActualizado);
   } catch (error) {
     console.error(`Error al actualizar usuario ${id}:`, error);
-    res.status(500).json({ message: 'Error al actualizar el usuario.' });
+    next(new InternalServerError('Error al actualizar el usuario.'));
   }
 };
 
-exports.toggleUsuarioStatus = async (req, res) => {
+exports.toggleUsuarioStatus = async (req, res, next) => {
     const { id } = req.params;
     try {
         const usuario = await prisma.usuario.findUnique({ where: { id: parseInt(id) } });
@@ -130,10 +138,10 @@ exports.toggleUsuarioStatus = async (req, res) => {
         res.json({ message: 'Estado del usuario actualizado.', usuario: usuarioActualizado });
     } catch (error) {
         console.error(`Error al cambiar estado del usuario ${id}:`, error);
-        res.status(500).json({ message: 'Error al cambiar el estado del usuario.' });
+        next(new InternalServerError('Error al cambiar el estado del usuario.'));
     }
 };
-exports.deleteUsuario = async (req, res) => {
+exports.deleteUsuario = async (req, res, next) => {
   const { id } = req.params;
   try {
     await prisma.$transaction(async (tx) => {
@@ -158,13 +166,17 @@ exports.deleteUsuario = async (req, res) => {
   } catch (error) {
     console.error(`Error al eliminar usuario ${id}:`, error);
     if (error.code === 'P2003') {
-        return res.status(409).json({ message: 'No se puede eliminar el usuario porque aún tiene pedidos o canjes activos. Primero debe gestionarlos.' });
+        return next(
+          new ConflictError(
+            'No se puede eliminar el usuario porque aún tiene pedidos o canjes activos. Primero debe gestionarlos.'
+          )
+        );
     }
-    res.status(500).json({ message: 'Error al eliminar el usuario.' });
+    next(new InternalServerError('Error al eliminar el usuario.'));
   }
 };
 
-exports.updateMiPerfil = async (req, res) => {
+exports.updateMiPerfil = async (req, res, next) => {
   const userId = req.usuario.userId;
   const { nombreCompleto, email, contrasena, contrasenaActual } = req.body;
 
@@ -208,12 +220,18 @@ exports.updateMiPerfil = async (req, res) => {
   } catch (error) {
     console.error("Error al actualizar perfil:", error);
     if (error.code === 'P2002') {
-      return res.status(409).json({ message: 'El email ya está en uso por otro usuario.' });
+      return next(
+        new ConflictError('El email ya está en uso por otro usuario.')
+      );
     }
-    res.status(500).json({ message: 'Error interno del servidor al actualizar el perfil.' });
+    next(
+      new InternalServerError(
+        'Error interno del servidor al actualizar el perfil.'
+      )
+    );
   }
 };
-exports.ajustarPuntos = async (req, res) => {
+exports.ajustarPuntos = async (req, res, next) => {
   const { id } = req.params;
   const { puntos, descripcion } = req.body;
   const adminId = req.usuario.userId;
@@ -244,10 +262,10 @@ exports.ajustarPuntos = async (req, res) => {
     res.json({ message: 'Puntos ajustados correctamente.', usuario: usuarioActualizado });
   } catch (error) {
     console.error(`Error al ajustar puntos para el usuario ${id}:`, error);
-    res.status(500).json({ message: 'Error al ajustar los puntos.' });
+    next(new InternalServerError('Error al ajustar los puntos.'));
   }
 };
-exports.getMiPerfil = async (req, res) => {
+exports.getMiPerfil = async (req, res, next) => {
   const userId = req.usuario.userId;
   try {
     const usuario = await prisma.usuario.findUnique({
@@ -262,6 +280,6 @@ exports.getMiPerfil = async (req, res) => {
     if (!usuario) return res.status(404).json({ message: 'Usuario no encontrado.' });
     res.json(usuario);
   } catch (error) {
-    res.status(500).json({ message: 'Error al obtener el perfil.' });
+    next(new InternalServerError('Error al obtener el perfil.'));
   }
 };

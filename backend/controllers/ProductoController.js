@@ -1,8 +1,9 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const { InternalServerError } = require('../utils/ApiError');
 
 // Obtener todos los productos
-const getAllProductos = async (req, res) => {
+const getAllProductos = async (req, res, next) => {
   try {
     const productos = await prisma.producto.findMany({
       include: { 
@@ -14,12 +15,12 @@ const getAllProductos = async (req, res) => {
     res.json(productos);
   } catch (error) {
     console.error("Error al obtener productos:", error);
-    res.status(500).json({ error: "Error al obtener productos" });
+    next(new InternalServerError('Error al obtener productos'));
   }
 };
 
 // Obtener productos por categoría
-const getProductosByCategoria = async (req, res) => {
+const getProductosByCategoria = async (req, res, next) => {
   try {
     const { categoriaId } = req.params;
     if (isNaN(categoriaId)) {
@@ -38,12 +39,12 @@ const getProductosByCategoria = async (req, res) => {
     res.json(productos);
   } catch (error) {
     console.error("Error al obtener productos por categoría:", error);
-    res.status(500).json({ error: "Error al obtener productos por categoría" });
+    next(new InternalServerError('Error al obtener productos por categoría'));
   }
 };
 
 // Crear producto
-const createProducto = async (req, res) => {
+const createProducto = async (req, res, next) => {
   try {
     const { nombre, descripcion, precioPuntos, stock, categoriaId } = req.body;
     const imagenUrl = req.file ? `/uploads/${req.file.filename}` : null;
@@ -96,12 +97,12 @@ const createProducto = async (req, res) => {
     res.status(201).json(nuevo);
   } catch (error) {
     console.error("Error al crear producto:", error);
-    res.status(500).json({ error: "Error al crear producto" });
+    next(new InternalServerError('Error al crear producto'));
   }
 };
 
 // Actualizar producto
-const updateProducto = async (req, res) => {
+const updateProducto = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { nombre, descripcion, precioPuntos, stock, categoriaId } = req.body;
@@ -165,12 +166,12 @@ const updateProducto = async (req, res) => {
     res.json(actualizado);
   } catch (error) {
     console.error("Error al actualizar producto:", error);
-    res.status(500).json({ error: "Error al actualizar producto" });
+    next(new InternalServerError('Error al actualizar producto'));
   }
 };
 
 // Eliminar producto
-const deleteProducto = async (req, res) => {
+const deleteProducto = async (req, res, next) => {
   try {
     const { id } = req.params;
     if (isNaN(id)) {
@@ -206,7 +207,7 @@ const deleteProducto = async (req, res) => {
     res.json({ message: "Producto eliminado correctamente" });
   } catch (error) {
     console.error("Error al eliminar producto:", error);
-    res.status(500).json({ error: "Error al eliminar producto" });
+    next(new InternalServerError('Error al eliminar producto'));
   }
 };
 

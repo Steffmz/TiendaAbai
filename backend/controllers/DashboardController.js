@@ -1,8 +1,9 @@
 // backend/controllers/DashboardController.js
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const { InternalServerError } = require('../utils/ApiError');
 
-exports.getStats = async (req, res) => {
+exports.getStats = async (req, res, next) => {
   try {
     // 1. Conteo total de usuarios (solo empleados)
     const totalUsuarios = await prisma.usuario.count({
@@ -59,6 +60,6 @@ exports.getStats = async (req, res) => {
 
   } catch (error) {
     console.error("Error al obtener estadísticas del dashboard:", error);
-    res.status(500).json({ message: 'Error interno del servidor.' });
+    next(new InternalServerError('Error interno del servidor.'));
   }
 };

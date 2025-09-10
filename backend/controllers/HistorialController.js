@@ -1,10 +1,11 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const { InternalServerError } = require('../utils/ApiError');
 
 /**
  * Obtiene el historial de puntos del usuario autenticado.
  */
-exports.getHistorial = async (req, res) => {
+exports.getHistorial = async (req, res, next) => {
   const usuarioId = req.usuario.userId;
 
   try {
@@ -16,6 +17,6 @@ exports.getHistorial = async (req, res) => {
     res.status(200).json(historial);
   } catch (error) {
     console.error("Error al obtener el historial de puntos:", error);
-    res.status(500).json({ message: "Error interno del servidor." });
+    next(new InternalServerError('Error interno del servidor.'));
   }
 };

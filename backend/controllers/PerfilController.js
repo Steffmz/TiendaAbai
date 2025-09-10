@@ -2,12 +2,13 @@
 
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const { InternalServerError } = require('../utils/ApiError');
 
 /**
  * Obtiene el perfil del usuario actualmente autenticado.
  * Se usa en los layouts para mostrar el nombre, puntos, etc.
  */
-exports.getPerfil = async (req, res) => {
+exports.getPerfil = async (req, res, next) => {
   try {
     const usuario = await prisma.usuario.findUnique({
       where: { id: req.usuario.userId },
@@ -33,6 +34,6 @@ exports.getPerfil = async (req, res) => {
     
   } catch (error) {
     console.error("Error al obtener perfil:", error);
-    res.status(500).json({ message: 'Error al obtener el perfil.' });
+    next(new InternalServerError('Error al obtener el perfil.'));
   }
 };

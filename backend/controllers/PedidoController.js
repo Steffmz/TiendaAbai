@@ -1,8 +1,9 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const { InternalServerError, BadRequestError } = require('../utils/ApiError');
 
 // Obtener todos los pedidos con paginación
-const getAllPedidos = async (req, res) => {
+const getAllPedidos = async (req, res, next) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 6;
   const skip = (page - 1) * limit;
@@ -29,13 +30,13 @@ const getAllPedidos = async (req, res) => {
     });
   } catch (error) {
     console.error("Error al obtener pedidos:", error);
-    res.status(500).json({ message: 'Error interno del servidor.' });
+    next(new InternalServerError('Error interno del servidor.'));
   }
 };
 
 
 // Actualizar el estado de un pedido
-const updateEstadoPedido = async (req, res) => {
+const updateEstadoPedido = async (req, res, next) => {
   const { id } = req.params;
   const { estado } = req.body;
   const adminId = req.usuario.userId;
@@ -107,12 +108,16 @@ const updateEstadoPedido = async (req, res) => {
     res.json({ message: 'Estado del pedido actualizado.', pedido: pedidoActualizado });
   } catch (error) {
     console.error(`Error al actualizar estado del pedido ${id}:`, error);
-    res.status(500).json({ message: error.message || 'Error al actualizar el estado del pedido.' });
+    next(
+      new InternalServerError(
+        error.message || 'Error al actualizar el estado del pedido.'
+      )
+    );
   }
 };
 
 // Crear un nuevo pedido (Canje de un empleado)
-const createPedido = async (req, res) => {
+const createPedido = async (req, res, next) => {
   const { productoId, cantidad } = req.body;
   const usuarioId = req.usuario.userId;
 
@@ -185,11 +190,15 @@ const createPedido = async (req, res) => {
 
   } catch (error) {
     console.error("Error al crear el pedido:", error.message);
-    res.status(400).json({ message: error.message || "Error interno del servidor al procesar el canje." });
+    next(
+      new BadRequestError(
+        error.message || 'Error interno del servidor al procesar el canje.'
+      )
+    );
   }
 };
 
-const getMisPedidos = async (req, res) => {
+const getMisPedidos = async (req, res, next) => {
   const usuarioId = req.usuario.userId;
   try {
     const pedidos = await prisma.pedido.findMany({
@@ -211,11 +220,11 @@ const getMisPedidos = async (req, res) => {
     res.json(pedidos);
   } catch (error) {
     console.error("Error al obtener mis pedidos:", error);
-    res.status(500).json({ message: 'Error interno del servidor.' });
+    next(new InternalServerError('Error interno del servidor.'));
   }
 };
 
-const crearPedidoDesdeCarrito = async (req, res) => {
+const crearPedidoDesdeCarrito = async (req, res, next) => {
   const usuarioId = req.usuario.userId;
   try {
     const resultado = await prisma.$transaction(async (tx) => {
@@ -287,7 +296,7 @@ const crearPedidoDesdeCarrito = async (req, res) => {
 
   } catch (error) {
     console.error("Error al crear el pedido desde el carrito:", error.message);
-    res.status(400).json({ message: error.message || "Error interno del servidor." });
+    next(new BadRequestError(error.message || 'Error interno del servidor.'));
   }
 };
 

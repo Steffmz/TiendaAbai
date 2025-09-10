@@ -2,6 +2,7 @@ const { PrismaClient } = require("@prisma/client");
 const fs = require('fs');
 const path = require('path');
 const prisma = new PrismaClient();
+const { InternalServerError } = require('../utils/ApiError');
 
 // Helper para convertir valores a booleano de forma segura
 const convertirABoolean = (valor) => {
@@ -14,7 +15,7 @@ const convertirABoolean = (valor) => {
 };
 
 // Obtener todas las categorías
-exports.getCategorias = async (req, res) => {
+exports.getCategorias = async (req, res, next) => {
   try {
     const categorias = await prisma.categoria.findMany({
       orderBy: { fechaCreacion: "desc" },
@@ -23,12 +24,12 @@ exports.getCategorias = async (req, res) => {
     res.json(categorias);
   } catch (error) {
     console.error("Error al obtener categorías:", error);
-    res.status(500).json({ message: "Error al obtener las categorías" });
+    next(new InternalServerError('Error al obtener las categorías'));
   }
 };
 
 // Obtener categoría por ID
-exports.getCategoriaById = async (req, res) => {
+exports.getCategoriaById = async (req, res, next) => {
   const { id } = req.params;
   try {
     const categoria = await prisma.categoria.findUnique({
@@ -39,12 +40,12 @@ exports.getCategoriaById = async (req, res) => {
     res.json(categoria);
   } catch (error) {
     console.error("Error al obtener categoría:", error);
-    res.status(500).json({ message: "Error al obtener la categoría" });
+    next(new InternalServerError('Error al obtener la categoría'));
   }
 };
 
 // Crear categoría
-exports.createCategoria = async (req, res) => {
+exports.createCategoria = async (req, res, next) => {
   const { nombre, descripcion } = req.body;
   try {
     if (!nombre || nombre.trim() === "") {
@@ -67,12 +68,12 @@ exports.createCategoria = async (req, res) => {
     res.status(201).json(nuevaCategoria);
   } catch (error) {
     console.error("Error al crear categoría:", error);
-    res.status(500).json({ error: "Error al crear la categoría" });
+    next(new InternalServerError('Error al crear la categoría'));
   }
 };
 
 // Actualizar categoría
-exports.updateCategoria = async (req, res) => {
+exports.updateCategoria = async (req, res, next) => {
   const { id } = req.params;
   const { nombre, descripcion, activo } = req.body;
   try {
@@ -97,12 +98,12 @@ exports.updateCategoria = async (req, res) => {
     res.json(categoriaActualizada);
   } catch (error) {
     console.error("Error al actualizar categoría:", error);
-    res.status(500).json({ error: "Error al actualizar la categoría" });
+    next(new InternalServerError('Error al actualizar la categoría'));
   }
 };
 
 // Eliminar categoría
-exports.deleteCategoria = async (req, res) => {
+exports.deleteCategoria = async (req, res, next) => {
   const { id } = req.params;
   try {
     const categoria = await prisma.categoria.findUnique({
@@ -128,12 +129,12 @@ exports.deleteCategoria = async (req, res) => {
     res.json({ message: "Categoría eliminada correctamente" });
   } catch (error) {
     console.error("Error al eliminar categoría:", error);
-    res.status(500).json({ error: "Error al eliminar la categoría" });
+    next(new InternalServerError('Error al eliminar la categoría'));
   }
 };
 
 // Activar / Desactivar categoría
-exports.toggleEstadoCategoria = async (req, res) => {
+exports.toggleEstadoCategoria = async (req, res, next) => {
   const { id } = req.params;
   try {
     const categoria = await prisma.categoria.findUnique({ where: { id: parseInt(id) } });
@@ -146,6 +147,6 @@ exports.toggleEstadoCategoria = async (req, res) => {
     res.json({ message: `Categoría ${categoriaActualizada.activo ? "activada" : "desactivada"}`, categoria: categoriaActualizada });
   } catch (error) {
     console.error("Error al cambiar estado de categoría:", error);
-    res.status(500).json({ error: "Error al cambiar el estado" });
+    next(new InternalServerError('Error al cambiar el estado'));
   }
 };

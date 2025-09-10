@@ -6,12 +6,13 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const prisma = new PrismaClient();
+const { InternalServerError, ConflictError } = require('../utils/ApiError');
 
 /**
  * Endpoint para REGISTRAR un nuevo usuario.
  * Incluye la lógica para crear el centro de costos y el cargo si no existen.
  */
-const register = async (req, res) => {
+const register = async (req, res, next) => {
     const { cedula, nombreCompleto, cargo, sede, email, contrasena, centroDeCostosNombre } = req.body;
 
     try {
@@ -53,10 +54,12 @@ const register = async (req, res) => {
     } catch (error) {
         if (error.code === 'P2002') {
             const field = error.meta?.target?.[0];
-            return res.status(409).json({ message: `El campo '${field}' ya está en uso.` });
+            return next(
+              new ConflictError(`El campo '${field}' ya está en uso.`)
+            );
         }
         console.error("Error al crear usuario:", error);
-        res.status(500).json({ message: 'Error interno del servidor al crear el usuario.' });
+        next(new InternalServerError('Error interno del servidor al crear el usuario.'));
     }
 };
 
@@ -64,7 +67,7 @@ const register = async (req, res) => {
  * Endpoint para INICIAR SESIÓN.
  * Devuelve un token JWT si las credenciales son correctas.
  */
-const login = async (req, res) => {
+const login = async (req, res, next) => {
     const { cedula, contrasena } = req.body;
 
     try {
@@ -97,11 +100,11 @@ const login = async (req, res) => {
 
     } catch (error) {
         console.error("Error en el login:", error);
-        res.status(500).json({ message: 'Error interno del servidor.' });
+        next(new InternalServerError('Error interno del servidor.'));
     }
 };
 
-const forgotPassword = async (req, res) => {
+const forgotPassword = async (req, res, next) => {
     const { email } = req.body;
 
     try {
@@ -139,14 +142,14 @@ const forgotPassword = async (req, res) => {
         console.error("Error en forgotPassword:", error);
         // Limpiamos los tokens si algo sale mal
         await prisma.usuario.update({ where: { email }, data: { passwordResetToken: null, passwordResetExpires: null } });
-        res.status(500).json({ message: 'Error interno del servidor.' });
+        next(new InternalServerError('Error interno del servidor.'));
     }
 };
 
 /**
  * Endpoint para reestablecer la contraseña usando el token.
  */
-const resetPassword = async (req, res) => {
+const resetPassword = async (req, res, next) => {
     const { token } = req.params;
     const { contrasena } = req.body;
 
@@ -179,7 +182,7 @@ const resetPassword = async (req, res) => {
 
     } catch (error) {
         console.error("Error en resetPassword:", error);
-        res.status(500).json({ message: 'Error interno del servidor.' });
+        next(new InternalServerError('Error interno del servidor.'));
     }
 };
 

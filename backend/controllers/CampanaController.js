@@ -2,6 +2,7 @@ const { PrismaClient } = require('@prisma/client');
 const fs = require('fs');
 const path = require('path');
 const prisma = new PrismaClient();
+const { InternalServerError } = require('../utils/ApiError');
 
 // FUNCIÓN PARA CORREGIR LA ZONA HORARIA
 const adjustDate = (dateString) => {
@@ -14,7 +15,7 @@ const adjustDate = (dateString) => {
 };
 
 // Obtener campañas con productos
-const getCampanas = async (req, res) => {
+const getCampanas = async (req, res, next) => {
   try {
     const campanas = await prisma.campana.findMany({
       orderBy: { fechaCreacion: 'desc' },
@@ -23,11 +24,11 @@ const getCampanas = async (req, res) => {
     res.json(campanas);
   } catch (error) {
     console.error('Error al obtener campañas:', error);
-    res.status(500).json({ error: 'Error al obtener campañas' });
+    next(new InternalServerError('Error al obtener campañas'));
   }
 };
 
-const getCampanaById = async (req, res) => {
+const getCampanaById = async (req, res, next) => {
   const { id } = req.params;
   try {
     const campana = await prisma.campana.findUnique({
@@ -43,13 +44,13 @@ const getCampanaById = async (req, res) => {
     res.json(campana);
   } catch (error) {
     console.error(`Error al obtener la campaña ${id}:`, error);
-    res.status(500).json({ message: "Error interno del servidor." });
+    next(new InternalServerError('Error interno del servidor.'));
   }
 };
 
 
 // Crear campaña
-const createCampana = async (req, res) => {
+const createCampana = async (req, res, next) => {
   try {
     const { titulo, descripcion, fechaInicio, fechaFin, aprobada: aprobadaStr, puntos: puntosStr, descuento: descuentoStr, productosIds } = req.body;
     const imagenUrl = req.file ? `/uploads/${req.file.filename}` : null;
@@ -91,12 +92,12 @@ const createCampana = async (req, res) => {
     res.json(nueva);
   } catch (error) {
     console.error("Error al crear campaña:", error);
-    res.status(500).json({ error: 'Error al crear campaña' });
+    next(new InternalServerError('Error al crear campaña'));
   }
 };
 
 // Actualizar campaña
-const updateCampana = async (req, res) => {
+const updateCampana = async (req, res, next) => {
   try {
     const { id } = req.params;
     const campanaExistente = await prisma.campana.findUnique({
@@ -145,11 +146,11 @@ const updateCampana = async (req, res) => {
     res.json(actualizada);
   } catch (error) {
     console.error("Error al actualizar campaña:", error);
-    res.status(500).json({ error: 'Error al actualizar campaña' });
+    next(new InternalServerError('Error al actualizar campaña'));
   }
 };
 
-const deleteCampana = async (req, res) => {
+const deleteCampana = async (req, res, next) => {
   try {
     const { id } = req.params;
     
@@ -173,11 +174,11 @@ const deleteCampana = async (req, res) => {
     res.json({ message: 'Campaña eliminada correctamente' });
   } catch (error) {
     console.error('Error al eliminar campaña:', error);
-    res.status(500).json({ error: 'Error al eliminar campaña' });
+    next(new InternalServerError('Error al eliminar campaña'));
   }
 };
 
-const asignarProducto = async (req, res) => {
+const asignarProducto = async (req, res, next) => {
   try {
     const { campanaId, productoId } = req.body;
     if (!campanaId || !productoId) {
@@ -195,11 +196,11 @@ const asignarProducto = async (req, res) => {
     res.json(campana);
   } catch (error) {
     console.error('Error al asignar producto:', error);
-    res.status(500).json({ error: 'Error al asignar producto a campaña' });
+    next(new InternalServerError('Error al asignar producto a campaña'));
   }
 };
 
-const quitarProducto = async (req, res) => {
+const quitarProducto = async (req, res, next) => {
   try {
     const { campanaId, productoId } = req.body;
     if (!campanaId || !productoId) {
@@ -217,7 +218,7 @@ const quitarProducto = async (req, res) => {
     res.json(campana);
   } catch (error) {
     console.error('Error al quitar producto:', error);
-    res.status(500).json({ error: 'Error al quitar producto de campaña' });
+    next(new InternalServerError('Error al quitar producto de campaña'));
   }
 };
 

@@ -2,9 +2,10 @@
 
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const { InternalServerError } = require('../utils/ApiError');
 
 // Obtener el carrito de un usuario
-exports.getCarrito = async (req, res) => {
+exports.getCarrito = async (req, res, next) => {
   const usuarioId = req.usuario.userId;
   try {
     const carritoItems = await prisma.carrito.findMany({
@@ -27,12 +28,12 @@ exports.getCarrito = async (req, res) => {
     res.json(carritoItems);
   } catch (error) {
     console.error('Error al obtener el carrito:', error);
-    res.status(500).json({ message: 'Error interno del servidor.' });
+    next(new InternalServerError('Error interno del servidor.'));
   }
 };
 
 // Agregar un producto al carrito
-exports.agregarAlCarrito = async (req, res) => {
+exports.agregarAlCarrito = async (req, res, next) => {
   const usuarioId = req.usuario.userId;
   const { productoId, cantidad } = req.body;
 
@@ -80,12 +81,12 @@ exports.agregarAlCarrito = async (req, res) => {
     }
   } catch (error) {
     console.error('Error al agregar al carrito:', error);
-    res.status(500).json({ message: 'Error interno del servidor.' });
+    next(new InternalServerError('Error interno del servidor.'));
   }
 };
 
 // Eliminar un producto del carrito
-exports.eliminarDelCarrito = async (req, res) => {
+exports.eliminarDelCarrito = async (req, res, next) => {
   const usuarioId = req.usuario.userId;
   const { productoId } = req.params;
 
@@ -108,6 +109,6 @@ exports.eliminarDelCarrito = async (req, res) => {
     res.json({ message: 'Producto eliminado del carrito.' });
   } catch (error) {
     console.error('Error al eliminar del carrito:', error);
-    res.status(500).json({ message: 'Error interno del servidor.' });
+    next(new InternalServerError('Error interno del servidor.'));
   }
 };
