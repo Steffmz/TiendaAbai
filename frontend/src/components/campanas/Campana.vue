@@ -1,418 +1,342 @@
 <template>
-  <div class="h-full flex flex-col">
-    <div class="max-w-7xl w-full mx-auto px-4">
-      <!-- Título -->
-      <div class="pt-4 pb-2 px-6 mb-1 shadow-sm text-center">
-        <h1 class="text-4xl font-bold text-gray-800 mb-1">Gestión de Campañas</h1>
-        <p class="text-gray-500 text-lg">Administra tus campañas promocionales</p>
+  <div class="max-w-7xl w-full mx-auto flex flex-col h-full">
+
+    <div class="page-header flex-shrink-0">
+      <h1 class="page-title">Gestión de Campañas</h1>
+      <p class="page-subtitle">Crea y administra tus campañas promocionales.</p>
+    </div>
+
+    <div class="actions-bar">
+      <input v-model="filtro" type="text" placeholder="Buscar campaña por título..." class="search-input" />
+      <button @click="abrirModalNueva" class="btn-new-item">+ Nueva Campaña</button>
+    </div>
+
+    <div class="flex-grow overflow-y-auto pb-4">
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Imagen</th>
+              <th>Título</th>
+              <th>Descripción</th>
+              <th>Fechas</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="loading" v-for="i in 6" :key="i">
+              <td><BaseSkeleton width="56px" height="56px" radius="8px" /></td>
+              <td><BaseSkeleton width="150px" height="24px" radius="6px" /></td>
+              <td><BaseSkeleton width="60px" height="28px" radius="6px" /></td>
+              <td><BaseSkeleton width="120px" height="24px" radius="6px" /></td>
+              <td><BaseSkeleton width="80px" height="24px" radius="6px" /></td>
+              <td>
+                <div class="actions-cell">
+                  <BaseSkeleton width="70px" height="32px" radius="6px" />
+                  <BaseSkeleton width="70px" height="32px" radius="6px" />
+                </div>
+              </td>
+            </tr>
+            <tr v-else-if="campanasPaginadas.length === 0">
+              <td colspan="6">
+                <EmptyState icon="mdi:bullhorn-off-outline" title="No se encontraron campañas" message="Prueba con otro término de búsqueda o crea una nueva campaña." />
+              </td>
+            </tr>
+            <tr v-else v-for="campana in campanasPaginadas" :key="campana.id">
+              <td><img :src="`${API_BASE_URL}${campana.imagenUrl}`" class="table-image" alt="Campaña"/></td>
+              <td>{{ campana.titulo }}</td>
+              <td><button @click="mostrarDescripcion = campana.descripcion" class="btn btn-secondary text-xs px-2 py-1">Ver</button></td>
+              <td>{{ formatDate(campana.fechaInicio) }} - {{ formatDate(campana.fechaFin) }}</td>
+              <td><span :class="['badge', campana.aprobada ? 'success' : 'danger']">{{ campana.aprobada ? 'Activa' : 'Inactiva' }}</span></td>
+              <td>
+                <div class="actions-cell">
+                  <button @click="abrirModalEditar(campana)" class="btn-edit">Editar</button>
+                  <button @click="confirmarEliminar(campana)" class="btn-danger">Eliminar</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
-      <!-- Barra búsqueda y botón -->
-      <div class="w-full flex justify-center mb-6">
-        <div class="flex flex-col md:flex-row items-center gap-3 w-full max-w-3xl">
-          <input v-model="filtro" type="text" placeholder="Buscar campañas..." class="w-64 md:flex-1 px-3 py-2 border border-yellow-400 rounded-lg text-blue-800 bg-blue-50
-                   focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-200
-                   text-sm shadow-sm transition-all duration-200" />
-
-          <button @click="abrirModalNueva" class="px-5 py-2 bg-[#FFB93B] text-black rounded-lg font-semibold shadow-md
-                   hover:bg-[#74B9E7] transition-all duration-200 hover:shadow-lg">
-            + Nueva Campaña
-          </button>
+      <div class="cards-container">
+        <div v-if="loading">
+          <div v-for="i in 4" :key="i" class="card"><BaseSkeleton width="100%" height="220px" /></div>
         </div>
-      </div>
-
-      <!-- TABLA -->
-      <div class="rounded-xl border border-gray-200 shadow-sm mb-2 w-full max-w-7xl mx-auto overflow-hidden">
-        <div>
-          <table class="w-full border-collapse">
-            <thead class="bg-[#74B9E7] text-black">
-              <tr>
-                <th class="px-3 py-3 text-center font-semibold w-24">Imagen</th>
-                <th class="px-3 py-3 text-center font-semibold w-40">Nombre</th>
-                <th class="px-3 py-3 text-center font-semibold w-24">Descripción</th>
-                <th class="px-3 py-3 text-center font-semibold w-28">Puntos</th>
-                <th class="px-3 py-3 text-center font-semibold w-28">Descuento</th>
-                <th class="px-3 py-3 text-center font-semibold w-48">Productos</th>
-                <th class="px-3 py-3 text-center font-semibold w-32">Fecha Inicio</th>
-                <th class="px-3 py-3 text-center font-semibold w-32">Fecha Fin</th>
-                <th class="px-3 py-3 text-center font-semibold w-32">Fecha Creación</th>
-                <th class="px-3 py-3 text-center font-semibold w-28">Estado</th>
-                <th class="px-3 py-3 text-center font-semibold w-36">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(campana, index) in campanasPaginadas" :key="campana.id"
-                :class="index % 2 === 0 ? 'bg-gray-50' : 'bg-white'"
-                class="border-b border-gray-100 hover:bg-[#fac8012f] transition-colors duration-150">
-
-                <!-- Imagen -->
-                <td data-label="Imagen" class="px-3 py-3 text-center">
-                  <div class="w-14 h-14 rounded-lg overflow-hidden border border-gray-200 shadow-sm mx-auto">
-                    <img :src="campana.imagenUrl
-                      ? (campana.imagenUrl.startsWith('http')
-                        ? campana.imagenUrl
-                        : `http://localhost:3000${campana.imagenUrl}`)
-                      : placeholder" alt="Imagen campaña" class="w-full h-full object-cover" />
-                  </div>
-                </td>
-
-                <!-- Nombre -->
-                <td data-label="Nombre" class="px-3 py-3 text-gray-800 font-medium text-center">
-                  <div class="truncate max-w-[160px]" :title="campana.titulo">
-                    {{ campana.titulo }}
-                  </div>
-                </td>
-
-                <!-- Descripción -->
-                <td data-label="Descripción" class="px-3 py-3 text-center">
-                  <button @click="mostrarDescripcion = mostrarDescripcion === campana.id ? null : campana.id"
-                    class="bg-blue-100 hover:bg-blue-200 px-3 py-1 rounded-md text-sm text-blue-700 font-medium transition-colors">
-                    Ver
-                  </button>
-                </td>
-
-                <!-- Puntos -->
-                <td data-label="Puntos" class="px-3 py-3 text-blue-700 font-semibold text-center">
-                  {{ campana.puntos ?? '-' }}
-                </td>
-
-                <!-- Descuento -->
-                <td data-label="Descuento" class="px-3 py-3 text-green-600 font-semibold text-center">
-                  {{ campana.descuento !== null && campana.descuento !== undefined ? campana.descuento + '%' : '-' }}
-                </td>
-
-                <!-- Productos -->
-                <td data-label="Productos" class="px-4 py-2 text-center">
-                  <button @click="abrirModalVerProductos(campana)"
-                    class="bg-blue-100 hover:bg-blue-200 px-3 py-1 rounded-md text-sm text-blue-700 font-medium transition-colors">
-                    Ver
-                  </button>
-                </td>
-
-                <!-- Fechas -->
-                <td data-label="Fecha Inicio" class="px-3 py-3 text-gray-500 text-sm text-center">
-                  {{ new Date(campana.fechaInicio).toLocaleDateString('es-CO') }}
-                </td>
-                <td data-label="Fecha Fin" class="px-3 py-3 text-gray-500 text-sm text-center">
-                  {{ new Date(campana.fechaFin).toLocaleDateString('es-CO') }}
-                </td>
-                <td data-label="Fecha Creación" class="px-3 py-3 text-gray-500 text-sm text-center">
-                  {{ new Date(campana.fechaCreacion).toLocaleDateString('es-CO') }}
-                </td>
-
-                <!-- Estado -->
-                <td data-label="Estado" class="px-3 py-3 text-center">
-                  <span :class="campana.aprobada
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-red-100 text-red-800'"
-                    class="px-2 py-1 rounded-full text-xs font-medium">
-                    {{ campana.aprobada ? 'Activa' : 'Finalizada' }}
-                  </span>
-                </td>
-
-                <!-- Acciones -->
-                <td data-label="Acciones" class="px-3 py-3">
-                  <div class="flex items-center justify-center gap-2">
-                    <button @click="abrirModalEditar(campana)"
-                      class="bg-blue-100 text-black hover:bg-blue-200 px-3 py-1 rounded-md text-sm font-medium transition-colors">
-                      Editar
-                    </button>
-                    <button @click="confirmarEliminar(campana)"
-                      class="bg-red-100 text-black hover:bg-red-200 px-3 py-1 rounded-md text-sm font-medium transition-colors">
-                      Eliminar
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div v-else-if="campanasPaginadas.length === 0">
+          <EmptyState icon="mdi:bullhorn-off-outline" title="No se encontraron campañas" message="Prueba con otro término de búsqueda o crea una nueva campaña." />
+        </div>
+        <div v-else v-for="campana in campanasPaginadas" :key="campana.id" class="card">
+          <div class="card-header">
+            <img :src="`${API_BASE_URL}${campana.imagenUrl}`" class="card-image" />
+            <div class="card-title-status">
+              <h3 class="card-title">{{ campana.titulo }}</h3>
+              <span :class="['badge', campana.aprobada ? 'success' : 'danger']">{{ campana.aprobada ? 'Activa' : 'Inactiva' }}</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-row"><strong>Inicia:</strong> {{ formatDate(campana.fechaInicio) }}</div>
+            <div class="card-row"><strong>Finaliza:</strong> {{ formatDate(campana.fechaFin) }}</div>
+          </div>
+          <div class="card-actions">
+            <button @click="abrirModalEditar(campana)" class="btn-edit">Editar</button>
+            <button @click="confirmarEliminar(campana)" class="btn-danger">Eliminar</button>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Modal de descripción (fuera de la tabla) -->
-    <div v-if="mostrarDescripcion"
-      class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4"
-      @click="mostrarDescripcion = null">
-      <div
-        class="relative bg-[var(--surface)] border border-[var(--border)] rounded-xl shadow-xl p-6 w-full max-w-md mx-auto"
-        @click.stop>
-
-        <!-- Contenido -->
-        <div class="bg-[var(--surface-2)] rounded-lg p-4">
-          <p class="text-base text-[var(--text)] leading-relaxed break-words whitespace-pre-wrap">
-            {{campanas.find(c => c.id === mostrarDescripcion)?.descripcion}}
-          </p>
-        </div>
-
-        <!-- Botón cerrar abajo -->
-        <div class="mt-4 text-center">
-          <button @click="mostrarDescripcion = null"
-            class="px-4 py-2 bg-[#74B9E7] text-black rounded-lg hover:bg-[#FFB93B] transition-colors">
-            Cerrar
-          </button>
-        </div>
-      </div>
+    <div v-if="!loading && totalPaginas > 1" class="pagination-controls">
+      <button @click="paginaAnterior" :disabled="paginaActual === 1" class="btn btn-secondary">Anterior</button>
+      <span>Página {{ paginaActual }} de {{ totalPaginas }}</span>
+      <button @click="paginaSiguiente" :disabled="paginaActual === totalPaginas" class="btn btn-secondary">Siguiente</button>
     </div>
 
-
-    <div v-if="modalAbierto" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <!-- El cambio clave está en la siguiente línea -->
-      <div class="modal-content bg-white rounded-xl shadow-lg relative">
-        <button 
-          @click="cerrarModal"
-          class="absolute top-2 right-2 p-1 
-                text-gray-500 hover:text-white 
-                hover:bg-red-500 rounded-full 
-                transition duration-200 text-xl"
-         >
-          &times;
-        </button>
-
-        <h2 class="text-xl font-bold text-gray-800 mb-6 text-center">
-          {{ editando ? 'Editar Campaña' : 'Nueva Campaña' }}
-        </h2>
-
+    <div v-if="modalAbierto" class="modal-overlay" @click.self="cerrarModal">
+      <div class="modal-content">
+        <h2 class="modal-title">{{ editando ? 'Editar Campaña' : 'Nueva Campaña' }}</h2>
         <form @submit.prevent="guardarCampana">
           <div class="form-grid">
             <div class="form-group grid-col-span-2">
-              <label>Nombre de la Campaña *</label>
-              <input v-model="formulario.titulo" type="text" required placeholder="Ej: Promo Verano 2024" />
+              <label>Nombre de la Campaña</label>
+              <input v-model="formulario.titulo" type="text" required />
             </div>
-
             <div class="form-group grid-col-span-2">
-              <label>Descripción *</label>
-              <textarea v-model="formulario.descripcion" required rows="3"
-                placeholder="Describe la campaña..."></textarea>
-            </div>
-
-            <div class="form-group">
-              <label>Fecha Inicio *</label>
-              <input type="date" v-model="formulario.fechaInicio" />
+              <label>Descripción</label>
+              <textarea v-model="formulario.descripcion" rows="3"></textarea>
             </div>
             <div class="form-group">
-              <label>Fecha Fin *</label>
-              <input type="date" v-model="formulario.fechaFin" />
-            </div>
-
-            <div class="form-group">
-              <label>Puntos *</label>
-              <input v-model.number="formulario.puntos" type="number" required min="1" placeholder="100" />
+              <label>Fecha Inicio</label>
+              <input v-model="formulario.fechaInicio" type="date" required />
             </div>
             <div class="form-group">
-              <label>Descuento (%) *</label>
-              <input v-model.number="formulario.descuento" type="number" required min="1" max="100" placeholder="15" />
+              <label>Fecha Fin</label>
+              <input v-model="formulario.fechaFin" type="date" required />
             </div>
-
             <div class="form-group">
-              <label>Estado *</label>
-              <select v-model="formulario.aprobada" required>
+              <label>Puntos</label>
+              <input v-model.number="formulario.puntos" type="number" min="0" />
+            </div>
+            <div class="form-group">
+              <label>Descuento (%)</label>
+              <input v-model.number="formulario.descuento" type="number" min="0" max="100" />
+            </div>
+            <div class="form-group">
+              <label>Estado</label>
+              <select v-model="formulario.aprobada">
                 <option :value="true">Activa</option>
                 <option :value="false">Inactiva</option>
               </select>
             </div>
-
             <div class="form-group">
               <label>Imagen</label>
               <input type="file" @change="manejarSubidaImagen" accept="image/*" />
             </div>
-
-          <div v-if="previewImage" class="form-group col-span-2">
-            <label class="block font-semibold mb-2">Vista Previa</label>
-            <div class="flex justify-center">
-              <img 
-                :src="previewImage" 
-                alt="Preview" 
-                class="max-w-[120px] max-h-[120px] object-contain rounded-md border shadow"
-              />
+            <div v-if="previewImage" class="form-group grid-col-span-2">
+                <label>Vista Previa</label>
+                <img :src="previewImage" class="max-w-[150px] rounded-md border" />
             </div>
-          </div>
-
             <div class="form-group grid-col-span-2">
-              <label>Productos</label>
-              <button type="button" class="btn btn-secondary" @click="modalSeleccionProductos = true">
-                Seleccionar Productos
-              </button>
-              <ul class="product-list">
-                <li v-for="p in productosSeleccionados" :key="p.id">{{ p.nombre }}</li>
-                <li v-if="productosSeleccionados.length === 0" class="text-gray-400">Ninguno seleccionado</li>
-              </ul>
-            </div>
+              <label>Productos Asociados</label>
+              </div>
           </div>
-
           <div class="modal-actions">
-            <button type="submit" class="btn btn-primary">
-              {{ editando ? 'Actualizar Campaña' : 'Crear Campaña' }}
-            </button>
+            <button type="button" @click="cerrarModal" class="btn btn-secondary">Cancelar</button>
+            <button type="submit" class="btn btn-primary">{{ editando ? 'Actualizar' : 'Crear' }}</button>
           </div>
         </form>
-
-
       </div>
     </div>
 
-   <!-- Modal Selección de productos (formulario) -->
-<div 
-  v-if="modalSeleccionProductos"
-  class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
->
-  <div class="modal-content bg-white relative">
-    <button 
-      class="modal-close-btn" 
-      @click="modalSeleccionProductos = false"
-    >
-      ✖
-    </button>
-
-    <h2 class="text-lg font-bold mb-3">Seleccionar Productos</h2>
-
-    <table class="w-full border product-table">
-      <thead>
-        <tr class="bg-gray-100">
-          <th class="p-2">✔</th>
-          <th class="p-2">Nombre</th>
-          <th class="p-2">Puntos</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr 
-          v-for="p in productos" 
-          :key="p.id" 
-          class="border-t"
-        >
-          <td class="text-center" data-label="Seleccionar">
-            <input
-              type="checkbox"
-              :checked="isProductoSeleccionado(p)"
-              @change="toggleProductoSeleccionado(p)"
-            />
-          </td>
-          <td class="p-2" data-label="Nombre">{{ p.nombre }}</td>
-          <td class="p-2" data-label="Puntos">{{ p.precioPuntos }} pts</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <div class="flex justify-end mt-3">
-      <button
-        class="bg-gray-500 text-white px-3 py-1 rounded"
-        @click="modalSeleccionProductos = false"
-      >
-        Cerrar
-      </button>
-    </div>
-  </div>
-</div>
-
-
-    <!-- Modal Ver productos (tabla) -->
-    <div v-if="modalVerProductos" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-        <h2 class="text-xl font-bold mb-4 text-center">
-          Productos de {{ campanaActual?.titulo }}
-        </h2>
-
-        <ul v-if="campanaActual?.productos?.length" class="divide-y">
-          <li
-            v-for="prod in campanaActual.productos"
-            :key="prod.id"
-            class="flex justify-between items-center py-2"
-          >
-            <!-- Nombre -->
-            <span class="flex-1">{{ prod.nombre }}</span>
-
-            <!-- Puntos -->
-            <span class="text-sm text-indigo-600 mr-4">
-              {{ prod.precioPuntos }} pts
-            </span>
-
-            <!-- Precio (si existe en tu objeto) -->
-            <span class="font-semibold text-gray-700">
-              {{ prod.precio }} $
-            </span>
-          </li>
-        </ul>
-
-        <p v-else class="text-gray-500 text-center">
-          No hay productos en esta campaña.
-        </p>
-
-        <div class="mt-4 text-right">
-          <button
-            @click="modalVerProductos = false"
-            class="bg-[#74B9E7] hover:bg-[#FFB93B] text-white px-4 py-2 rounded transition"
-          >
-            Cerrar
-          </button>
+    <div v-if="mostrarDescripcion" class="modal-overlay" @click.self="mostrarDescripcion = null">
+      <div class="modal-content">
+        <h2 class="modal-title">Descripción</h2>
+        <p class="text-center">{{ mostrarDescripcion }}</p>
+        <div class="modal-actions">
+          <button @click="mostrarDescripcion = null" class="btn btn-primary">Cerrar</button>
         </div>
       </div>
     </div>
 
-
-    <!-- Paginación -->
-    <div class="flex flex-col items-center justify-center mt-4">
-      <p class="text-gray-700">
-        Existen <span class="text-blue-500 font-semibold">{{ totalCampanas }}</span> campañas
-      </p>
-
-      <div class="flex items-center mt-2 space-x-1">
-        <button @click="paginaAnterior" :disabled="paginaActual === 1"
-          class="w-8 h-8 flex items-center justify-center rounded-md bg-[#fffef9] border border-gray-200 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
-          ←
-        </button>
-        <button v-for="pagina in paginasVisibles" :key="pagina" @click="irAPagina(pagina)" :class="[
-          'w-8 h-8 flex items-center justify-center rounded-md border font-medium',
-          paginaActual === pagina
-            ? 'bg-blue-500 text-white border-blue-500'
-            : 'bg-[#fffef9] border-gray-200 text-gray-600 hover:bg-gray-100'
-        ]">
-          {{ pagina }}
-        </button>
-        <button @click="paginaSiguiente" :disabled="paginaActual === totalPaginas"
-          class="w-8 h-8 flex items-center justify-center rounded-md bg-[#fffef9] border border-gray-200 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
-          →
-        </button>
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup>
-import useCampana from './useCampana'
+import { ref, computed, onMounted } from "vue";
+import axios from "axios";
+import Swal from "sweetalert2";
+import { PAGINATION } from "../../config";
+import BaseSkeleton from "../shared/BaseSkeleton.vue";
+import EmptyState from "../shared/EmptyState.vue";
 
-const {
-  BASE,
-  filtro,
-  placeholder,
-  modalAbierto,
-  modalSeleccionProductos,
-  modalVerProductos,
-  editando,
-  previewImage,
-  mostrarDescripcion,
-  campanaActual,
-  campanas,
-  campanasPaginadas,
-  formulario,
-  productos,
-  productosSeleccionados,
-  abrirModalNueva,
-  abrirModalEditar,
-  abrirModalVerProductos,
-  cerrarModal,
-  guardarCampana,
-  confirmarEliminar,
-  manejarSubidaImagen,
-  totalCampanas,
-  paginaAnterior,
-  paginaSiguiente,
-  paginaActual,
-  totalPaginas,
-  paginasVisibles,
-  irAPagina,
-  isProductoSeleccionado,
-  toggleProductoSeleccionado,
-} = useCampana()
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_URL = `${API_BASE_URL}/api/campanas`;
+const API_PRODUCTOS = `${API_BASE_URL}/api/productos`;
+
+// --- STATE ---
+const campanas = ref([]);
+const productos = ref([]);
+const loading = ref(true);
+const filtro = ref("");
+const paginaActual = ref(1);
+const modalAbierto = ref(false);
+const editando = ref(false);
+const previewImage = ref(null);
+const productosSeleccionados = ref([]);
+const mostrarDescripcion = ref(null);
+
+const formulario = ref({
+  id: null,
+  titulo: "",
+  descripcion: "",
+  fechaInicio: "",
+  fechaFin: "",
+  aprobada: false,
+  puntos: null,
+  descuento: null,
+  imagen: null,
+});
+
+// --- HELPERS ---
+const getAuthHeaders = (isFormData = false) => {
+  const token = localStorage.getItem("authToken");
+  const headers = { Authorization: `Bearer ${token}` };
+  if (isFormData) {
+    headers["Content-Type"] = "multipart/form-data";
+  }
+  return { headers };
+};
+
+const formatDate = (dateString) => new Date(dateString).toLocaleDateString('es-CO', { timeZone: 'UTC' });
+const formatDateForInput = (dateString) => new Date(dateString).toISOString().split("T")[0];
+
+// --- PAGINACIÓN ---
+const elementosPorPagina = PAGINATION.CAMPAIGNS || 6;
+const campanasFiltradas = computed(() =>
+  campanas.value.filter((c) =>
+    c.titulo.toLowerCase().includes(filtro.value.toLowerCase())
+  )
+);
+const totalPaginas = computed(() => Math.ceil(campanasFiltradas.value.length / elementosPorPagina));
+const campanasPaginadas = computed(() => {
+  const inicio = (paginaActual.value - 1) * elementosPorPagina;
+  return campanasFiltradas.value.slice(inicio, inicio + elementosPorPagina);
+});
+
+const paginaAnterior = () => { if (paginaActual.value > 1) paginaActual.value--; };
+const paginaSiguiente = () => { if (paginaActual.value < totalPaginas.value) paginaActual.value++; };
+
+
+// --- LÓGICA DE DATOS ---
+const cargarDatos = async () => {
+  loading.value = true;
+  try {
+    const [resCampanas, resProductos] = await Promise.all([
+      axios.get(API_URL, getAuthHeaders()),
+      axios.get(API_PRODUCTOS, getAuthHeaders())
+    ]);
+    campanas.value = resCampanas.data;
+    productos.value = resProductos.data;
+  } catch (err) {
+    Swal.fire("Error", "No se pudieron cargar los datos necesarios.", "error");
+  } finally {
+    loading.value = false;
+  }
+};
+
+onMounted(cargarDatos);
+
+// --- LÓGICA DE MODAL Y FORMULARIO ---
+const abrirModalNueva = () => {
+  editando.value = false;
+  formulario.value = {
+    id: null,
+    titulo: "",
+    descripcion: "",
+    fechaInicio: "",
+    fechaFin: "",
+    aprobada: true,
+    puntos: null,
+    descuento: null,
+    imagen: null,
+  };
+  productosSeleccionados.value = [];
+  previewImage.value = null;
+  modalAbierto.value = true;
+};
+
+const abrirModalEditar = (campana) => {
+  editando.value = true;
+  formulario.value = {
+    ...campana,
+    fechaInicio: formatDateForInput(campana.fechaInicio),
+    fechaFin: formatDateForInput(campana.fechaFin),
+    imagen: null,
+  };
+  previewImage.value = campana.imagenUrl ? `${API_BASE_URL}${campana.imagenUrl}` : null;
+  productosSeleccionados.value = campana.productos || [];
+  modalAbierto.value = true;
+};
+
+const cerrarModal = () => {
+  modalAbierto.value = false;
+};
+
+const manejarSubidaImagen = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    formulario.value.imagen = file;
+    previewImage.value = URL.createObjectURL(file);
+  }
+};
+
+const guardarCampana = async () => {
+  const formData = new FormData();
+  Object.keys(formulario.value).forEach(key => {
+    if (key === 'imagen') return;
+    if (formulario.value[key] !== null) {
+      formData.append(key, formulario.value[key]);
+    }
+  });
+  if (formulario.value.imagen) formData.append("imagen", formulario.value.imagen);
+  if (productosSeleccionados.value.length > 0) {
+    formData.append("productosIds", JSON.stringify(productosSeleccionados.value.map(p => p.id)));
+  }
+
+  try {
+    const url = editando.value ? `${API_URL}/${formulario.value.id}` : API_URL;
+    const method = editando.value ? 'put' : 'post';
+    await axios({ method, url, data: formData, ...getAuthHeaders(true) });
+    
+    await cargarDatos();
+    cerrarModal();
+    Swal.fire("Éxito", `Campaña ${editando.value ? 'actualizada' : 'creada'}.`, "success");
+  } catch (err) {
+    Swal.fire("Error", "No se pudo guardar la campaña.", "error");
+  }
+};
+
+const confirmarEliminar = (campana) => {
+  Swal.fire({
+    title: "¿Estás seguro?",
+    text: `Se eliminará la campaña "${campana.titulo}"`,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Sí, eliminar",
+    cancelButtonText: "Cancelar",
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        await axios.delete(`${API_URL}/${campana.id}`, getAuthHeaders());
+        await cargarDatos();
+        Swal.fire("Eliminado", "La campaña ha sido eliminada.", "success");
+      } catch (err) {
+        Swal.fire("Error", "No se pudo eliminar la campaña.", "error");
+      }
+    }
+  });
+};
 </script>
 
-<style src="./Campana.css"></style>
+<style src="../../assets/css/AdminGestion.css"></style>

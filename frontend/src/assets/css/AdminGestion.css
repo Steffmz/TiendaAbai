@@ -125,3 +125,30 @@ tbody tr:hover { background-color: var(--surface-2); }
 .modal-content { background: var(--surface); padding: 2rem; border-radius: 12px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
 .modal-title { font-size: 1.5rem; font-weight: 600; text-align: center; margin-bottom: 1.5rem; }
 .modal-actions { margin-top: 2rem; display: flex; justify-content: flex-end; gap: 1rem; }
+/* Botón principal de acciones (ej. "Nueva Campaña", "Nuevo Usuario") */
+.btn-new-item {
+  background-color: #FFB93B; /* Color naranja/amarillo */
+  color: #000; /* Texto negro */
+  font-weight: 600;
+  padding: 0.6rem 1.2rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease-in-out;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap; /* Evita que el texto se rompa */
+}
+
+.btn-new-item:hover {
+  background-color: #e6a733; /* Un tono un poco más oscuro al pasar el ratón */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.dark .btn-new-item {
+  background-color: #e6a733; /* Color naranja/amarillo para dark mode */
+  color: #fff;
+}
+
+.dark .btn-new-item:hover {
+  background-color: #cd942c;
+}
