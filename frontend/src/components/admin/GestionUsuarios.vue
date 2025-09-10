@@ -27,7 +27,7 @@
           <template v-if="loading">
             <tr>
               <td colspan="7" class="p-0">
-                <div v-for="i in 5" :key="i" class="flex items-center p-4 gap-4 border-b border-[var(--border)]">
+                <div v-for="i in 6" :key="i" class="flex items-center p-4 gap-4 border-b border-[var(--border)]">
                   <BaseSkeleton width="150px" height="24px" radius="6px" />
                   <BaseSkeleton width="100px" height="24px" radius="6px" />
                   <BaseSkeleton width="50px" height="24px" radius="6px" />
@@ -43,8 +43,8 @@
             </tr>
           </template>
 
-          <template v-else-if="filteredUsuarios.length > 0">
-            <tr v-for="usuario in filteredUsuarios" :key="usuario.id">
+          <template v-else-if="usuarios.length > 0">
+            <tr v-for="usuario in usuarios" :key="usuario.id">
               <td>{{ usuario.nombreCompleto }}</td>
               <td>{{ usuario.cedula }}</td>
               <td>{{ usuario.puntosTotales }}</td>
@@ -119,14 +119,15 @@
 </template>
 
 <script setup>
-// El script que ya tenías en tu rama, que es el más completo.
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import axios from "axios";
 import Swal from "sweetalert2";
 import BaseModal from "../shared/BaseModal.vue";
 import BaseSkeleton from "../shared/BaseSkeleton.vue";
 import EmptyState from "../shared/EmptyState.vue";
+import { PAGINATION } from '../../config';
 
+// --- MODIFICADO: Lógica de paginación y búsqueda del lado del servidor ---
 const usuarios = ref([]);
 const loading = ref(true);
 const showModal = ref(false);
@@ -139,19 +140,27 @@ const showPuntosModal = ref(false);
 const formPuntos = ref({});
 const cargos = ref([]);
 const centrosDeCostos = ref([]);
+
 const currentPage = ref(1);
 const totalUsers = ref(0);
-const usersPerPage = ref(10); // Puedes ajustar este número si quieres menos items por página
-const totalPages = computed(() => Math.ceil(totalUsers.value / usersPerPage.value));
+const usersPerPage = PAGINATION.USERS;
+const totalPages = computed(() => Math.ceil(totalUsers.value / usersPerPage));
+
 const getAuthHeaders = () => ({ headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` }});
 
 const fetchData = async () => {
   loading.value = true;
   try {
-    const params = new URLSearchParams({ page: currentPage.value, limit: usersPerPage.value });
+    const params = new URLSearchParams({ 
+        page: currentPage.value, 
+        limit: usersPerPage,
+        search: searchQuery.value // Enviamos la búsqueda al backend
+    });
     const usuariosRes = await axios.get(`${API_URL}?${params.toString()}`, getAuthHeaders());
     usuarios.value = usuariosRes.data.usuarios;
     totalUsers.value = usuariosRes.data.total;
+    
+    // Cargamos cargos y centros de costos solo una vez
     if(cargos.value.length === 0) {
         const [cargosRes, centrosRes] = await Promise.all([
             axios.get(`${ADMIN_DATA_URL}/cargos`, getAuthHeaders()),
@@ -168,25 +177,22 @@ const fetchData = async () => {
   }
 };
 
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++;
-    fetchData();
-  }
-};
-const prevPage = () => {
-  if (currentPage.value > 1) {
-    currentPage.value--;
-    fetchData();
-  }
-};
+const nextPage = () => { if (currentPage.value < totalPages.value) { currentPage.value++; fetchData(); }};
+const prevPage = () => { if (currentPage.value > 1) { currentPage.value--; fetchData(); }};
+
+// Watcher para la búsqueda
+let searchTimeout;
+watch(searchQuery, () => {
+    currentPage.value = 1; // Reseteamos a la página 1 en cada búsqueda
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        fetchData();
+    }, 300); // Espera 300ms antes de buscar para no saturar
+});
+
 onMounted(fetchData);
 
-const filteredUsuarios = computed(() => {
-  if (!searchQuery.value) return usuarios.value;
-  const lowerCaseQuery = searchQuery.value.toLowerCase();
-  return usuarios.value.filter(u => u.nombreCompleto.toLowerCase().includes(lowerCaseQuery) || u.cedula.includes(lowerCaseQuery));
-});
+// El resto de funciones permanecen mayormente iguales
 
 const openModal = (usuario = null) => {
   if (usuario) {
@@ -256,7 +262,6 @@ const deleteUsuario = async (usuario) => {
     icon: 'error',
     showCancelButton: true,
     confirmButtonColor: '#d33',
-    // 👇 LÍNEA CORREGIDA
     confirmButtonText: 'Sí, eliminar', 
     cancelButtonText: 'Cancelar'
   });
@@ -264,6 +269,7 @@ const deleteUsuario = async (usuario) => {
     try {
       await axios.delete(`${API_URL}/${usuario.id}`, getAuthHeaders());
       Swal.fire("Eliminado", "Usuario eliminado con éxito.", "success");
+      // Si la página actual queda vacía, retrocedemos una página
       if (usuarios.value.length === 1 && currentPage.value > 1) {
         currentPage.value--;
       }
@@ -276,7 +282,6 @@ const deleteUsuario = async (usuario) => {
 </script>
 
 <style scoped>
-/* Los estilos de tu rama, que son más consistentes con el resto de la app */
 .max-w-7xl { max-width: 80rem; width: 100%; margin: 0 auto; }
 .page-header { text-align: center; margin-bottom: 1.5rem; }
 .page-title { font-size: 1.8rem; font-weight: 600; color: var(--text); }
