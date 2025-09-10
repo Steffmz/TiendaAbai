@@ -1,0 +1,312 @@
+/* ---- Modal base ---- */
+.modal-content {
+  width: 95%;
+  max-width: 800px;
+  padding: 2rem;
+  border-radius: 12px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem 1.5rem;
+}
+
+.grid-col-span-2 {
+  grid-column: span 2 / span 2;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  text-align: left;
+  font-weight: 500;
+  color: #4b5563;
+  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: #f9fafb;
+  text-align: left;
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #74B9E7;
+  box-shadow: 0 0 0 2px rgba(116, 185, 231, 0.4);
+}
+
+.form-preview-image {
+  max-height: 120px;
+  width: auto;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  margin-top: 0.5rem;
+}
+
+.btn-secondary {
+  background-color: #e5e7eb;
+  color: #374151;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  width: fit-content;
+}
+.btn-secondary:hover {
+  background-color: #d1d5db;
+}
+
+.product-list {
+  list-style-type: disc;
+  list-style-position: inside;
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+
+.modal-actions {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+/* 🎨 Botón Crear/Actualizar Campaña en amarillo */
+.btn-submit,
+.btn-primary {
+  padding: 0.75rem 2rem;
+  border: none;
+  border-radius: 8px;
+  background-color: #FFB93B; /* Amarillo */
+  color: black;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+}
+.btn-submit:hover,
+.btn-primary:hover {
+  background-color: #74B9E7; /* Azul clarito al hover */
+  transform: translateY(-1px);
+}
+
+/* ---- Responsivo MODAL ---- */
+@media (max-width: 1024px) {
+  .modal-content {
+    max-width: 650px;
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .modal-content {
+    width: 90%;
+    max-width: none;
+    padding: 1rem;
+    border-radius: 10px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr; /* 1 columna en móvil */
+    gap: 0.8rem;
+  }
+
+  .grid-col-span-2 {
+    grid-column: span 1 / span 1;
+  }
+
+  .form-group label {
+    font-size: 0.85rem;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    font-size: 0.9rem;
+    padding: 0.5rem 0.7rem;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .btn-primary {
+    width: 100%;
+    padding: 0.7rem;
+    font-size: 0.95rem;
+  }
+
+  .form-group img {
+    max-width: 100px;
+    max-height: 100px;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-content {
+    width: 95%;
+    padding: 0.8rem;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    font-size: 0.85rem;
+    padding: 0.45rem 0.6rem;
+  }
+
+  .btn-primary {
+    font-size: 0.9rem;
+    padding: 0.6rem;
+  }
+}
+
+/* 📱 Estilos móviles para la tabla de campañas */
+@media (max-width: 768px) {
+  table,
+  thead,
+  tbody,
+  th,
+  td,
+  tr {
+    display: block;
+    width: 100%;
+  }
+
+  thead {
+    display: none;
+  }
+
+  tr {
+    margin-bottom: 0.8rem;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 0.8rem 1rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    font-size: 0.9rem;
+  }
+
+  td {
+    display: block;
+    padding: 0.4rem 0;
+    border: none;
+    font-size: 0.9rem;
+    text-align: center;
+  }
+
+  td::before {
+    content: attr(data-label);
+    display: block;
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.8rem;
+    margin-bottom: 0.2rem;
+    text-align: center;
+  }
+
+  td img {
+    margin: 0 auto;
+    max-width: 90px;
+    max-height: 90px;
+    border-radius: 6px;
+  }
+
+  .flex.items-center.justify-center.gap-2 {
+    flex-direction: column;
+    gap: 0.4rem;
+    align-items: center;
+  }
+
+  button {
+    width: 85%;
+    max-width: 220px;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+    border-radius: 8px !important;
+    font-weight: 600; 
+    text-align: center;
+  }
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #6b7280; /* gris */
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s, transform 0.2s;
+  z-index: 50;
+}
+
+.modal-close-btn:hover {
+  color: #ef4444; /* rojo al hover */
+  transform: scale(1.1);
+}
+
+/* 🎯 Tabla responsiva solo dentro del modal */
+@media (max-width: 768px) {
+  .product-table,
+  .product-table thead,
+  .product-table tbody,
+  .product-table th,
+  .product-table td,
+  .product-table tr {
+    display: block;
+    width: 100%;
+  }
+
+  .product-table thead {
+    display: none;
+  }
+
+  .product-table tr {
+    margin-bottom: 0.8rem;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 0.8rem 1rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    text-align: left;
+  }
+
+  .product-table td {
+    display: block;
+    padding: 0.4rem 0;
+    border: none;
+    font-size: 0.9rem;
+  }
+
+  .product-table td::before {
+    content: attr(data-label);
+    display: block;
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.8rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .product-table td input[type="checkbox"] {
+    transform: scale(1.2);
+  }
+}
