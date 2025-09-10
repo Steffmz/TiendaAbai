@@ -28,10 +28,11 @@ export default function useCategorias() {
   const categoriasPorPagina = PAGINATION.CATEGORIES;
   const previewImage = ref(null);
 
+  // --- MODIFICADO ---
+  // Se eliminó 'descripcion' del formulario
   const form = ref({
     id: null,
     nombre: "",
-    descripcion: "",
     imagen: null,
   });
 
@@ -58,7 +59,6 @@ export default function useCategorias() {
     );
   });
 
-  // ...
   const paginasVisibles = computed(() => {
     const total = totalPaginas.value;
     const actual = paginaActual.value;
@@ -113,7 +113,8 @@ export default function useCategorias() {
 
     const formData = new FormData();
     formData.append("nombre", form.value.nombre.trim());
-    formData.append("descripcion", form.value.descripcion.trim());
+    // --- MODIFICADO ---
+    // Se eliminó la línea que añadía 'descripcion'
     if (form.value.imagen) {
       formData.append("imagen", form.value.imagen);
     }
@@ -186,7 +187,9 @@ export default function useCategorias() {
 
   // Modal control
   const limpiarFormulario = () => {
-    form.value = { id: null, nombre: "", descripcion: "", imagen: null };
+    // --- MODIFICADO ---
+    // Se eliminó 'descripcion' del formulario
+    form.value = { id: null, nombre: "", imagen: null };
     previewImage.value = null;
   };
 
@@ -198,10 +201,11 @@ export default function useCategorias() {
 
   const abrirModalEditar = (categoria) => {
     editando.value = true;
+    // --- MODIFICADO ---
+    // Se eliminó 'descripcion' del formulario
     form.value = {
       id: categoria.id,
       nombre: categoria.nombre,
-      descripcion: categoria.descripcion || "",
       imagen: null,
     };
     previewImage.value = categoria.imagenUrl

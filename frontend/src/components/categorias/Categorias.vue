@@ -23,17 +23,16 @@
           <tr>
             <th>Imagen</th>
             <th>Nombre</th>
-            <th>Descripción</th>
             <th>Estado</th>
             <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
           <tr v-if="loading">
-            <td colspan="5" class="text-center py-8">Cargando categorías...</td>
+            <td colspan="4" class="text-center py-8">Cargando categorías...</td>
           </tr>
           <tr v-else-if="categoriasPaginadas.length === 0">
-            <td colspan="5" class="text-center py-8">No se encontraron categorías.</td>
+            <td colspan="4" class="text-center py-8">No se encontraron categorías.</td>
           </tr>
           <tr v-else v-for="categoria in categoriasPaginadas" :key="categoria.id" class="table-row">
             <td class="flex justify-center py-2">
@@ -46,11 +45,6 @@
               </div>
             </td>
             <td class="text-center">{{ categoria.nombre }}</td>
-            <td class="text-center">
-              <button @click="mostrarDescripcion = categoria.descripcion" class="btn-secondary text-xs">
-                Ver
-              </button>
-            </td>
             <td class="text-center">
               <Switch :modelValue="categoria.activo" @update:modelValue="cambioEstado(categoria)" />
             </td>
@@ -76,10 +70,6 @@
                 <div class="card-row">
                   <strong>Estado:</strong>
                   <Switch :modelValue="categoria.activo" @update:modelValue="cambioEstado(categoria)" />
-                </div>
-                  <div class="card-row">
-                  <strong>Descripción:</strong>
-                  <button @click="mostrarDescripcion = categoria.descripcion" class="btn-secondary text-xs">Ver</button>
                 </div>
               </div>
               <div class="card-actions">
@@ -115,10 +105,6 @@
             <input v-model="form.nombre" type="text" required placeholder="Nombre de la categoría" />
           </div>
           <div class="form-group">
-            <label>Descripción</label>
-            <textarea v-model="form.descripcion" rows="3" placeholder="Descripción de la categoría"></textarea>
-          </div>
-          <div class="form-group">
             <label>Imagen</label>
             <input type="file" @change="handleImageUpload" accept="image/*" class="file-input" />
             <div v-if="previewImage" class="mt-4 flex justify-center">
@@ -132,28 +118,16 @@
         </form>
       </div>
     </div>
-    <div v-if="mostrarDescripcion" class="modal-overlay" @click="mostrarDescripcion = null">
-      <div class="modal-content" @click.stop>
-        <h2 class="modal-title">Descripción</h2>
-        <p>{{ mostrarDescripcion }}</p>
-        <div class="modal-actions mt-4">
-          <button @click="mostrarDescripcion = null" class="btn btn-primary">Cerrar</button>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup>
-// El script no necesita cambios
-import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import useCategorias from './useCategorias';
 import Switch from './Switch.vue';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const router = useRouter();
-const mostrarDescripcion = ref(null);
 
 const {
   categoriasPaginadas,
@@ -186,8 +160,6 @@ const irAProductos = (categoriaId) => {
 </script>
 
 <style scoped>
-/* LOS ESTILOS PERMANECEN IGUALES, PERO YA NO SE APLICARÁ LA CLASE .page-container */
-
 .max-w-7xl {
   max-width: 80rem;
   width: 100%;
