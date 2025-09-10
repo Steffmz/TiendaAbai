@@ -4,45 +4,49 @@ const bcrypt = require('bcryptjs');
 
 exports.getAllUsuarios = async (req, res) => {
   const adminId = req.usuario.userId;
-  // 1. Obtenemos los parámetros de paginación de la URL (query string)
+  // --- LÓGICA DE PAGINACIÓN Y BÚSQUEDA ---
   const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 6; // Límite por defecto de 10 usuarios
+  const limit = parseInt(req.query.limit) || 6; // Límite por defecto de 6
   const skip = (page - 1) * limit;
+  const searchQuery = req.query.search || '';
+
+  // Cláusula 'where' para filtrar y buscar
+  const whereClause = {
+    AND: [
+      { id: { not: adminId } },
+      { rol: { not: 'Administrador' } },
+      {
+        OR: [
+          { nombreCompleto: { contains: searchQuery } },
+          { cedula: { contains: searchQuery } },
+        ],
+      },
+    ],
+  };
+  // --- FIN ---
 
   try {
-    // 2. Usamos 'skip' y 'take' de Prisma para la paginación
-    const usuarios = await prisma.usuario.findMany({
-      where: {
-        AND: [
-          { id: { not: adminId } },
-          { rol: { not: 'Administrador' } }
-        ]
-      },
-      select: {
-        id: true,
-        cedula: true,
-        nombreCompleto: true,
-        email: true,
-        rol: true,
-        activo: true,
-        puntosTotales: true,
-        sede: true,
-        cargos: { select: { id: true, nombre: true } },
-        centroDeCostos: { select: { id: true, nombre: true } },
-      },
-      orderBy: { nombreCompleto: 'asc' },
-      skip: skip,
-      take: limit,
-    });
-
-    const totalUsuarios = await prisma.usuario.count({
-      where: {
-        AND: [
-          { id: { not: adminId } },
-          { rol: { not: 'Administrador' } }
-        ]
-      }
-    });
+    const [usuarios, totalUsuarios] = await prisma.$transaction([
+      prisma.usuario.findMany({
+        where: whereClause,
+        select: {
+          id: true,
+          cedula: true,
+          nombreCompleto: true,
+          email: true,
+          rol: true,
+          activo: true,
+          puntosTotales: true,
+          sede: true,
+          cargos: { select: { id: true, nombre: true } },
+          centroDeCostos: { select: { id: true, nombre: true } },
+        },
+        orderBy: { nombreCompleto: 'asc' },
+        skip: skip,
+        take: limit,
+      }),
+      prisma.usuario.count({ where: whereClause })
+    ]);
 
     res.json({
       usuarios,
@@ -57,6 +61,7 @@ exports.getAllUsuarios = async (req, res) => {
   }
 };
 
+// ... (El resto de las funciones no cambian)
 exports.createUsuario = async (req, res) => {
     const { cedula, nombreCompleto, email, contrasena, rol, sede, cargoId, centroDeCostosId } = req.body;
 
@@ -251,7 +256,7 @@ exports.getMiPerfil = async (req, res) => {
         nombreCompleto: true,
         email: true,
         cedula: true,
-        puntosTotales: true, // Asegúrate de incluir los puntos
+        puntosTotales: true,
       }
     });
     if (!usuario) return res.status(404).json({ message: 'Usuario no encontrado.' });
