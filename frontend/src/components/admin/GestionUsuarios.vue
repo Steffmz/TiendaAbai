@@ -1,18 +1,31 @@
 <template>
   <div class="max-w-7xl w-full mx-auto">
+    <!-- Header -->
     <div class="page-header">
       <h1 class="page-title">Gestión de Usuarios</h1>
       <p class="page-subtitle">Administra los usuarios del sistema.</p>
     </div>
 
-    <div class="actions-bar">
-      <input type="text" v-model="searchQuery" placeholder="Buscar por nombre o cédula..." class="search-input" />
-      <button @click="openModal()" class="btn-primary">+ Nuevo Usuario</button>
+    <!-- Barra de acciones -->
+    <div class="w-full flex justify-center mb-6">
+        <div class="flex flex-col md:flex-row items-center gap-3 w-full max-w-3xl">
+          <input v-model="searchQuery" type="text" placeholder="Buscar por nombre o cédula..."
+            class="w-64 md:flex-1 px-3 py-2 border border-yellow-400 rounded-lg text-blue-800 bg-blue-50
+                  focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-200
+                  text-sm shadow-sm transition-all duration-200" />
+
+          <button @click="openModal()"
+            class="px-5 py-2 bg-[#FFB93B] text-black rounded-lg font-semibold shadow-md
+                  hover:bg-[#74B9E7] transition-all duration-200 hover:shadow-lg">
+            + Nuevo Usuario
+          </button>
+        </div>
     </div>
 
-    <div class="table-container">
-      <table>
-        <thead>
+    <!-- Vista Desktop - Tabla -->
+    <div class="hidden md:block rounded-xl border border-gray-200 shadow-sm mb-2 w-full max-w-7xl mx-auto overflow-hidden">
+      <table class="w-full border-collapse">
+        <thead class="bg-[#74B9E7] text-black">
           <tr>
             <th>Nombre Completo</th>
             <th>Cédula</th>
@@ -24,10 +37,15 @@
           </tr>
         </thead>
         <tbody>
+          <!-- Skeletons mientras carga -->
           <template v-if="loading">
             <tr>
               <td colspan="7" class="p-0">
-                <div v-for="i in 5" :key="i" class="flex items-center p-4 gap-4 border-b border-[var(--border)]">
+                <div
+                  v-for="i in 5"
+                  :key="i"
+                  class="flex items-center p-4 gap-4 border-b border-[var(--border)]"
+                >
                   <BaseSkeleton width="150px" height="24px" radius="6px" />
                   <BaseSkeleton width="100px" height="24px" radius="6px" />
                   <BaseSkeleton width="50px" height="24px" radius="6px" />
@@ -43,6 +61,7 @@
             </tr>
           </template>
 
+          <!-- Usuarios -->
           <template v-else-if="filteredUsuarios.length > 0">
             <tr v-for="usuario in filteredUsuarios" :key="usuario.id">
               <td>{{ usuario.nombreCompleto }}</td>
@@ -51,69 +70,264 @@
               <td>{{ usuario.email }}</td>
               <td>{{ usuario.rol }}</td>
               <td>
-                <span :class="['badge', usuario.activo ? 'success' : 'danger']">
-                  {{ usuario.activo ? 'Activo' : 'Inactivo' }}
+                <span
+                  :class="['badge', usuario.activo ? 'success' : 'danger']"
+                >
+                  {{ usuario.activo ? "Activo" : "Inactivo" }}
                 </span>
               </td>
               <td class="actions-cell">
-                <button @click="openModal(usuario)" class="btn btn-edit">Editar</button>
-                <button @click="openPuntosModal(usuario)" class="btn btn-info">Puntos</button>
-                <button @click="toggleStatus(usuario)" :class="['btn', usuario.activo ? 'btn-danger' : 'btn-success']">
-                  {{ usuario.activo ? 'Desactivar' : 'Activar' }}
+                <button
+                  @click="openModal(usuario)"
+                  class="bg-blue-100 text-black hover:bg-blue-200 px-3 py-1 rounded-md text-sm font-medium transition-colors duration-150"
+                >
+                  Editar
                 </button>
-                <button @click="deleteUsuario(usuario)" class="btn btn-danger">Eliminar</button>
+                <button
+                  @click="openPuntosModal(usuario)"
+                  class="bg-blue-100 text-black hover:bg-blue-200 px-3 py-1 rounded-md text-sm font-medium transition-colors duration-150"
+                >
+                  Puntos
+                </button>
+                <button
+                  @click="toggleStatus(usuario)"
+                   :class="[usuario.activo
+                  ? 'bg-red-100 hover:bg-red-200'
+                  : 'bg-green-100 hover:bg-green-200',
+                  'text-black px-3 py-1 rounded-md text-sm font-medium transition-colors duration-150']">
+                {{ usuario.activo ? 'Desactivar' : 'Activar' }}
+                </button>
+                <button
+                  @click="deleteUsuario(usuario)"
+                  class="bg-red-100 text-black hover:bg-red-200 px-3 py-1 rounded-md text-sm font-medium transition-colors duration-150"
+                >
+                  Eliminar
+                </button>
               </td>
             </tr>
           </template>
-          
+
+          <!-- Estado vacío -->
           <template v-else>
             <tr>
               <td colspan="7">
-                <EmptyState icon="mdi:account-search-outline" title="No se encontraron usuarios" message="Prueba con otro término de búsqueda o crea un nuevo usuario." />
+                <EmptyState
+                  icon="mdi:account-search-outline"
+                  title="No se encontraron usuarios"
+                  message="Prueba con otro término de búsqueda o crea un nuevo usuario."
+                />
               </td>
             </tr>
           </template>
         </tbody>
       </table>
+    </div>
 
-      <div v-if="!loading && totalPages > 1" class="pagination-controls">
-        <button @click="prevPage" :disabled="currentPage === 1" class="btn btn-secondary">
-          Anterior
-        </button>
-        <span>Página {{ currentPage }} de {{ totalPages }}</span>
-        <button @click="nextPage" :disabled="currentPage === totalPages" class="btn btn-secondary">
-          Siguiente
-        </button>
+    <!-- Vista Mobile - Cards -->
+    <div class="block md:hidden">
+      <template v-if="loading">
+        <div v-for="i in 5" :key="i" class="mobile-card mb-4">
+          <BaseSkeleton width="100%" height="20px" radius="4px" class="mb-2" />
+          <BaseSkeleton width="60%" height="16px" radius="4px" class="mb-2" />
+          <BaseSkeleton width="40%" height="16px" radius="4px" class="mb-3" />
+          <div class="flex gap-2">
+            <BaseSkeleton width="70px" height="28px" radius="4px" />
+            <BaseSkeleton width="70px" height="28px" radius="4px" />
+          </div>
+        </div>
+      </template>
+
+      <!-- Cards de usuarios -->
+      <template v-else-if="filteredUsuarios.length > 0">
+        <div v-for="usuario in filteredUsuarios" :key="usuario.id" class="mobile-card">
+          <div class="mobile-card-header">
+            <h3 class="mobile-card-title">{{ usuario.nombreCompleto }}</h3>
+            <span
+              :class="['badge', usuario.activo ? 'success' : 'danger']"
+            >
+              {{ usuario.activo ? "Activo" : "Inactivo" }}
+            </span>
+          </div>
+          
+          <div class="mobile-card-content">
+            <div class="mobile-info-item">
+              <span class="mobile-label">Cédula:</span>
+              <span>{{ usuario.cedula }}</span>
+            </div>
+            <div class="mobile-info-item">
+              <span class="mobile-label">Email:</span>
+              <span class="mobile-value">{{ usuario.email }}</span>
+            </div>
+            <div class="mobile-info-item">
+              <span class="mobile-label">Rol:</span>
+              <span>{{ usuario.rol }}</span>
+            </div>
+            <div class="mobile-info-item">
+              <span class="mobile-label">Puntos:</span>
+              <span class="mobile-points">{{ usuario.puntosTotales }}</span>
+            </div>
+          </div>
+
+          <div class="mobile-card-actions">
+            <button
+              @click="openModal(usuario)"
+              class="bg-blue-100 text-black hover:bg-blue-200 px-3 py-1 rounded-md text-sm font-medium transition-colors duration-150"
+            >
+              Editar
+            </button>
+            <button
+              @click="openPuntosModal(usuario)"
+              class="bg-blue-100 text-black hover:bg-blue-200 px-3 py-1 rounded-md text-sm font-medium transition-colors duration-150"
+            >
+              Puntos
+            </button>
+            <button
+              @click="toggleStatus(usuario)"
+              :class="[usuario.activo
+                  ? 'bg-red-100 text-red-800'
+                  : 'bg-green-100 text-green-800',
+                  'text-black px-3 py-1 rounded-md text-sm font-medium transition-colors duration-150']">
+                {{ usuario.activo ? 'Desactivar' : 'Activar' }}
+            </button> 
+            <button
+              @click="deleteUsuario(usuario)"
+              class="bg-red-100 text-black hover:bg-red-200 px-3 py-1 rounded-md text-sm font-medium transition-colors duration-150"
+            >
+              Eliminar
+            </button>
+          </div>
+        </div>
+      </template>
+
+      <!-- Estado vacío para mobile -->
+      <template v-else>
+        <div class="mobile-empty">
+          <EmptyState
+            icon="mdi:account-search-outline"
+            title="No se encontraron usuarios"
+            message="Prueba con otro término de búsqueda o crea un nuevo usuario."
+          />
+        </div>
+      </template>
+    </div>
+
+    <!-- Paginación -->
+    <div v-if="!loading && totalPages > 1" class="pagination-controls">
+      <button
+        @click="prevPage"
+        :disabled="currentPage === 1"
+        class="btn btn-secondary"
+      >
+        Anterior
+      </button>
+      <span>Página {{ currentPage }} de {{ totalPages }}</span>
+      <button
+        @click="nextPage"
+        :disabled="currentPage === totalPages"
+        class="btn btn-secondary"
+      >
+        Siguiente
+      </button>
+    </div>
+
+    <!-- Modal Crear/Editar -->
+   <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
+      <div class="modal-content">
+        <h2 class="modal-title">{{ isEditMode ? 'Editar Usuario' : 'Crear Usuario' }}</h2>
+        <form @submit.prevent="saveUsuario">
+          <div class="form-grid">
+             <!-- Nombre -->
+        <div class="form-group">
+          <label>Nombre Completo</label>
+          <input
+            v-model="form.nombreCompleto"
+            type="text"
+            required
+            @input="form.nombreCompleto = capitalizeWords(form.nombreCompleto)"
+          />
+        </div>
+             <!-- Cédula -->
+        <div class="form-group">
+          <label>Cédula</label>
+          <input
+            v-model="form.cedula"
+            type="text"
+            required
+            :disabled="isEditMode"
+            pattern="^[0-9]{5,15}$"
+            maxlength="15"
+            title="La cédula debe tener entre 5 y 15 dígitos y solo números"
+            @input="form.cedula = form.cedula.replace(/[^0-9]/g, '')"
+          />
+        </div>
+            <div class="form-group"><label>Email</label><input v-model="form.email" type="email" required /></div>
+            <div class="form-group">
+          <label>Sede</label>
+          <input v-model="form.sede" type="text" required />
+        </div>
+            <!-- Contraseña (solo en crear) -->
+        <div class="form-group" v-if="!isEditMode">
+          <label>Contraseña</label>
+          <input
+            v-model="form.contrasena"
+            type="password"
+            required
+            maxlength="16"
+            pattern="^(?=.*[0-9]).{1,16}$"
+            title="La contraseña debe tener máximo 16 caracteres e incluir al menos un dígito"
+          />
+        </div>
+            <div class="form-group"><label>Rol</label><select v-model="form.rol" required>
+                <option value="Empleado">Empleado</option>
+                <option value="Administrador">Administrador</option>
+              </select></div>
+            <div class="form-group"><label>Cargo ID</label><input v-model.number="form.cargoId" type="number"
+                placeholder="ID del Cargo existente" required /></div>
+            <div class="form-group"><label>Centro de Costos ID</label><input v-model.number="form.centroDeCostosId"
+                type="number" placeholder="ID del C. de Costos existente" required /></div>
+          </div>
+          <div class="modal-actions">
+            <button type="button" @click="closeModal" class="btn btn-secondary">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+          </div>
+        </form>
       </div>
     </div>
 
-    <BaseModal :show="showModal" :title="isEditMode ? 'Editar Usuario' : 'Crear Usuario'" @close="closeModal">
-      <form id="usuarioForm" @submit.prevent="saveUsuario">
-        <div class="form-grid">
-          <div class="form-group"><label>Nombre Completo</label><input v-model="form.nombreCompleto" type="text" required /></div>
-          <div class="form-group"><label>Cédula</label><input v-model="form.cedula" type="text" :disabled="isEditMode" required /></div>
-          <div class="form-group"><label>Email</label><input v-model="form.email" type="email" required /></div>
-          <div class="form-group"><label>Sede</label><input v-model="form.sede" type="text" required /></div>
-          <div class="form-group" v-if="!isEditMode"><label>Contraseña</label><input v-model="form.contrasena" type="password" required /></div>
-          <div class="form-group"><label>Rol</label><select v-model="form.rol" required><option value="Empleado">Empleado</option><option value="Administrador">Administrador</option></select></div>
-          <div class="form-group"><label>Cargo</label><select v-model.number="form.cargoId" required><option disabled value="">Selecciona un cargo</option><option v-for="cargo in cargos" :key="cargo.id" :value="cargo.id">{{ cargo.nombre }}</option></select></div>
-          <div class="form-group"><label>Centro de Costos</label><select v-model.number="form.centroDeCostosId" required><option disabled value="">Selecciona un centro</option><option v-for="centro in centrosDeCostos" :key="centro.id" :value="centro.id">{{ centro.nombre }}</option></select></div>
+    <!-- Modal Ajustar Puntos -->
+    <BaseModal
+      :show="showPuntosModal"
+      :title="`Ajustar Puntos a ${formPuntos.nombreCompleto}`"
+      @close="closePuntosModal"
+      width="500px"
+    >
+      <form id="puntosForm" @submit.prevent="savePuntos">
+        <div class="form-group">
+          <label>Puntos a Añadir/Quitar</label>
+          <input
+            v-model.number="formPuntos.puntos"
+            type="number"
+            required
+            placeholder="Ej: 100 para añadir, -50 para quitar"
+          />
+        </div>
+        <div class="form-group">
+          <label>Motivo del Ajuste</label>
+          <textarea
+            v-model="formPuntos.descripcion"
+            required
+            placeholder="Ej: Bono por desempeño Q3"
+          />
         </div>
       </form>
       <template #actions>
-        <button type="button" @click="closeModal" class="btn btn-secondary">Cancelar</button>
-        <button type="submit" form="usuarioForm" class="btn btn-primary">Guardar</button>
+        <button type="button" @click="closePuntosModal" class="btn btn-secondary">
+          Cancelar
+        </button>
+        <button type="submit" form="puntosForm" class="btn btn-primary">
+          Guardar Ajuste
+        </button>
       </template>
-    </BaseModal>
-    <BaseModal :show="showPuntosModal" :title="`Ajustar Puntos a ${formPuntos.nombreCompleto}`" @close="closePuntosModal" width="500px">
-        <form id="puntosForm" @submit.prevent="savePuntos">
-            <div class="form-group"><label>Puntos a Añadir/Quitar</label><input v-model.number="formPuntos.puntos" type="number" required placeholder="Ej: 100 para añadir, -50 para quitar" /></div>
-            <div class="form-group"><label>Motivo del Ajuste</label><textarea v-model="formPuntos.descripcion" required placeholder="Ej: Bono por desempeño Q3" /></div>
-        </form>
-        <template #actions>
-            <button type="button" @click="closePuntosModal" class="btn btn-secondary">Cancelar</button>
-            <button type="submit" form="puntosForm" class="btn btn-primary">Guardar Ajuste</button>
-        </template>
     </BaseModal>
   </div>
 </template>
@@ -165,6 +379,22 @@ const fetchData = async () => {
     Swal.fire("Error", "No se pudieron cargar los datos necesarios.", "error");
   } finally {
     loading.value = false;
+  }
+};
+
+const capitalizeWords = (text) => {
+  if (!text) return '';
+  return text
+    .toLowerCase()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+};
+
+const capitalizeCargo = () => {
+  if (form.cargoId && cargos.length) {
+    const cargo = cargos.find(c => c.id === form.cargoId);
+    if (cargo) {
+      cargo.nombre = capitalizeWords(cargo.nombre);
+    }
   }
 };
 
@@ -256,7 +486,6 @@ const deleteUsuario = async (usuario) => {
     icon: 'error',
     showCancelButton: true,
     confirmButtonColor: '#d33',
-    // 👇 LÍNEA CORREGIDA
     confirmButtonText: 'Sí, eliminar', 
     cancelButtonText: 'Cancelar'
   });
@@ -275,32 +504,4 @@ const deleteUsuario = async (usuario) => {
 };
 </script>
 
-<style scoped>
-/* Los estilos de tu rama, que son más consistentes con el resto de la app */
-.max-w-7xl { max-width: 80rem; width: 100%; margin: 0 auto; }
-.page-header { text-align: center; margin-bottom: 1.5rem; }
-.page-title { font-size: 1.8rem; font-weight: 600; color: var(--text); }
-.page-subtitle { color: var(--text-muted); }
-.actions-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-.search-input { padding: 0.6rem 1rem; border: 1px solid var(--border); border-radius: 6px; width: 300px; }
-.table-container { overflow-x: auto; background: var(--surface); border-radius: 8px; border: 1px solid var(--border); }
-table { width: 100%; border-collapse: collapse; }
-th, td { padding: 8px 15px; text-align: center; border-bottom: 1px solid var(--border); }
-th { background-color: var(--table-header); color: white; }
-.badge { padding: 4px 10px; border-radius: 12px; font-size: 0.8em; font-weight: 600; }
-.badge.success { background-color: rgba(34, 197, 94, 0.2); color: #22c55e; }
-.badge.danger { background-color: rgba(239, 68, 68, 0.2); color: #ef4444; }
-.actions-cell { display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap; }
-.btn { padding: 0.5rem 1rem; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; }
-.btn-primary { background-color: var(--primary); color: var(--primary-contrast); }
-.btn-secondary { background-color: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
-.btn-edit { background-color: #f59e0b; color: white; }
-.btn-danger { background-color: #ef4444; color: white; }
-.btn-success { background-color: #22c55e; color: white; }
-.btn-info { background-color: #3b82f6; color: white; }
-.form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
-.form-group { display: flex; flex-direction: column; }
-.form-group label { margin-bottom: 0.5rem; }
-.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.6rem; border: 1px solid var(--border); border-radius: 4px; }
-.pagination-controls { display: flex; justify-content: center; align-items: center; gap: 1rem; padding: 1.5rem; }
-</style>
+<style src="./Usuarios.css"></style>
