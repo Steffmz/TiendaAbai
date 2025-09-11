@@ -7,20 +7,19 @@
 
     <div class="w-full flex justify-center mb-6">
       <div class="flex flex-col md:flex-row items-center gap-3 w-full max-w-3xl">
-        <input v-model="searchQuery" type="text" placeholder="Buscar por nombre o cédula..."
-          class="w-64 md:flex-1 px-3 py-2 border border-yellow-400 rounded-lg text-blue-800 bg-blue-50
+        <input v-model="searchQuery" type="text" placeholder="Buscar por nombre o cédula..." class="w-64 md:flex-1 px-3 py-2 border border-yellow-400 rounded-lg text-blue-800 bg-blue-50
                focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-200
                text-sm shadow-sm transition-all duration-200" />
 
-        <button @click="openModal()"
-          class="px-5 py-2 bg-[#FFB93B] text-black rounded-lg font-semibold shadow-md
+        <button @click="openModal()" class="px-5 py-2 bg-[#FFB93B] text-black rounded-lg font-semibold shadow-md
                hover:bg-[#74B9E7] transition-all duration-200 hover:shadow-lg">
           + Nuevo Usuario
         </button>
       </div>
     </div>
 
-    <div class="hidden md:block rounded-xl border border-gray-200 shadow-sm mb-2 w-full max-w-7xl mx-auto overflow-hidden">
+    <div
+      class="hidden md:block rounded-xl border border-gray-200 shadow-sm mb-2 w-full max-w-7xl mx-auto overflow-hidden">
       <table class="w-full border-collapse">
         <thead class="bg-[#74B9E7] text-black">
           <tr>
@@ -101,100 +100,100 @@
     </div>
 
     <div class="block md:hidden">
-        <template v-if="loading">
-            <div v-for="i in 5" :key="i" class="mobile-card mb-4">
-                <BaseSkeleton width="100%" height="20px" radius="4px" class="mb-2" />
-                <BaseSkeleton width="60%" height="16px" radius="4px" class="mb-2" />
-                <BaseSkeleton width="40%" height="16px" radius="4px" class="mb-3" />
-                <div class="flex gap-2">
-                    <BaseSkeleton width="70px" height="28px" radius="4px" />
-                    <BaseSkeleton width="70px" height="28px" radius="4px" />
-                </div>
-            </div>
-        </template>
+      <template v-if="loading">
+        <div v-for="i in 5" :key="i" class="mobile-card mb-4">
+          <BaseSkeleton width="100%" height="20px" radius="4px" class="mb-2" />
+          <BaseSkeleton width="60%" height="16px" radius="4px" class="mb-2" />
+          <BaseSkeleton width="40%" height="16px" radius="4px" class="mb-3" />
+          <div class="flex gap-2">
+            <BaseSkeleton width="70px" height="28px" radius="4px" />
+            <BaseSkeleton width="70px" height="28px" radius="4px" />
+          </div>
+        </div>
+      </template>
 
-        <template v-else-if="usuarios.length > 0">
-            <div v-for="usuario in usuarios" :key="usuario.id" class="mobile-card">
-                <div class="mobile-card-header">
-                    <h3 class="mobile-card-title">{{ usuario.nombreCompleto }}</h3>
-                    <span :class="['badge', usuario.activo ? 'success' : 'danger']">
-                        {{ usuario.activo ? "Activo" : "Inactivo" }}
-                    </span>
-                </div>
-                
-                <div class="mobile-card-content">
-                    <div class="mobile-info-item">
-                        <span class="mobile-label">Cédula:</span>
-                        <span>{{ usuario.cedula }}</span>
-                    </div>
-                    <div class="mobile-info-item">
-                        <span class="mobile-label">Email:</span>
-                        <span class="mobile-value">{{ usuario.email }}</span>
-                    </div>
-                    <div class="mobile-info-item">
-                        <span class="mobile-label">Rol:</span>
-                        <span>{{ usuario.rol }}</span>
-                    </div>
-                    <div class="mobile-info-item">
-                        <span class="mobile-label">Puntos:</span>
-                        <span class="mobile-points">{{ usuario.puntosTotales }}</span>
-                    </div>
-                </div>
+      <template v-else-if="usuarios.length > 0">
+        <div v-for="usuario in usuarios" :key="usuario.id" class="mobile-card">
+          <div class="mobile-card-header">
+            <h3 class="mobile-card-title">{{ usuario.nombreCompleto }}</h3>
+            <span :class="['badge', usuario.activo ? 'success' : 'danger']">
+              {{ usuario.activo ? "Activo" : "Inactivo" }}
+            </span>
+          </div>
 
-                <div class="mobile-card-actions">
-                    <button @click="openModal(usuario)"
-                        class="bg-blue-100 text-black hover:bg-blue-200 px-3 py-1 rounded-md text-sm font-medium transition-colors duration-150">
-                        Editar
-                    </button>
-                    <button @click="openPuntosModal(usuario)"
-                        class="bg-blue-100 text-black hover:bg-blue-200 px-3 py-1 rounded-md text-sm font-medium transition-colors duration-150">
-                        Puntos
-                    </button>
-                    <button @click="toggleStatus(usuario)" :class="[usuario.activo
-                        ? 'bg-red-100 text-red-800'
-                        : 'bg-green-100 text-green-800',
-                        'text-black px-3 py-1 rounded-md text-sm font-medium transition-colors duration-150']">
-                        {{ usuario.activo ? 'Desactivar' : 'Activar' }}
-                    </button> 
-                    <button @click="deleteUsuario(usuario)"
-                        class="bg-red-100 text-black hover:bg-red-200 px-3 py-1 rounded-md text-sm font-medium transition-colors duration-150">
-                        Eliminar
-                    </button>
-                </div>
+          <div class="mobile-card-content">
+            <div class="mobile-info-item">
+              <span class="mobile-label">Cédula:</span>
+              <span>{{ usuario.cedula }}</span>
             </div>
-        </template>
+            <div class="mobile-info-item">
+              <span class="mobile-label">Email:</span>
+              <span class="mobile-value">{{ usuario.email }}</span>
+            </div>
+            <div class="mobile-info-item">
+              <span class="mobile-label">Rol:</span>
+              <span>{{ usuario.rol }}</span>
+            </div>
+            <div class="mobile-info-item">
+              <span class="mobile-label">Puntos:</span>
+              <span class="mobile-points">{{ usuario.puntosTotales }}</span>
+            </div>
+          </div>
 
-        <template v-else>
-            <div class="mobile-empty">
-                <EmptyState icon="mdi:account-search-outline" title="No se encontraron usuarios"
-                    message="Prueba con otro término de búsqueda o crea un nuevo usuario." />
-            </div>
-        </template>
+          <div class="mobile-card-actions">
+            <button @click="openModal(usuario)"
+              class="bg-blue-100 text-black hover:bg-blue-200 px-3 py-1 rounded-md text-sm font-medium transition-colors duration-150">
+              Editar
+            </button>
+            <button @click="openPuntosModal(usuario)"
+              class="bg-blue-100 text-black hover:bg-blue-200 px-3 py-1 rounded-md text-sm font-medium transition-colors duration-150">
+              Puntos
+            </button>
+            <button @click="toggleStatus(usuario)" :class="[usuario.activo
+              ? 'bg-red-100 text-red-800'
+              : 'bg-green-100 text-green-800',
+              'text-black px-3 py-1 rounded-md text-sm font-medium transition-colors duration-150']">
+              {{ usuario.activo ? 'Desactivar' : 'Activar' }}
+            </button>
+            <button @click="deleteUsuario(usuario)"
+              class="bg-red-100 text-black hover:bg-red-200 px-3 py-1 rounded-md text-sm font-medium transition-colors duration-150">
+              Eliminar
+            </button>
+          </div>
+        </div>
+      </template>
+
+      <template v-else>
+        <div class="mobile-empty">
+          <EmptyState icon="mdi:account-search-outline" title="No se encontraron usuarios"
+            message="Prueba con otro término de búsqueda o crea un nuevo usuario." />
+        </div>
+      </template>
     </div>
 
     <div v-if="!loading && totalPages > 1" class="flex flex-col items-center justify-center mt-4">
-        <p class="text-gray-700">
-            Existen <span class="text-blue-500 font-semibold">{{ totalUsers }}</span> usuarios
-        </p>
-        <div class="flex items-center mt-2 space-x-1">
-            <button @click="prevPage" :disabled="currentPage === 1"
-              class="w-8 h-8 flex items-center justify-center rounded-md bg-[#fffef9] border border-gray-200 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
-              ←
-            </button>
-            <button v-for="pagina in paginasVisibles" :key="pagina" @click="goToPage(pagina)" :class="[
-              'w-8 h-8 flex items-center justify-center rounded-md border font-medium',
-              currentPage === pagina
-                ? 'bg-blue-500 text-white border-blue-500'
-                : 'bg-[#fffef9] border-gray-200 text-gray-600 hover:bg-gray-100',
-              pagina === '...' ? 'cursor-default' : ''
-            ]">
-              {{ pagina }}
-            </button>
-            <button @click="nextPage" :disabled="currentPage === totalPages"
-              class="w-8 h-8 flex items-center justify-center rounded-md bg-[#fffef9] border border-gray-200 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
-              →
-            </button>
-        </div>
+      <p class="text-gray-700">
+        Existen <span class="text-blue-500 font-semibold">{{ totalUsers }}</span> usuarios
+      </p>
+      <div class="flex items-center mt-2 space-x-1">
+        <button @click="prevPage" :disabled="currentPage === 1"
+          class="w-8 h-8 flex items-center justify-center rounded-md bg-[#fffef9] border border-gray-200 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+          ←
+        </button>
+        <button v-for="pagina in paginasVisibles" :key="pagina" @click="goToPage(pagina)" :class="[
+          'w-8 h-8 flex items-center justify-center rounded-md border font-medium',
+          currentPage === pagina
+            ? 'bg-blue-500 text-white border-blue-500'
+            : 'bg-[#fffef9] border-gray-200 text-gray-600 hover:bg-gray-100',
+          pagina === '...' ? 'cursor-default' : ''
+        ]">
+          {{ pagina }}
+        </button>
+        <button @click="nextPage" :disabled="currentPage === totalPages"
+          class="w-8 h-8 flex items-center justify-center rounded-md bg-[#fffef9] border border-gray-200 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+          →
+        </button>
+      </div>
     </div>
 
     <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
@@ -220,16 +219,23 @@
             </div>
             <div class="form-group" v-if="!isEditMode">
               <label>Contraseña</label>
-              <input v-model="form.contrasena" type="password" required maxlength="16"
-                pattern="^(?=.*[0-9]).{1,16}$"
+              <input v-model="form.contrasena" type="password" required maxlength="16" pattern="^(?=.*[0-9]).{1,16}$"
                 title="La contraseña debe tener máximo 16 caracteres e incluir al menos un dígito" />
             </div>
             <div class="form-group"><label>Rol</label><select v-model="form.rol" required>
                 <option value="Empleado">Empleado</option>
                 <option value="Administrador">Administrador</option>
               </select></div>
-            <div class="form-group"><label>Cargo</label><select v-model.number="form.cargoId" required><option disabled value="">Selecciona un cargo</option><option v-for="cargo in cargos" :key="cargo.id" :value="cargo.id">{{ cargo.nombre }}</option></select></div>
-            <div class="form-group"><label>Centro de Costos</label><select v-model.number="form.centroDeCostosId" required><option disabled value="">Selecciona un centro</option><option v-for="centro in centrosDeCostos" :key="centro.id" :value="centro.id">{{ centro.nombre }}</option></select></div>
+            <div class="form-group"><label>Cargo</label><select v-model.number="form.cargoId" required>
+                <option disabled value="">Selecciona un cargo</option>
+                <option v-for="cargo in cargos" :key="cargo.id" :value="cargo.id">{{ cargo.nombre }}</option>
+              </select></div>
+            <div class="form-group"><label>Centro de Costos</label><select v-model.number="form.centroDeCostosId"
+                required>
+                <option disabled value="">Selecciona un centro</option>
+                <option v-for="centro in centrosDeCostos" :key="centro.id" :value="centro.id">{{ centro.nombre }}
+                </option>
+              </select></div>
           </div>
           <div class="modal-actions">
             <button type="button" @click="closeModal" class="btn btn-secondary">Cancelar</button>
@@ -295,15 +301,15 @@ const getAuthHeaders = () => ({ headers: { Authorization: `Bearer ${localStorage
 const fetchData = async () => {
   loading.value = true;
   try {
-    const params = new URLSearchParams({ 
-        page: currentPage.value, 
-        limit: usersPerPage.value,
-        search: searchQuery.value
+    const params = new URLSearchParams({
+      page: currentPage.value,
+      limit: usersPerPage.value,
+      search: searchQuery.value
     });
     const usuariosRes = await axios.get(`${API_URL}?${params.toString()}`, getAuthHeaders());
     usuarios.value = usuariosRes.data.usuarios;
     totalUsers.value = usuariosRes.data.total;
-    
+
     if (cargos.value.length === 0) {
       const [cargosRes, centrosRes] = await Promise.all([
         axios.get(`${ADMIN_DATA_URL}/cargos`, getAuthHeaders()),
@@ -314,7 +320,7 @@ const fetchData = async () => {
     }
   } catch (error) {
     console.error("Error al cargar datos:", error);
-    Swal.fire("Error", "No se pudieron cargar los datos necesarios.", "error");
+    Swal.fire("Error", "No se pudieron cargar los datos de los usuarios. Por favor, intente de nuevo más tarde.", "error");
   } finally {
     loading.value = false;
   }
@@ -343,41 +349,40 @@ const prevPage = () => {
 
 let searchTimeout;
 watch(searchQuery, () => {
-    currentPage.value = 1;
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(() => {
-        fetchData();
-    }, 300); 
+  currentPage.value = 1;
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    fetchData();
+  }, 300);
 });
 
-// Lógica para mostrar las páginas de la paginación
 const paginasVisibles = computed(() => {
-    const total = totalPages.value;
-    const actual = currentPage.value;
-    const rango = 1;
-    const paginas = [];
+  const total = totalPages.value;
+  const actual = currentPage.value;
+  const rango = 1;
+  const paginas = [];
 
-    if (total <= 7) {
-      for (let i = 1; i <= total; i++) paginas.push(i);
-      return paginas;
-    }
-
-    paginas.push(1);
-    if (actual > rango + 2) paginas.push('...');
-    for (let i = Math.max(2, actual - rango); i <= Math.min(total - 1, actual + rango); i++) {
-      paginas.push(i);
-    }
-    if (actual < total - rango - 1) paginas.push('...');
-    paginas.push(total);
-
+  if (total <= 7) {
+    for (let i = 1; i <= total; i++) paginas.push(i);
     return paginas;
+  }
+
+  paginas.push(1);
+  if (actual > rango + 2) paginas.push('...');
+  for (let i = Math.max(2, actual - rango); i <= Math.min(total - 1, actual + rango); i++) {
+    paginas.push(i);
+  }
+  if (actual < total - rango - 1) paginas.push('...');
+  paginas.push(total);
+
+  return paginas;
 });
 
 const goToPage = (pagina) => {
-    if (typeof pagina === 'number') {
-        currentPage.value = pagina;
-        fetchData();
-    }
+  if (typeof pagina === 'number') {
+    currentPage.value = pagina;
+    fetchData();
+  }
 };
 
 onMounted(fetchData);
@@ -402,15 +407,15 @@ const saveUsuario = async () => {
   try {
     if (isEditMode.value) {
       await axios.put(`${API_URL}/${form.value.id}`, form.value, getAuthHeaders());
-      Swal.fire("Éxito", "Usuario actualizado.", "success");
+      Swal.fire("¡Éxito!", "El usuario ha sido actualizado correctamente.", "success");
     } else {
       await axios.post(API_URL, form.value, getAuthHeaders());
-      Swal.fire("Éxito", "Usuario creado.", "success");
+      Swal.fire("¡Éxito!", "El nuevo usuario ha sido creado.", "success");
     }
     closeModal();
     await fetchData();
   } catch (error) {
-    let errorHtml = error.response?.data?.message || 'No se pudo guardar el usuario.';
+    let errorHtml = error.response?.data?.message || 'No se pudo guardar el usuario. Verifique los datos e intente nuevamente.';
     if (error.response?.data?.errors) {
       errorHtml = '<ul style="text-align: left; list-style-position: inside;">' + error.response.data.errors.map(e => `<li>${e.message}</li>`).join('') + '</ul>';
     }
@@ -426,11 +431,11 @@ const closePuntosModal = () => { showPuntosModal.value = false; };
 const savePuntos = async () => {
   try {
     await axios.post(`${API_URL}/${formPuntos.value.id}/puntos`, { puntos: formPuntos.value.puntos, descripcion: formPuntos.value.descripcion }, getAuthHeaders());
-    Swal.fire("Éxito", "Puntos ajustados.", "success");
+    Swal.fire("¡Éxito!", "Los puntos del usuario han sido ajustados.", "success");
     closePuntosModal();
     await fetchData();
   } catch (error) {
-    Swal.fire("Error", error.response?.data?.message || "No se pudo ajustar los puntos.", "error");
+    Swal.fire("Error", error.response?.data?.message || "No se pudo realizar el ajuste de puntos.", "error");
   }
 };
 

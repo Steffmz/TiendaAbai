@@ -71,11 +71,15 @@ export default function useCategorias() {
     }
 
     const paginas = [1];
-    if (actual > rango + 2) paginas.push('...');
-    for (let i = Math.max(2, actual - rango); i <= Math.min(total - 1, actual + rango); i++) {
+    if (actual > rango + 2) paginas.push("...");
+    for (
+      let i = Math.max(2, actual - rango);
+      i <= Math.min(total - 1, actual + rango);
+      i++
+    ) {
       paginas.push(i);
     }
-    if (actual < total - rango - 1) paginas.push('...');
+    if (actual < total - rango - 1) paginas.push("...");
     paginas.push(total);
 
     return paginas;
@@ -108,13 +112,15 @@ export default function useCategorias() {
 
   const guardarCategoria = async () => {
     if (!form.value.nombre.trim()) {
-      return Swal.fire("Attention", "Category name is required.", "warning");
+      return Swal.fire(
+        "Atención",
+        "El nombre de la categoría es obligatorio.",
+        "warning"
+      );
     }
 
     const formData = new FormData();
     formData.append("nombre", form.value.nombre.trim());
-    // --- MODIFICADO ---
-    // Se eliminó la línea que añadía 'descripcion'
     if (form.value.imagen) {
       formData.append("imagen", form.value.imagen);
     }
@@ -132,37 +138,37 @@ export default function useCategorias() {
 
       await obtenerCategorias();
       cerrarModal();
-      Swal.fire(
-        "Success",
-        `Category ${editando.value ? "updated" : "created"} successfully.`,
+      Swal.fire(  
+        "¡Éxito!",
+        `La categoría fue ${
+          editando.value ? "actualizada" : "creada"
+        } correctamente.`,
         "success"
       );
     } catch (err) {
-      error.value = err.response?.data?.error || "Could not save the category.";
+      error.value =
+        err.response?.data?.error || "No se pudo guardar la categoría.";
       Swal.fire("Error", error.value, "error");
     }
   };
 
-  const confirmarEliminar = async (categoria) => {
+const confirmarEliminar = async (categoria) => {
     const result = await Swal.fire({
-      title: "Are you sure?",
-      text: `The category "${categoria.nombre}" will be deleted. This action cannot be undone.`,
+      title: "¿Estás seguro?",
+      text: `La categoría "${categoria.nombre}" será eliminada. Esta acción no se puede deshacer.`,
       icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, delete it!",
-      cancelButtonText: "Cancel",
+      confirmButtonText: "Sí, ¡eliminar!",
+      cancelButtonText: "Cancelar",
     });
 
     if (result.isConfirmed) {
       try {
         await axios.delete(`${API_URL}/${categoria.id}`, getAuthHeaders());
-        Swal.fire("Deleted!", "The category has been deleted.", "success");
+        Swal.fire("¡Eliminada!", "La categoría ha sido eliminada.", "success");
         await obtenerCategorias();
       } catch (err) {
         error.value =
-          err.response?.data?.error || "Could not delete the category.";
+          err.response?.data?.error || "No se pudo eliminar la categoría. Es posible que tenga productos asociados.";
         Swal.fire("Error", error.value, "error");
       }
     }

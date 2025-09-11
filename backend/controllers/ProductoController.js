@@ -49,7 +49,7 @@ const createProducto = async (req, res) => {
     const imagenUrl = req.file ? `/uploads/${req.file.filename}` : null;
     if (!nombre || !precioPuntos || !categoriaId) {
       return res.status(400).json({ 
-        error: "Nombre, precioPuntos y categoriaId son obligatorios" 
+        error: "El nombre, el precio en puntos y la categoría son campos obligatorios." 
       });
     }
 

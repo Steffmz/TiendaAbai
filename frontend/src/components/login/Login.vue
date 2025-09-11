@@ -40,25 +40,25 @@ const checkDarkMode = () => {
 const onCedulaInput = (event, isRegistro = false) => {
   const value = event.target.value.replace(/\D/g, ''); // Solo números
   const limitedValue = value.slice(0, 15); // Máximo 15 caracteres
-  
+
   if (isRegistro) {
     registro.value.cedula = limitedValue;
   } else {
     cedula.value = limitedValue;
   }
-  
+
   event.target.value = limitedValue;
 };
 
 const onPasswordInput = (event, isRegistro = false) => {
   const limitedValue = event.target.value.slice(0, 18); // Máximo 18 caracteres
-  
+
   if (isRegistro) {
     registro.value.contrasena = limitedValue;
   } else {
     password.value = limitedValue;
   }
-  
+
   event.target.value = limitedValue;
 };
 
@@ -95,7 +95,7 @@ const login = async () => {
     if (error.response) {
       errorMessage.value = error.response.data.message;
     } else {
-      errorMessage.value = 'Error connecting to the server.';
+      errorMessage.value = 'No se pudo conectar con el servidor. Por favor, intente más tarde.';
     }
   }
 };
@@ -133,11 +133,11 @@ const closeModal = () => {
 // --- Animación del Canvas (Optimizada) ---
 onMounted(() => {
   checkDarkMode();
-  
+
   const observer = new MutationObserver(() => {
     checkDarkMode();
   });
-  
+
   observer.observe(document.documentElement, {
     attributes: true,
     attributeFilter: ['class']
@@ -246,61 +246,33 @@ onMounted(() => {
       <div class="login-right">
         <div class="login-card">
           <div class="logo-container">
-            <img 
-              v-if="isDarkMode" 
-              src="../../assets/img/Logo-blanco.png" 
-              alt="Logo Abai Dark" 
-              class="logo-abai" 
-            />
-            <img 
-              v-else 
-              src="../../assets/img/abai-logo.png" 
-              alt="Logo Abai Light" 
-              class="logo-abai" 
-            />
+            <img v-if="isDarkMode" src="../../assets/img/Logo-blanco.png" alt="Logo Abai Dark" class="logo-abai" />
+            <img v-else src="../../assets/img/abai-logo.png" alt="Logo Abai Light" class="logo-abai" />
           </div>
           <h2 class="title">BIENVENIDOS</h2>
           <p v-if="errorMessage && !showModal" class="error-text">{{ errorMessage }}</p>
           <form @submit.prevent="login">
             <div class="input-group">
               <label for="cedula">Cédula</label>
-              <input 
-                type="text" 
-                id="cedula" 
-                v-model="cedula" 
-                @input="onCedulaInput"
-                placeholder="Ingresa tu cédula" 
-                maxlength="15"
-                pattern="[0-9]*"
-                inputmode="numeric"
-                required 
-              />
+              <input type="text" id="cedula" v-model="cedula" @input="onCedulaInput" placeholder="Ingresa tu cédula"
+                maxlength="15" pattern="[0-9]*" inputmode="numeric" required />
             </div>
             <div class="input-group">
               <label for="password">Contraseña</label>
               <div class="password-container">
-                <input 
-                  :type="showPassword ? 'text' : 'password'" 
-                  id="password" 
-                  v-model="password" 
-                  @input="onPasswordInput"
-                  placeholder="Ingresa tu contraseña" 
-                  maxlength="18"
-                  required 
-                />
-                <button 
-                  type="button" 
-                  class="password-toggle"
-                  @click="togglePasswordVisibility(false)"
-                  tabindex="-1"
-                >
-                  <svg v-if="showPassword" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-                    <line x1="1" y1="1" x2="23" y2="23"/>
+                <input :type="showPassword ? 'text' : 'password'" id="password" v-model="password"
+                  @input="onPasswordInput" placeholder="Ingresa tu contraseña" maxlength="18" required />
+                <button type="button" class="password-toggle" @click="togglePasswordVisibility(false)" tabindex="-1">
+                  <svg v-if="showPassword" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path
+                      d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                    <line x1="1" y1="1" x2="23" y2="23" />
                   </svg>
-                  <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                    <circle cx="12" cy="12" r="3"/>
+                  <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
                   </svg>
                 </button>
               </div>
@@ -346,43 +318,25 @@ onMounted(() => {
           </div>
           <div class="input-group">
             <label for="cedula-reg">Cédula</label>
-            <input 
-              type="text" 
-              id="cedula-reg" 
-              v-model="registro.cedula" 
-              @input="onCedulaInput($event, true)"
-              placeholder="Ingresa tu cédula" 
-              maxlength="15"
-              pattern="[0-9]*"
-              inputmode="numeric"
-              required 
-            />
+            <input type="text" id="cedula-reg" v-model="registro.cedula" @input="onCedulaInput($event, true)"
+              placeholder="Ingresa tu cédula" maxlength="15" pattern="[0-9]*" inputmode="numeric" required />
           </div>
           <div class="input-group">
             <label for="password-reg">Contraseña</label>
             <div class="password-container">
-              <input 
-                :type="showPasswordReg ? 'text' : 'password'" 
-                id="password-reg" 
-                v-model="registro.contrasena" 
-                @input="onPasswordInput($event, true)"
-                placeholder="Crea una contraseña"
-                maxlength="18"
-                required 
-              />
-              <button 
-                type="button" 
-                class="password-toggle"
-                @click="togglePasswordVisibility(true)"
-                tabindex="-1"
-              >
-                <svg v-if="showPasswordReg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-                  <line x1="1" y1="1" x2="23" y2="23"/>
+              <input :type="showPasswordReg ? 'text' : 'password'" id="password-reg" v-model="registro.contrasena"
+                @input="onPasswordInput($event, true)" placeholder="Crea una contraseña" maxlength="18" required />
+              <button type="button" class="password-toggle" @click="togglePasswordVisibility(true)" tabindex="-1">
+                <svg v-if="showPasswordReg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path
+                    d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                  <line x1="1" y1="1" x2="23" y2="23" />
                 </svg>
-                <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                  <circle cx="12" cy="12" r="3"/>
+                <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <circle cx="12" cy="12" r="3" />
                 </svg>
               </button>
             </div>

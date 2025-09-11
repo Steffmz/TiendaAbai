@@ -1,6 +1,6 @@
 <template>
   <div class="max-w-7xl w-full mx-auto flex flex-col h-full">
-    
+
     <div class="page-header flex-shrink-0">
       <div class="flex justify-between items-center w-full flex-wrap gap-4">
         <button @click="router.back()" class="back-button">&larr; Volver</button>
@@ -27,11 +27,21 @@
           </thead>
           <tbody>
             <tr v-if="loading" v-for="i in 6" :key="i">
-              <td><BaseSkeleton width="60px" height="60px" radius="8px" /></td>
-              <td><BaseSkeleton width="150px" height="24px" radius="6px" /></td>
-              <td><BaseSkeleton width="60px" height="28px" radius="6px" /></td>
-              <td><BaseSkeleton width="80px" height="24px" radius="6px" /></td>
-              <td><BaseSkeleton width="50px" height="24px" radius="6px" /></td>
+              <td>
+                <BaseSkeleton width="60px" height="60px" radius="8px" />
+              </td>
+              <td>
+                <BaseSkeleton width="150px" height="24px" radius="6px" />
+              </td>
+              <td>
+                <BaseSkeleton width="60px" height="28px" radius="6px" />
+              </td>
+              <td>
+                <BaseSkeleton width="80px" height="24px" radius="6px" />
+              </td>
+              <td>
+                <BaseSkeleton width="50px" height="24px" radius="6px" />
+              </td>
               <td>
                 <div class="actions-cell">
                   <BaseSkeleton width="70px" height="32px" radius="6px" />
@@ -39,16 +49,18 @@
                 </div>
               </td>
             </tr>
-            
+
             <tr v-else-if="productosPaginados.length === 0">
               <td colspan="6">
-                <EmptyState icon="mdi:package-variant-closed-remove-outline" title="No hay productos" message="Esta categoría aún no tiene productos. ¡Añade el primero!" />
+                <EmptyState icon="mdi:package-variant-closed-remove-outline" title="No hay productos"
+                  message="Esta categoría aún no tiene productos. ¡Añade el primero!" />
               </td>
             </tr>
             <tr v-else v-for="producto in productosPaginados" :key="producto.id">
-              <td><img :src="`${API_BASE_URL}${producto.imagenUrl}`" class="table-image" alt="Producto"/></td>
+              <td><img :src="`${API_BASE_URL}${producto.imagenUrl}`" class="table-image" alt="Producto" /></td>
               <td>{{ producto.nombre }}</td>
-              <td><button @click="mostrarDescripcionCompleta = producto.descripcion" class="btn btn-secondary text-xs px-2 py-1">Ver</button></td>
+              <td><button @click="mostrarDescripcionCompleta = producto.descripcion"
+                  class="btn btn-secondary text-xs px-2 py-1">Ver</button></td>
               <td>{{ producto.precioPuntos }}</td>
               <td>{{ producto.stock }}</td>
               <td>
@@ -64,20 +76,24 @@
 
       <div class="cards-container">
         <div v-if="loading">
-            <div v-for="i in 4" :key="i" class="card"><BaseSkeleton width="100%" height="300px" /></div>
+          <div v-for="i in 4" :key="i" class="card">
+            <BaseSkeleton width="100%" height="300px" />
+          </div>
         </div>
         <div v-else-if="productosPaginados.length === 0">
-            <EmptyState icon="mdi:package-variant-closed-remove-outline" title="No hay productos" message="Esta categoría aún no tiene productos. ¡Añade el primero!" />
+          <EmptyState icon="mdi:package-variant-closed-remove-outline" title="No hay productos"
+            message="Esta categoría aún no tiene productos. ¡Añade el primero!" />
         </div>
         <div v-else v-for="producto in productosPaginados" :key="producto.id" class="card">
-          <img :src="`${API_BASE_URL}${producto.imagenUrl}`" class="card-image" alt="Producto"/>
+          <img :src="`${API_BASE_URL}${producto.imagenUrl}`" class="card-image" alt="Producto" />
           <div class="card-body">
             <h3 class="card-title">{{ producto.nombre }}</h3>
             <div class="card-row"><strong>Precio:</strong> {{ producto.precioPuntos }} pts</div>
             <div class="card-row"><strong>Stock:</strong> {{ producto.stock }}</div>
             <div class="card-row">
               <strong>Descripción:</strong>
-              <button @click="mostrarDescripcionCompleta = producto.descripcion" class="btn btn-secondary text-xs px-2 py-1">Ver</button>
+              <button @click="mostrarDescripcionCompleta = producto.descripcion"
+                class="btn btn-secondary text-xs px-2 py-1">Ver</button>
             </div>
           </div>
           <div class="card-actions">
@@ -91,38 +107,43 @@
     <div v-if="!loading && totalPaginas > 1" class="pagination-controls">
       <button @click="paginaAnterior" :disabled="paginaActual === 1" class="btn btn-secondary">Anterior</button>
       <span>Página {{ paginaActual }} de {{ totalPaginas }}</span>
-      <button @click="paginaSiguiente" :disabled="paginaActual === totalPaginas" class="btn btn-secondary">Siguiente</button>
+      <button @click="paginaSiguiente" :disabled="paginaActual === totalPaginas"
+        class="btn btn-secondary">Siguiente</button>
     </div>
     <div v-if="mostrarModal" class="modal-overlay" @click.self="cerrarModal">
-        <div class="modal-content">
-            <h2 class="modal-title">{{ editando ? 'Editar Producto' : 'Nuevo Producto' }}</h2>
-            <form @submit.prevent="guardarProducto" class="space-y-5">
-                <div class="form-group"><label>Nombre *</label><input v-model="form.nombre" type="text" required/></div>
-                <div class="form-group"><label>Descripción</label><textarea v-model="form.descripcion" rows="3"></textarea></div>
-                <div class="form-grid">
-                    <div><label>Precio (puntos) *</label><input v-model="form.precioPuntos" type="number" min="1" required/></div>
-                    <div><label>Stock *</label><input v-model="form.stock" type="number" min="0" required/></div>
-                </div>
-                <div class="form-group">
-                    <label>Imagen</label>
-                    <input type="file" @change="handleImageUpload" accept="image/*" class="file-input"/>
-                    <img v-if="previewImage" :src="previewImage" class="preview-image mt-4 rounded-lg border max-w-[100px]" alt="Preview"/>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" @click="cerrarModal" class="btn btn-secondary">Cancelar</button>
-                    <button type="submit" class="btn btn-primary" :disabled="loading">{{ loading ? 'Guardando...' : 'Guardar' }}</button>
-                </div>
-            </form>
-        </div>
+      <div class="modal-content">
+        <h2 class="modal-title">{{ editando ? 'Editar Producto' : 'Nuevo Producto' }}</h2>
+        <form @submit.prevent="guardarProducto" class="space-y-5">
+          <div class="form-group"><label>Nombre *</label><input v-model="form.nombre" type="text" required /></div>
+          <div class="form-group"><label>Descripción</label><textarea v-model="form.descripcion" rows="3"></textarea>
+          </div>
+          <div class="form-grid">
+            <div><label>Precio (puntos) *</label><input v-model="form.precioPuntos" type="number" min="1" required />
+            </div>
+            <div><label>Stock *</label><input v-model="form.stock" type="number" min="0" required /></div>
+          </div>
+          <div class="form-group">
+            <label>Imagen</label>
+            <input type="file" @change="handleImageUpload" accept="image/*" class="file-input" />
+            <img v-if="previewImage" :src="previewImage" class="preview-image mt-4 rounded-lg border max-w-[100px]"
+              alt="Preview" />
+          </div>
+          <div class="modal-actions">
+            <button type="button" @click="cerrarModal" class="btn btn-secondary">Cancelar</button>
+            <button type="submit" class="btn btn-primary" :disabled="loading">{{ loading ? 'Guardando...' : 'Guardar'
+              }}</button>
+          </div>
+        </form>
+      </div>
     </div>
     <div v-if="mostrarDescripcionCompleta" class="modal-overlay" @click.self="mostrarDescripcionCompleta = null">
-        <div class="modal-content">
-            <h2 class="modal-title">Descripción del Producto</h2>
-            <p class="descripcion-texto whitespace-pre-wrap break-words text-center">{{ mostrarDescripcionCompleta }}</p>
-            <div class="modal-actions">
-                <button @click="mostrarDescripcionCompleta = null" class="btn btn-primary">Cerrar</button>
-            </div>
+      <div class="modal-content">
+        <h2 class="modal-title">Descripción del Producto</h2>
+        <p class="descripcion-texto whitespace-pre-wrap break-words text-center">{{ mostrarDescripcionCompleta }}</p>
+        <div class="modal-actions">
+          <button @click="mostrarDescripcionCompleta = null" class="btn btn-primary">Cerrar</button>
         </div>
+      </div>
     </div>
   </div>
 </template>
@@ -175,16 +196,16 @@ const cargarProductos = async () => {
     const id = route.params.categoriaId;
     const { data } = await axios.get(`${API_BASE_URL}/api/productos/categoria/${id}`, getAuthHeaders());
     productos.value = Array.isArray(data) ? data : (data.productos || []);
-    
+
     if (productos.value.length > 0 && productos.value[0].categoria) {
-        categoriaNombre.value = productos.value[0].categoria.nombre;
+      categoriaNombre.value = productos.value[0].categoria.nombre;
     } else {
-        const catRes = await axios.get(`${API_BASE_URL}/api/categorias/${id}`, getAuthHeaders());
-        categoriaNombre.value = catRes.data.nombre;
+      const catRes = await axios.get(`${API_BASE_URL}/api/categorias/${id}`, getAuthHeaders());
+      categoriaNombre.value = catRes.data.nombre;
     }
     paginaActual.value = 1;
   } catch (error) {
-    Swal.fire('Error', 'No se pudieron cargar los productos.', 'error');
+    Swal.fire('Error', 'No se pudieron cargar los productos de esta categoría.', 'error');
   } finally {
     loading.value = false;
   }
@@ -226,34 +247,34 @@ const handleImageUpload = (event) => {
 };
 
 const guardarProducto = async () => {
-    loading.value = true;
-    const data = new FormData();
-    data.append('nombre', form.value.nombre);
-    data.append('descripcion', form.value.descripcion || '');
-    data.append('precioPuntos', form.value.precioPuntos);
-    data.append('stock', form.value.stock);
-    if (!editando.value) {
-      data.append('categoriaId', route.params.categoriaId);
-    }
-    if (form.value.imagen) {
-      data.append('imagen', form.value.imagen);
-    }
+  loading.value = true;
+  const data = new FormData();
+  data.append('nombre', form.value.nombre);
+  data.append('descripcion', form.value.descripcion || '');
+  data.append('precioPuntos', form.value.precioPuntos);
+  data.append('stock', form.value.stock);
+  if (!editando.value) {
+    data.append('categoriaId', route.params.categoriaId);
+  }
+  if (form.value.imagen) {
+    data.append('imagen', form.value.imagen);
+  }
 
-    const url = editando.value
-      ? `${API_BASE_URL}/api/productos/${productoEditando.value.id}`
-      : `${API_BASE_URL}/api/productos`;
-    const method = editando.value ? 'put' : 'post';
+  const url = editando.value
+    ? `${API_BASE_URL}/api/productos/${productoEditando.value.id}`
+    : `${API_BASE_URL}/api/productos`;
+  const method = editando.value ? 'put' : 'post';
 
     try {
         await axios({ method, url, data, ...getAuthHeaders(true) });
-        Swal.fire('Éxito', `Producto ${editando.value ? 'actualizado' : 'creado'}.`, 'success');
+        Swal.fire('¡Éxito!', `El producto ha sido ${editando.value ? 'actualizado' : 'creado'} correctamente.`, 'success');
         cerrarModal();
         await cargarProductos();
     } catch (error) {
-        Swal.fire('Error', error.response?.data?.error || 'No se pudo guardar el producto.', 'error');
+        Swal.fire('Error', error.response?.data?.error || 'No se pudo guardar el producto. Revisa los datos e intenta de nuevo.', 'error');
     } finally {
-        loading.value = false;
-    }
+    loading.value = false;
+  }
 };
 
 const eliminarProducto = async (producto) => {
@@ -266,13 +287,13 @@ const eliminarProducto = async (producto) => {
     cancelButtonText: 'Cancelar'
   });
 
-  if (result.isConfirmed) {
+if (result.isConfirmed) {
     try {
       await axios.delete(`${API_BASE_URL}/api/productos/${producto.id}`, getAuthHeaders());
-      Swal.fire('Eliminado', 'El producto ha sido eliminado.', 'success');
+      Swal.fire('¡Eliminado!', 'El producto ha sido eliminado correctamente.', 'success');
       await cargarProductos();
     } catch (error) {
-      Swal.fire('Error', error.response?.data?.error || 'No se pudo eliminar el producto.', 'error');
+      Swal.fire('Error', error.response?.data?.error || 'No se pudo eliminar el producto. Es posible que esté asociado a un pedido.', 'error');
     }
   }
 };

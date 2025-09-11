@@ -1,5 +1,3 @@
-// backend/controllers/AuthController.js
-
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -7,10 +5,6 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const prisma = new PrismaClient();
 
-/**
- * Endpoint para REGISTRAR un nuevo usuario.
- * Incluye la lógica para crear el centro de costos y el cargo si no existen.
- */
 const register = async (req, res) => {
     const { cedula, nombreCompleto, cargo, sede, email, contrasena, centroDeCostosNombre } = req.body;
 
@@ -60,10 +54,7 @@ const register = async (req, res) => {
     }
 };
 
-/**
- * Endpoint para INICIAR SESIÓN.
- * Devuelve un token JWT si las credenciales son correctas.
- */
+
 const login = async (req, res) => {
     const { cedula, contrasena } = req.body;
 
@@ -77,7 +68,7 @@ const login = async (req, res) => {
         });
 
         if (!usuario || !(await bcrypt.compare(contrasena, usuario.contrasena))) {
-            return res.status(401).json({ message: 'Credenciales inválidas.' });
+            return res.status(401).json({ message: 'La cédula o la contraseña son incorrectas.' });
         }
 
         const payload = {
