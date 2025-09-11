@@ -27,7 +27,7 @@ exports.getCarrito = async (req, res) => {
     res.json(carritoItems);
   } catch (error) {
     console.error('Error al obtener el carrito:', error);
-    res.status(500).json({ message: 'Error interno del servidor.' });
+    res.status(500).json({ message: 'No se pudo obtener el carrito', details: error.message });
   }
 };
 
@@ -80,7 +80,7 @@ exports.agregarAlCarrito = async (req, res) => {
     }
   } catch (error) {
     console.error('Error al agregar al carrito:', error);
-    res.status(500).json({ message: 'Error interno del servidor.' });
+    res.status(500).json({ message: 'No se pudo agregar el producto al carrito', details: error.message });
   }
 };
 
@@ -108,6 +108,6 @@ exports.eliminarDelCarrito = async (req, res) => {
     res.json({ message: 'Producto eliminado del carrito.' });
   } catch (error) {
     console.error('Error al eliminar del carrito:', error);
-    res.status(500).json({ message: 'Error interno del servidor.' });
+    res.status(500).json({ message: 'No se pudo eliminar el producto del carrito', details: error.message });
   }
 };

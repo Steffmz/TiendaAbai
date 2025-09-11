@@ -56,7 +56,7 @@ const register = async (req, res) => {
             return res.status(409).json({ message: `El campo '${field}' ya está en uso.` });
         }
         console.error("Error al crear usuario:", error);
-        res.status(500).json({ message: 'Error interno del servidor al crear el usuario.' });
+        res.status(500).json({ message: 'No se pudo crear el usuario', details: error.message });
     }
 };
 
@@ -97,7 +97,7 @@ const login = async (req, res) => {
 
     } catch (error) {
         console.error("Error en el login:", error);
-        res.status(500).json({ message: 'Error interno del servidor.' });
+        res.status(500).json({ message: 'No se pudo iniciar sesión', details: error.message });
     }
 };
 
@@ -139,7 +139,7 @@ const forgotPassword = async (req, res) => {
         console.error("Error en forgotPassword:", error);
         // Limpiamos los tokens si algo sale mal
         await prisma.usuario.update({ where: { email }, data: { passwordResetToken: null, passwordResetExpires: null } });
-        res.status(500).json({ message: 'Error interno del servidor.' });
+        res.status(500).json({ message: 'No se pudo procesar la solicitud de recuperación de contraseña', details: error.message });
     }
 };
 
@@ -179,7 +179,7 @@ const resetPassword = async (req, res) => {
 
     } catch (error) {
         console.error("Error en resetPassword:", error);
-        res.status(500).json({ message: 'Error interno del servidor.' });
+        res.status(500).json({ message: 'No se pudo restablecer la contraseña', details: error.message });
     }
 };
 

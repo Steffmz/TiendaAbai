@@ -16,6 +16,6 @@ exports.getHistorial = async (req, res) => {
     res.status(200).json(historial);
   } catch (error) {
     console.error("Error al obtener el historial de puntos:", error);
-    res.status(500).json({ message: "Error interno del servidor." });
+    res.status(500).json({ message: 'No se pudo obtener el historial de puntos', details: error.message });
   }
 };

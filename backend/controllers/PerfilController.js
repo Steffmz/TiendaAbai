@@ -33,6 +33,6 @@ exports.getPerfil = async (req, res) => {
     
   } catch (error) {
     console.error("Error al obtener perfil:", error);
-    res.status(500).json({ message: 'Error al obtener el perfil.' });
+    res.status(500).json({ message: 'No se pudo obtener el perfil', details: error.message });
   }
 };

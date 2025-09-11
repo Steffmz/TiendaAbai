@@ -57,7 +57,7 @@ exports.getAllUsuarios = async (req, res) => {
 
   } catch (error) {
     console.error("Error al obtener usuarios:", error);
-    res.status(500).json({ message: 'Error interno del servidor.' });
+    res.status(500).json({ message: 'No se pudieron obtener los usuarios', details: error.message });
   }
 };
 
@@ -87,7 +87,7 @@ exports.createUsuario = async (req, res) => {
             return res.status(409).json({ message: `El campo '${error.meta.target[0]}' ya está en uso.` });
         }
         console.error("Error al crear usuario:", error);
-        res.status(500).json({ message: 'Error interno del servidor.' });
+        res.status(500).json({ message: 'No se pudo crear el usuario', details: error.message });
     }
 };
 
@@ -210,7 +210,7 @@ exports.updateMiPerfil = async (req, res) => {
     if (error.code === 'P2002') {
       return res.status(409).json({ message: 'El email ya está en uso por otro usuario.' });
     }
-    res.status(500).json({ message: 'Error interno del servidor al actualizar el perfil.' });
+    res.status(500).json({ message: 'No se pudo actualizar el perfil', details: error.message });
   }
 };
 exports.ajustarPuntos = async (req, res) => {

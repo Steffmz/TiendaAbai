@@ -59,6 +59,6 @@ exports.getStats = async (req, res) => {
 
   } catch (error) {
     console.error("Error al obtener estadísticas del dashboard:", error);
-    res.status(500).json({ message: 'Error interno del servidor.' });
+    res.status(500).json({ message: 'No se pudieron obtener las estadísticas del dashboard', details: error.message });
   }
 };

@@ -29,7 +29,7 @@ const getAllPedidos = async (req, res) => {
     });
   } catch (error) {
     console.error("Error al obtener pedidos:", error);
-    res.status(500).json({ message: 'Error interno del servidor.' });
+    res.status(500).json({ message: 'No se pudieron obtener los pedidos', details: error.message });
   }
 };
 
@@ -211,7 +211,7 @@ const getMisPedidos = async (req, res) => {
     res.json(pedidos);
   } catch (error) {
     console.error("Error al obtener mis pedidos:", error);
-    res.status(500).json({ message: 'Error interno del servidor.' });
+    res.status(500).json({ message: 'No se pudieron obtener tus pedidos', details: error.message });
   }
 };
 
