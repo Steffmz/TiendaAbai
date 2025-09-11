@@ -237,7 +237,7 @@ onMounted(() => {
     <canvas id="magneticCanvas"></canvas>
   </div>
 
-  <div class="page-container">
+  <div class="login-container">
     <div class="login-wrapper">
       <div class="login-left">
         <img src="../../assets/img/abai3.jpg" alt="Imagen Tienda Puntos" />

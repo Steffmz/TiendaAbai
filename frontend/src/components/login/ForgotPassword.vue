@@ -2,7 +2,7 @@
   <div class="electro-background">
     <canvas id="magneticCanvas"></canvas>
   </div>
-  <div class="page-container">
+  <div class="login-container">
     <div class="login-wrapper">
       <div class="login-right">
         <div class="login-card">
