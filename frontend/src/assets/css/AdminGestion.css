@@ -51,25 +51,28 @@
   .table-container { display: block; }
 }
 
-table { width: 100%; border-collapse: collapse; } /* 1. Aseguramos que los bordes se colapsen */
+table { width: 100%; border-collapse: collapse; }
 
 th, td {
   padding: 12px 15px;
   text-align: center;
-  /* 2. ELIMINAMOS el borde inferior de las celdas */
-  /* border-bottom: 1px solid var(--border); */
 }
 th { background-color: #74b9e7; color: black; font-weight: 600; }
 tbody tr {
-  /* 3. AÑADIMOS el borde inferior a la FILA completa */
   border-bottom: 1px solid var(--border);
+  transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s; /* Transición suave */
 }
 
 tbody tr:last-child {
-  /* 4. Quitamos el borde de la última fila para que no se vea doble */
   border-bottom: none;
 }
-tbody tr:hover { background-color: var(--surface-2); }
+
+tbody tr:hover {
+  background-color: var(--surface-2);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05); /* Sombra sutil */
+  transform: translateY(-1px); /* Efecto de elevación */
+}
+
 .table-image { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; margin: 0 auto; }
 .actions-cell { display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap; }
 
@@ -84,7 +87,20 @@ tbody tr:hover { background-color: var(--surface-2); }
 @media (min-width: 768px) {
   .cards-container { display: none; }
 }
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s; /* Transición suave */
+}
+
+.card:hover {
+  background-color: var(--surface-2);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.1); /* Sombra más pronunciada */
+  transform: translateY(-2px); /* Efecto de elevación mayor */
+}
+
 .card-header { display: flex; align-items: center; gap: 1rem; padding: 1rem; border-bottom: 1px solid var(--border); }
 .card-image { width: 64px; height: 64px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
 .card-title-status { flex-grow: 1; }

@@ -349,6 +349,8 @@ watch(searchQuery, () => {
         fetchData();
     }, 300); 
 });
+
+// Lógica para mostrar las páginas de la paginación
 const paginasVisibles = computed(() => {
     const total = totalPages.value;
     const actual = currentPage.value;
@@ -381,8 +383,6 @@ const goToPage = (pagina) => {
 onMounted(fetchData);
 
 const filteredUsuarios = computed(() => {
-  // Esta computada ahora solo devuelve los usuarios ya paginados por el backend
-  // Mantenemos el nombre por compatibilidad con la vista móvil que aún podría usarla
   return usuarios.value;
 });
 
