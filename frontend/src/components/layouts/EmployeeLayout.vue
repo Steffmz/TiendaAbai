@@ -1,45 +1,68 @@
 <template>
   <div class="employee-layout">
+    <!-- NAVBAR -->
     <header class="navbar">
       <div class="navbar-content">
+        <!-- Logo -->
         <div class="logo">
-          <img src="../../assets/img/Logo-blanco.png" alt="ABAI Logo" />
+          <img src="../../assets/img/abai-logo.png" alt="ABAI Logo" />
         </div>
-        <nav class="nav-links">
-          <router-link to="/tienda">Tienda</router-link>
-          <router-link to="/tienda/carrito">Mi Carrito</router-link>
-          <router-link to="/tienda/mis-pedidos">Mis Pedidos</router-link>
-          <router-link to="/tienda/mi-perfil">Mi Perfil</router-link>
-        </nav>
-        <div class="user-info">
-          <span v-if="userData.nombreCompleto">Hola, {{ userData.nombreCompleto.split(' ')[0] }}</span>
-          <span class="points-badge">{{ userData.puntosTotales }} Puntos</span>
 
-          <router-link to="/tienda/carrito" class="cart-button" title="Carrito" id="cart-icon">
-            <svg></svg>
-            <span v-if="cartStore.totalItems > 0" class="cart-badge">{{ cartStore.totalItems }}</span>
+        <!-- Links SOLO con iconos -->
+        <nav class="nav-links">
+          <router-link to="/tienda" class="nav-item" title="Tienda">
+            <span class="iconify" data-icon="mdi:storefront"></span>
+          </router-link>
+          <router-link to="/tienda/mis-pedidos" class="nav-item" title="Pedidos">
+            <span class="iconify" data-icon="mdi:clipboard-list"></span>
+          </router-link>
+          <router-link to="/tienda/mi-perfil" class="nav-item" title="Perfil">
+            <span class="iconify" data-icon="mdi:account-circle"></span>
+          </router-link>
+        </nav>
+
+        <!-- Usuario / Puntos / Iconos -->
+        <div class="user-info">
+          <span v-if="userData.nombreCompleto" class="user-name">
+            {{ userData.nombreCompleto.split(' ')[0] }}
+          </span>
+          <span class="points-badge">{{ userData.puntosTotales }} pts</span>
+
+          <!-- Carrito -->
+          <router-link to="/tienda/carrito" class="icon-button" title="Carrito">
+            <span class="iconify" data-icon="mdi:cart-outline"></span>
+            <span v-if="cartStore.totalItems > 0" class="cart-badge">
+              {{ cartStore.totalItems }}
+            </span>
           </router-link>
 
-          <button @click="toggleNotifications" class="notification-button" title="Notificaciones">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-              <path fill="currentColor"
-                d="M21 19v1H3v-1l2-2v-6c0-3.1 2.03-5.83 5-6.71V4a2 2 0 0 1 2-2a2 2 0 0 1 2 2v.29c2.97.88 5 3.61 5 6.71v6zm-7 2a2 2 0 0 1-2 2a2 2 0 0 1-2-2" />
-            </svg>
-            <span v-if="unreadCount > 0" class="cart-badge">{{ unreadCount }}</span>
+          <!-- Notificaciones -->
+          <button
+            @click="toggleNotifications"
+            class="icon-button"
+            title="Notificaciones"
+          >
+            <span class="iconify" data-icon="mdi:bell-outline"></span>
+            <span v-if="unreadCount > 0" class="cart-badge">
+              {{ unreadCount }}
+            </span>
           </button>
 
-          <button @click="logout" class="logout-button" title="Cerrar Sesión">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-              <path fill="currentColor"
-                d="M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h7v2H5v14h7v2zm11-4l-1.375-1.45l2.55-2.55H9v-2h8.175l-2.55-2.55L16 7l5 5z" />
-            </svg>
+          <!-- Logout -->
+          <button @click="logout" class="icon-button" title="Cerrar Sesión">
+            <span class="iconify" data-icon="mdi:logout"></span>
           </button>
         </div>
       </div>
     </header>
 
-    <NotificationsPanel :show="showNotifications" @close="showNotifications = false" />
+    <!-- Notificaciones -->
+    <NotificationsPanel
+      :show="showNotifications"
+      @close="showNotifications = false"
+    />
 
+    <!-- CONTENIDO -->
     <main class="main-content">
       <router-view @redemption-successful="fetchUserData" />
     </main>
@@ -47,56 +70,54 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import axios from 'axios';
-import NotificationsPanel from '../shared/NotificationsPanel.vue';
-import { useNotifications } from '../../composables/useNotifications';
-import { useCartStore } from '../../stores/cartStore'; 
-import Topbar from '../menu/Topbar.vue';
+import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import axios from "axios";
+import NotificationsPanel from "../shared/NotificationsPanel.vue";
+import { useNotifications } from "../../composables/useNotifications";
+import { useCartStore } from "../../stores/cartStore";
 
 const router = useRouter();
 const userData = ref({
-  nombreCompleto: '', // Empezamos con el nombre vacío
-  puntosTotales: 0
+  nombreCompleto: "",
+  puntosTotales: 0,
 });
 const showNotifications = ref(false);
 const cartStore = useCartStore();
 
 const getAuthHeaders = () => ({
-  headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+  headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` },
 });
 const { unreadCount, fetchUnreadCount, markAllAsRead } = useNotifications();
 
 const fetchUserData = async () => {
   try {
-    const { data } = await axios.get('http://localhost:3000/api/perfil', getAuthHeaders());
+    const { data } = await axios.get(
+      "http://localhost:3000/api/perfil",
+      getAuthHeaders()
+    );
     userData.value = data;
     await cartStore.fetchCarrito();
   } catch (error) {
-    console.error("Error al cargar datos del usuario en el layout:", error);
-    logout(); // Si falla, cerramos sesión para evitar inconsistencias
+    console.error("Error al cargar datos del usuario:", error);
+    logout();
   }
 };
 
 const logout = () => {
-  localStorage.removeItem('authToken');
-  router.push('/login');
+  localStorage.removeItem("authToken");
+  router.push("/login");
 };
 
 const toggleNotifications = () => {
   showNotifications.value = !showNotifications.value;
-  // Si abrimos el panel, marcamos como leídas
-  if (showNotifications.value) {
-    markAllAsRead();
-  }
+  if (showNotifications.value) markAllAsRead();
 };
 
 onMounted(() => {
   fetchUserData();
   fetchUnreadCount();
 });
-
 </script>
 
 <style scoped>
@@ -104,20 +125,17 @@ onMounted(() => {
   width: 100%;
   min-height: 100vh;
   background-color: var(--background);
-  /* Mantiene el espacio para la barra de navegación fija */
   padding-top: 70px;
 }
 
 .main-content {
-  /* Este es el código clave que ahora funcionará correctamente */
   width: 100%;
   max-width: 1280px;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 0 auto;
   padding: 2rem;
 }
 
-/* --- Estilos de la Barra de Navegación (sin cambios importantes) --- */
+/* ==== NAVBAR ==== */
 .navbar {
   position: fixed;
   top: 0;
@@ -125,9 +143,9 @@ onMounted(() => {
   width: 100%;
   height: 70px;
   z-index: 50;
-  background: linear-gradient(135deg, #74B9E7 0%, #2B7FFF 100%);
+  background: linear-gradient(135deg, #74b9e7 0%, #2b7fff 100%);
   color: white;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .navbar-content {
@@ -140,13 +158,117 @@ onMounted(() => {
   padding: 0 2rem;
 }
 
-/* --- Resto de estilos (iconos, enlaces, etc.) --- */
-.logo img { height: 40px; }
-.nav-links a { color: white; text-decoration: none; font-weight: 500; margin: 0 1rem; padding: 0.5rem 0; border-bottom: 2px solid transparent; transition: border-color 0.3s; }
-.nav-links a.router-link-exact-active { border-bottom-color: white; }
-.user-info { display: flex; align-items: center; gap: 1rem; }
-.points-badge { background-color: rgba(255, 255, 255, 0.2); padding: 0.4rem 0.8rem; border-radius: 9999px; font-weight: 600; font-size: 0.9rem; }
-.logout-button, .notification-button, .cart-button { position: relative; background: none; border: none; color: white; cursor: pointer; opacity: 0.8; transition: opacity 0.3s; }
-.logout-button:hover, .notification-button:hover, .cart-button:hover { opacity: 1; }
-.cart-badge { position: absolute; top: -5px; right: -10px; background-color: #ef4444; color: white; border-radius: 50%; padding: 0.1em 0.4em; font-size: 0.75rem; font-weight: bold; }
+/* Logo */
+.logo img {
+  height: 40px;
+  transition: transform 0.3s;
+}
+.logo img:hover {
+  transform: scale(1.05);
+}
+
+/* Links SOLO ICONOS */
+.nav-links {
+  display: flex;
+  gap: 1.8rem;
+}
+.nav-item {
+  font-size: 1.6rem;
+  color: white;
+  text-decoration: none;
+  transition: transform 0.3s, color 0.3s;
+}
+.nav-item:hover {
+  transform: translateY(-2px);
+  color: #ffdd57;
+}
+.nav-links a.router-link-exact-active {
+  color: #ffdd57;
+}
+
+/* Usuario */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+.user-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.points-badge {
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+/* Botones */
+.icon-button {
+  position: relative;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  transition: color 0.3s, transform 0.2s;
+}
+.icon-button:hover {
+  color: #ffdd57;
+  transform: scale(1.1);
+}
+
+/* Badges */
+.cart-badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  background-color: #ef4444;
+  color: white;
+  border-radius: 50%;
+  padding: 0.1em 0.4em;
+  font-size: 0.7rem;
+  font-weight: bold;
+}
+
+/* ==== RESPONSIVE ==== */
+@media (max-width: 768px) {
+  .navbar-content {
+    padding: 0 1rem;
+    gap: 1rem;
+  }
+
+  .nav-links {
+    gap: 1rem;
+  }
+
+  .user-info {
+    gap: 0.6rem;
+  }
+
+  .user-name {
+    display: none; /* Ocultar nombre en móvil */
+  }
+  .points-badge {
+    padding: 0.25rem 0.6rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-links {
+    gap: 0.8rem;
+  }
+
+  .nav-item {
+    font-size: 1.3rem;
+  }
+
+  .points-badge {
+    display: none; /* Ocultar puntos en pantallas muy pequeñas */
+  }
+}
 </style>

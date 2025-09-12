@@ -153,36 +153,230 @@ onMounted(fetchProfileData);
 </script>
 
 <style scoped>
-/* Estilos generales del perfil */
-.profile-container { max-width: 900px; margin: auto; }
-.profile-header { background: white; padding: 2rem; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
-.user-details h2 { font-size: 1.8rem; font-weight: 600; color: #1e293b; }
-.user-details p { color: #64748b; }
-.points-display { display: inline-block; background-color: var(--primary); color: var(--primary-contrast, white); padding: 0.5rem 1.5rem; border-radius: 9999px; font-weight: 600; margin-top: 1rem; }
-.btn-edit { background-color: #f59e0b; color: white; padding: 0.5rem 1rem; border-radius: 8px; border: none; cursor: pointer; font-weight: 500; margin-top: 1rem; }
+/* Contenedor principal */
+.profile-container {
+  max-width: 900px;
+  margin: auto;
+  min-height: 100vh; 
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding-top: 1rem;
+  box-sizing: border-box;
+  overflow: hidden; /* Quitamos scroll general */
+}
 
-/* Estilos de la sección de historial */
-.history-section { margin-top: 2.5rem; }
-.history-section h2 { font-size: 1.5rem; font-weight: 600; margin-bottom: 1rem; color: #1e293b; }
-.history-list { display: flex; flex-direction: column; gap: 0.75rem; }
-.history-item { display: flex; align-items: center; gap: 1rem; background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-.history-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; }
+/* Encabezado del perfil */
+.profile-header {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  margin-bottom: 1.5rem;
+}
+
+.user-details h2 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+.user-details p {
+  color: #64748b;
+}
+
+/* Botón de puntos */
+.points-display {
+  display: inline-block;
+  background: linear-gradient(90deg, var(--primary), #2563eb);
+  color: white;
+  padding: 0.6rem 1.4rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-top: 1rem;
+  margin-right: 0.75rem;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+  transition: all 0.2s ease-in-out;
+}
+.points-display:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(37, 99, 235, 0.4);
+}
+
+/* Botón Editar Perfil */
+.btn-edit {
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+  color: white;
+  padding: 0.6rem 1.4rem;
+  border-radius: 9999px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);
+  margin-top: 1rem;
+  transition: all 0.2s ease-in-out;
+}
+.btn-edit:hover {
+  background: linear-gradient(90deg, #d97706, #f59e0b);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(245, 158, 11, 0.4);
+}
+
+/* Sección de historial */
+.history-section {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.history-section h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #1e293b;
+}
+
+/* Lista con scroll */
+.history-list {
+  flex-grow: 1;
+  max-height: 300px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-right: 0.5rem;
+}
+
+/* Estilo scroll */
+.history-list::-webkit-scrollbar {
+  width: 6px;
+}
+.history-list::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 10px;
+}
+.history-list::-webkit-scrollbar-thumb {
+  background: #9ca3af;
+  border-radius: 10px;
+}
+.history-list::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+/* Items historial */
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.history-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  flex-shrink: 0;
+}
 .history-details { flex-grow: 1; }
 .history-description { font-weight: 500; color: #374151; }
 .history-date { color: #6b7280; font-size: 0.8rem; }
 .history-points { font-weight: bold; font-size: 1.1rem; }
 .text-success { color: #16a34a; }
 .text-danger { color: #dc2626; }
-.no-history { text-align: center; padding: 2rem; background-color: white; border-radius: 8px; color: #6b7280; }
+.no-history {
+  text-align: center;
+  padding: 2rem;
+  background-color: white;
+  border-radius: 8px;
+  color: #6b7280;
+}
 
-/* Estilos del modal de edición */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-.modal-content { background: var(--surface, white); padding: 2rem; border-radius: 8px; width: 90%; max-width: 500px; border: 1px solid var(--border, #e2e8f0); color: var(--text, #1e293b); }
-.modal-title { font-size: 1.5rem; font-weight: 600; margin-bottom: 1.5rem; text-align: center; }
-.form-group { display: flex; flex-direction: column; margin-bottom: 1rem; }
-.form-group label { margin-bottom: 0.5rem; font-weight: 500; }
-.form-group input { width: 100%; padding: 0.6rem; border: 1px solid var(--border, #d1d5db); border-radius: 4px; background-color: var(--surface-2, #f9fafb); color: var(--text, #1e293b); }
-.modal-actions { margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 1rem; }
-.btn-primary { background-color: var(--primary); color: var(--primary-contrast); padding: 0.6rem 1rem; border: none; border-radius: 6px; }
-.btn-secondary { background-color: var(--surface-2); color: var(--text); border: 1px solid var(--border); padding: 0.6rem 1rem; border-radius: 6px; }
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.modal-content {
+  background: var(--surface, white);
+  padding: 2rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  border: 1px solid var(--border, #e2e8f0);
+  color: var(--text, #1e293b);
+}
+.modal-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+.form-group label {
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+.form-group input {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid var(--border, #d1d5db);
+  border-radius: 4px;
+  background-color: var(--surface-2, #f9fafb);
+  color: var(--text, #1e293b);
+}
+
+/* Modal Botones */
+.modal-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+.modal-actions .btn-primary {
+  background: linear-gradient(90deg, var(--primary), #2563eb);
+  color: white;
+  padding: 0.6rem 1.4rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+  transition: all 0.2s ease-in-out;
+}
+.modal-actions .btn-primary:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(90deg, #1d4ed8, #1e40af);
+  box-shadow: 0 6px 14px rgba(37, 99, 235, 0.4);
+}
+
+.modal-actions .btn-secondary {
+  background: #f3f4f6;
+  color: #374151;
+  padding: 0.6rem 1.4rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: 1px solid #d1d5db;
+  transition: all 0.2s ease-in-out;
+}
+.modal-actions .btn-secondary:hover {
+  background: #e5e7eb;
+  transform: translateY(-2px);
+}
 </style>
+
+
