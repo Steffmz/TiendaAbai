@@ -104,10 +104,10 @@ const updateEstadoPedido = async (req, res) => {
       return pedidoActualizado;
     });
 
-    res.json({ message: 'Estado del pedido actualizado.', pedido: pedidoActualizado });
+    res.json({ message: 'El estado del pedido ha sido actualizado correctamente.', pedido: pedidoActualizado });
   } catch (error) {
     console.error(`Error al actualizar estado del pedido ${id}:`, error);
-    res.status(500).json({ message: error.message || 'Error al actualizar el estado del pedido.' });
+    res.status(500).json({ message: error.message || 'Ocurrió un error al intentar actualizar el estado del pedido.' });
   }
 };
 
@@ -181,11 +181,11 @@ const createPedido = async (req, res) => {
       return nuevoPedido;
     });
 
-    res.status(201).json({ message: '¡Canje realizado con éxito! Tu pedido está pendiente de aprobación.', pedido: resultado });
+res.status(201).json({ message: '¡Canje realizado con éxito! Tu pedido ha sido procesado y está pendiente de aprobación.', pedido: resultado });
 
   } catch (error) {
     console.error("Error al crear el pedido:", error.message);
-    res.status(400).json({ message: error.message || "Error interno del servidor al procesar el canje." });
+    res.status(400).json({ message: error.message || "No se pudo procesar el canje. Por favor, inténtalo de nuevo." });
   }
 };
 

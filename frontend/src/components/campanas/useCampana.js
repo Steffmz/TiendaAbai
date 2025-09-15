@@ -135,7 +135,7 @@ export default function useCampana() {
     cargarProductos();
   });
 
-  // Guardar campaña
+
   const guardarCampana = async () => {
     if (
       !formulario.value.titulo ||
@@ -145,7 +145,7 @@ export default function useCampana() {
       Swal.fire(
         "Datos Incompletos",
         "El título, la fecha de inicio y la fecha de fin son campos obligatorios.",
-        "warning" // Cambiado a 'warning' que es más apropiado
+        "warning"
       );
       return;
     }

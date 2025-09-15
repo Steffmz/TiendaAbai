@@ -67,7 +67,7 @@ exports.createCategoria = async (req, res) => {
     res.status(201).json(nuevaCategoria);
   } catch (error) {
     console.error("Error al crear categoría:", error);
-    res.status(500).json({ error: "Error al crear la categoría" });
+    res.status(500).json({ error: "Ocurrió un error inesperado al intentar crear la categoría." });
   }
 };
 
@@ -111,12 +111,11 @@ exports.deleteCategoria = async (req, res) => {
     });
     if (!categoria) return res.status(404).json({ error: "Categoría no encontrada" });
 
-    if (categoria._count.productos > 0) {
-      const categoriaDesactivada = await prisma.categoria.update({
-        where: { id: parseInt(id) },
-        data: { activo: false }
+if (categoria._count.productos > 0) {
+      // Devolvemos un error claro en lugar de desactivar la categoría
+      return res.status(400).json({ 
+        error: "No se puede eliminar la categoría porque tiene productos asociados. Primero elimine los productos o muévalos a otra categoría." 
       });
-      return res.json({ message: "Categoría desactivada (tiene productos asociados)", categoria: categoriaDesactivada });
     }
     
     if (categoria.imagenUrl) {

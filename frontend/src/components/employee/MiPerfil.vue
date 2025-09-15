@@ -108,7 +108,7 @@ const openEditModal = async () => {
     form.value.contrasenaActual = '';
     showEditModal.value = true;
   } catch (error) {
-    Swal.fire('Error', 'No se pudieron cargar los datos para editar.', 'error');
+    Swal.fire('Error', 'No pudimos cargar tus datos para la edición. Por favor, recarga la página e intenta de nuevo.', 'error');
   }
 };
 
@@ -131,9 +131,9 @@ const updateProfile = async () => {
     
     Swal.fire('Éxito', 'Perfil actualizado correctamente.', 'success');
     closeEditModal();
-    await fetchProfileData(); // Recargamos los datos para ver los cambios
+    await fetchProfileData();
   } catch (error) {
-    Swal.fire('Error', error.response?.data?.message || 'No se pudo actualizar el perfil.', 'error');
+    Swal.fire('Error', error.response?.data?.message || 'No se pudo actualizar tu perfil. Verifica los datos e inténtalo de nuevo.', 'error');
   }
 };
 

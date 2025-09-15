@@ -1,15 +1,15 @@
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 // Obtener todos los productos
 const getAllProductos = async (req, res) => {
   try {
     const productos = await prisma.producto.findMany({
-      include: { 
+      include: {
         categoria: true,
-        campanas: true 
+        campanas: true,
       },
-      orderBy: { id: 'desc' }
+      orderBy: { id: "desc" },
     });
     res.json(productos);
   } catch (error) {
@@ -28,11 +28,11 @@ const getProductosByCategoria = async (req, res) => {
 
     const productos = await prisma.producto.findMany({
       where: { categoriaId: parseInt(categoriaId) },
-      include: { 
+      include: {
         categoria: true,
-        campanas: true
+        campanas: true,
       },
-      orderBy: { id: 'desc' }
+      orderBy: { id: "desc" },
     });
 
     res.json(productos);
@@ -48,8 +48,9 @@ const createProducto = async (req, res) => {
     const { nombre, descripcion, precioPuntos, stock, categoriaId } = req.body;
     const imagenUrl = req.file ? `/uploads/${req.file.filename}` : null;
     if (!nombre || !precioPuntos || !categoriaId) {
-      return res.status(400).json({ 
-        error: "El nombre, el precio en puntos y la categoría son campos obligatorios." 
+      return res.status(400).json({
+        error:
+          "El nombre, el precio en puntos y la categoría son campos obligatorios.",
       });
     }
 
@@ -59,11 +60,15 @@ const createProducto = async (req, res) => {
     const categoriaIdNum = parseInt(categoriaId);
 
     if (isNaN(precioPuntosNum) || precioPuntosNum <= 0) {
-      return res.status(400).json({ error: "El precio en puntos debe ser un número mayor a 0" });
+      return res
+        .status(400)
+        .json({ error: "El precio en puntos debe ser un número mayor a 0" });
     }
 
     if (isNaN(stockNum) || stockNum < 0) {
-      return res.status(400).json({ error: "El stock debe ser un número mayor o igual a 0" });
+      return res
+        .status(400)
+        .json({ error: "El stock debe ser un número mayor o igual a 0" });
     }
 
     if (isNaN(categoriaIdNum)) {
@@ -72,11 +77,13 @@ const createProducto = async (req, res) => {
 
     // Verificar que la categoría existe
     const categoria = await prisma.categoria.findUnique({
-      where: { id: categoriaIdNum }
+      where: { id: categoriaIdNum },
     });
 
     if (!categoria) {
-      return res.status(404).json({ error: "La categoría especificada no existe" });
+      return res
+        .status(404)
+        .json({ error: "La categoría especificada no existe" });
     }
 
     const nuevo = await prisma.producto.create({
@@ -86,17 +93,19 @@ const createProducto = async (req, res) => {
         precioPuntos: precioPuntosNum,
         stock: stockNum,
         imagenUrl,
-        categoriaId: categoriaIdNum
+        categoriaId: categoriaIdNum,
       },
       include: {
-        categoria: true
-      }
+        categoria: true,
+      },
     });
 
     res.status(201).json(nuevo);
   } catch (error) {
     console.error("Error al crear producto:", error);
-    res.status(500).json({ error: "Error al crear producto" });
+    res
+      .status(500)
+      .json({ error: "Ocurrió un error inesperado al crear el producto." });
   }
 };
 
@@ -112,7 +121,7 @@ const updateProducto = async (req, res) => {
     }
 
     const productoExistente = await prisma.producto.findUnique({
-      where: { id: Number(id) }
+      where: { id: Number(id) },
     });
 
     if (!productoExistente) {
@@ -120,35 +129,51 @@ const updateProducto = async (req, res) => {
     }
 
     // Validar campos si están presentes
-    const precioPuntosNum = precioPuntos ? parseInt(precioPuntos) : productoExistente.precioPuntos;
-    const stockNum = stock !== undefined ? parseInt(stock) : productoExistente.stock;
-    const categoriaIdNum = categoriaId ? parseInt(categoriaId) : productoExistente.categoriaId;
+    const precioPuntosNum = precioPuntos
+      ? parseInt(precioPuntos)
+      : productoExistente.precioPuntos;
+    const stockNum =
+      stock !== undefined ? parseInt(stock) : productoExistente.stock;
+    const categoriaIdNum = categoriaId
+      ? parseInt(categoriaId)
+      : productoExistente.categoriaId;
 
     if (precioPuntos && (isNaN(precioPuntosNum) || precioPuntosNum <= 0)) {
-      return res.status(400).json({ error: "El precio en puntos debe ser un número mayor a 0" });
+      return res
+        .status(400)
+        .json({ error: "El precio en puntos debe ser un número mayor a 0" });
     }
 
     if (stock !== undefined && (isNaN(stockNum) || stockNum < 0)) {
-      return res.status(400).json({ error: "El stock debe ser un número mayor o igual a 0" });
+      return res
+        .status(400)
+        .json({ error: "El stock debe ser un número mayor o igual a 0" });
     }
 
     // Si se cambió la categoría, verificar que existe
     if (categoriaId && categoriaIdNum !== productoExistente.categoriaId) {
       const categoria = await prisma.categoria.findUnique({
-        where: { id: categoriaIdNum }
+        where: { id: categoriaIdNum },
       });
 
       if (!categoria) {
-        return res.status(404).json({ error: "La categoría especificada no existe" });
+        return res
+          .status(404)
+          .json({ error: "La categoría especificada no existe" });
       }
     }
 
     const dataUpdate = {
       nombre: nombre ? nombre.trim() : productoExistente.nombre,
-      descripcion: descripcion !== undefined ? (descripcion ? descripcion.trim() : null) : productoExistente.descripcion,
+      descripcion:
+        descripcion !== undefined
+          ? descripcion
+            ? descripcion.trim()
+            : null
+          : productoExistente.descripcion,
       precioPuntos: precioPuntosNum,
       stock: stockNum,
-      categoriaId: categoriaIdNum
+      categoriaId: categoriaIdNum,
     };
 
     // Solo actualizar imagen si se subió una nueva
@@ -158,17 +183,20 @@ const updateProducto = async (req, res) => {
       where: { id: Number(id) },
       data: dataUpdate,
       include: {
-        categoria: true
-      }
+        categoria: true,
+      },
     });
 
     res.json(actualizado);
   } catch (error) {
     console.error("Error al actualizar producto:", error);
-    res.status(500).json({ error: "Error al actualizar producto" });
+    res
+      .status(500)
+      .json({
+        error: "Ocurrió un error inesperado al actualizar el producto.",
+      });
   }
 };
-
 // Eliminar producto
 const deleteProducto = async (req, res) => {
   try {
@@ -181,8 +209,8 @@ const deleteProducto = async (req, res) => {
     const producto = await prisma.producto.findUnique({
       where: { id: parseInt(id) },
       include: {
-        campanas: true
-      }
+        campanas: true,
+      },
     });
 
     if (!producto) {
@@ -191,16 +219,19 @@ const deleteProducto = async (req, res) => {
 
     // Verificar si el producto está asociado a campañas activas
     if (producto.campanas && producto.campanas.length > 0) {
-      const campanasActivas = producto.campanas.filter(campana => campana.aprobada);
+      const campanasActivas = producto.campanas.filter(
+        (campana) => campana.aprobada
+      );
       if (campanasActivas.length > 0) {
-        return res.status(400).json({ 
-          error: "No se puede eliminar el producto porque está asociado a campañas activas" 
+        return res.status(400).json({
+          error:
+            "No se puede eliminar el producto porque está asociado a campañas activas",
         });
       }
     }
 
-    await prisma.producto.delete({ 
-      where: { id: parseInt(id) } 
+    await prisma.producto.delete({
+      where: { id: parseInt(id) },
     });
 
     res.json({ message: "Producto eliminado correctamente" });
@@ -215,5 +246,5 @@ module.exports = {
   getProductosByCategoria,
   createProducto,
   updateProducto,
-  deleteProducto
+  deleteProducto,
 };
