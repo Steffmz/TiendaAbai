@@ -30,18 +30,19 @@ export default function useCampana() {
 
   // Paginación
   const paginaActual = ref(1);
-  const elementosPorPagina = PAGINATION.CAMPAIGNS;;
+  const elementosPorPagina = PAGINATION.CAMPAIGNS;
   const totalPaginas = computed(() =>
     Math.ceil(campanasFiltradas.value.length / elementosPorPagina)
   );
 
-const paginasVisibles = computed(() => {
+  const paginasVisibles = computed(() => {
     const total = totalPaginas.value;
     const actual = paginaActual.value;
     const rango = 1; // Cuántas páginas mostrar a cada lado de la actual
     const paginas = [];
 
-    if (total <= 7) { // Si hay 7 o menos páginas, muéstralas todas
+    if (total <= 7) {
+      // Si hay 7 o menos páginas, muéstralas todas
       for (let i = 1; i <= total; i++) {
         paginas.push(i);
       }
@@ -51,13 +52,17 @@ const paginasVisibles = computed(() => {
     // Lógica para muchas páginas
     paginas.push(1);
     if (actual > rango + 2) {
-      paginas.push('...');
+      paginas.push("...");
     }
-    for (let i = Math.max(2, actual - rango); i <= Math.min(total - 1, actual + rango); i++) {
+    for (
+      let i = Math.max(2, actual - rango);
+      i <= Math.min(total - 1, actual + rango);
+      i++
+    ) {
       paginas.push(i);
     }
     if (actual < total - rango - 1) {
-      paginas.push('...');
+      paginas.push("...");
     }
     paginas.push(total);
 
@@ -103,16 +108,16 @@ const paginasVisibles = computed(() => {
 
   // Cargar campañas
   const cargarCampanas = async () => {
-  try {
-    const token = localStorage.getItem("authToken");
-    const response = token
-      ? await axios.get(API_URL, getAuthHeaders())
-      : await axios.get(API_URL);
-    campanas.value = response.data;
-  } catch (err) {
-    console.error("Error cargando campañas:", err);
-  }
-};
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = token
+        ? await axios.get(API_URL, getAuthHeaders())
+        : await axios.get(API_URL);
+      campanas.value = response.data;
+    } catch (err) {
+      console.error("Error cargando campañas:", err);
+    }
+  };
 
   // Cargar productos
   const cargarProductos = async () => {
@@ -138,9 +143,9 @@ const paginasVisibles = computed(() => {
       !formulario.value.fechaFin
     ) {
       Swal.fire(
-        "Error",
-        "Título, fecha de inicio y fecha de fin son obligatorios",
-        "error"
+        "Datos Incompletos",
+        "El título, la fecha de inicio y la fecha de fin son campos obligatorios.",
+        "warning" // Cambiado a 'warning' que es más apropiado
       );
       return;
     }
@@ -189,15 +194,19 @@ const paginasVisibles = computed(() => {
       await cargarCampanas();
       cerrarModal();
       Swal.fire(
-        "Éxito",
-        editando.value
-          ? "Campaña actualizada exitosamente"
-          : "Campaña creada exitosamente",
+        "¡Éxito!",
+        `La campaña ha sido ${
+          editando.value ? "actualizada" : "creada"
+        } correctamente.`,
         "success"
       );
     } catch (err) {
       console.error("Error guardando campaña:", err);
-      Swal.fire("Error", "No se pudo guardar la campaña", "error");
+      Swal.fire(
+        "Error",
+        "No se pudo guardar la campaña. Por favor, revisa los datos.",
+        "error"
+      );
     }
   };
 
@@ -219,13 +228,17 @@ const paginasVisibles = computed(() => {
       await axios.delete(`${API_URL}/${campana.id}`, getAuthHeaders());
       await cargarCampanas();
       Swal.fire(
-        "Eliminado",
-        "La campaña fue eliminada correctamente",
+        "¡Eliminada!",
+        "La campaña se ha eliminado correctamente.",
         "success"
       );
     } catch (err) {
       console.error("Error eliminando campaña:", err);
-      Swal.fire("Error", "No se pudo eliminar la campaña", "error");
+      Swal.fire(
+        "Error",
+        "No se pudo eliminar la campaña. Es posible que tenga elementos asociados.",
+        "error"
+      );
     }
   };
 

@@ -10,21 +10,22 @@
             <img src="../../assets/img/abai-logo.png" alt="Logo Abai" class="logo-abai" />
           </div>
           <h2 class="title">Recuperar Contraseña</h2>
-          
+
           <div v-if="message" class="success-message">
             <p>{{ message }}</p>
             <router-link to="/login" class="back-link">Volver a inicio de sesión</router-link>
           </div>
 
           <form v-else @submit.prevent="requestReset">
-            <p class="info-text">Ingresa el correo electrónico asociado a tu cuenta y te enviaremos un enlace para reestablecer tu contraseña.</p>
+            <p class="info-text">Ingresa el correo electrónico asociado a tu cuenta y te enviaremos un enlace para
+              reestablecer tu contraseña.</p>
             <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
 
             <div class="input-group">
               <label for="email">Correo Electrónico</label>
               <input type="email" id="email" v-model="email" placeholder="tu.correo@ejemplo.com" required />
             </div>
-            
+
             <button type="submit" class="btn-login" :disabled="loading">
               {{ loading ? 'Enviando...' : 'Enviar Enlace' }}
             </button>
@@ -53,7 +54,7 @@ const requestReset = async () => {
     const response = await axios.post(`${API_BASE_URL}/api/auth/forgot-password`, { email: email.value });
     message.value = response.data.message;
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || 'Ocurrió un error. Inténtalo de nuevo.';
+    errorMessage.value = error.response?.data?.message || 'No se pudo conectar con el servidor. Por favor, verifica tu conexión e inténtalo de nuevo.';
   } finally {
     loading.value = false;
   }

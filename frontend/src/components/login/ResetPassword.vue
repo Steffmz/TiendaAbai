@@ -15,20 +15,20 @@
             <p>{{ message }}</p>
             <router-link to="/login" class="back-link">Ir a inicio de sesión</router-link>
           </div>
-          
+
           <form v-else @submit.prevent="resetPassword">
             <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
-            
+
             <div class="input-group">
               <label for="password">Nueva Contraseña</label>
               <input type="password" id="password" v-model="password" required />
             </div>
-            
+
             <div class="input-group">
               <label for="confirmPassword">Confirmar Nueva Contraseña</label>
               <input type="password" id="confirmPassword" v-model="confirmPassword" required />
             </div>
-            
+
             <button type="submit" class="btn-login" :disabled="loading">
               {{ loading ? 'Actualizando...' : 'Actualizar Contraseña' }}
             </button>
@@ -62,20 +62,20 @@ const resetPassword = async () => {
 
   loading.value = true;
   errorMessage.value = '';
-  
+
   try {
     const token = route.params.token;
     const response = await axios.post(`${API_BASE_URL}/api/auth/reset-password/${token}`, {
       contrasena: password.value,
     });
-    
+
     message.value = response.data.message;
     Swal.fire('¡Éxito!', 'Tu contraseña ha sido actualizada.', 'success').then(() => {
-        router.push('/login');
+      router.push('/login');
     });
 
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || 'Ocurrió un error.';
+    errorMessage.value = error.response?.data?.message || 'No se pudo procesar la solicitud. El enlace puede haber expirado o hay un problema de conexión.';
   } finally {
     loading.value = false;
   }
