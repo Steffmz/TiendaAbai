@@ -199,29 +199,35 @@
     <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
       <div class="modal-content">
         <h2 class="modal-title">{{ isEditMode ? 'Editar Usuario' : 'Crear Usuario' }}</h2>
-        <form @submit.prevent="saveUsuario">
+        <form @submit.prevent="saveUsuario" novalidate>
           <div class="form-grid">
             <div class="form-group">
               <label>Nombre Completo</label>
-              <input v-model="form.nombreCompleto" type="text" required
-                @input="form.nombreCompleto = capitalizeWords(form.nombreCompleto)" />
-            </div>
-            <div class="form-group">
-              <label>Cédula</label>
-              <input v-model="form.cedula" type="text" required :disabled="isEditMode" pattern="^[0-9]{5,15}$"
-                maxlength="15" title="La cédula debe tener entre 5 y 15 dígitos y solo números"
-                @input="form.cedula = form.cedula.replace(/[^0-9]/g, '')" />
-            </div>
-            <div class="form-group"><label>Email</label><input v-model="form.email" type="email" required /></div>
-            <div class="form-group">
-              <label>Sede</label>
-              <input v-model="form.sede" type="text" required />
-            </div>
-            <div class="form-group" v-if="!isEditMode">
-              <label>Contraseña</label>
-              <input v-model="form.contrasena" type="password" required maxlength="16" pattern="^(?=.*[0-9]).{1,16}$"
-                title="La contraseña debe tener máximo 16 caracteres e incluir al menos un dígito" />
-            </div>
+          <input v-model="form.nombreCompleto" type="text" required
+            @input="form.nombreCompleto = capitalizeWords(form.nombreCompleto)"
+            @keydown.enter.prevent="focusNextInput" />
+        </div>
+        <div class="form-group">
+          <label>Cédula</label>
+          <input v-model="form.cedula" type="text" required :disabled="isEditMode" pattern="^[0-9]{5,15}$"
+            maxlength="15" title="La cédula debe tener entre 5 y 15 dígitos y solo números"
+            @input="form.cedula = form.cedula.replace(/[^0-9]/g, '')"
+            @keydown.enter.prevent="focusNextInput" />
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input v-model="form.email" type="email" required @keydown.enter.prevent="focusNextInput" />
+        </div>
+        <div class="form-group">
+          <label>Sede</label>
+          <input v-model="form.sede" type="text" required @keydown.enter.prevent="focusNextInput" />
+        </div>
+        <div class="form-group" v-if="!isEditMode">
+          <label>Contraseña</label>
+          <input v-model="form.contrasena" type="password" required maxlength="16" pattern="^(?=.*[0-9]).{1,16}$"
+            title="La contraseña debe tener máximo 16 caracteres e incluir al menos un dígito"
+            @keydown.enter.prevent="focusNextInput" />
+        </div>
             <div class="form-group"><label>Rol</label><select v-model="form.rol" required>
                 <option value="Empleado">Empleado</option>
                 <option value="Administrador">Administrador</option>
@@ -473,6 +479,23 @@ const deleteUsuario = async (usuario) => {
     } catch (error) {
       Swal.fire("Error", error.response?.data?.message || "No se pudo eliminar.", "error");
     }
+  }
+};
+// ... al final de tu <script setup>
+
+const focusNextInput = (event) => {
+  const form = event.target.form;
+  if (!form) return;
+
+  const focusable = Array.from(
+    form.querySelectorAll('input, select, textarea, button')
+  ).filter(el => !el.disabled && el.offsetParent !== null); // Filtra elementos visibles y habilitados
+
+  const index = focusable.indexOf(event.target);
+
+  if (index !== -1 && index < focusable.length - 1) {
+    const nextElement = focusable[index + 1];
+    nextElement.focus();
   }
 };
 </script>

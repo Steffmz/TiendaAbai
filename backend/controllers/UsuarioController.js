@@ -86,15 +86,18 @@ exports.createUsuario = async (req, res) => {
     const { contrasena: _, ...usuarioSinContrasena } = nuevoUsuario;
     res.status(201).json(usuarioSinContrasena);
   } catch (error) {
-    if (error.code === "P2002") {
-      return res
-        .status(409)
-        .json({
-          message: `El campo '${error.meta.target[0]}' ya está en uso.`,
-        });
+    if (error.code === "P2002" && error.meta?.target) {
+      if (error.meta.target.includes('email')) {
+        return res.status(409).json({ message: 'El correo electrónico ingresado ya está registrado.' });
+      }
+      if (error.meta.target.includes('cedula')) {
+        return res.status(409).json({ message: 'La cédula ingresada ya está registrada.' });
+      }
+      return res.status(409).json({ message: 'Alguno de los datos ingresados ya está en uso.' });
     }
+    
     console.error("Error al crear usuario:", error);
-    res.status(500).json({ message: "Error interno del servidor." });
+    res.status(500).json({ message: "Ocurrió un error inesperado al crear el usuario." });
   }
 };
 

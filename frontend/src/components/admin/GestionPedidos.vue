@@ -7,7 +7,7 @@
 
     <div class="table-container">
       <table class="hidden md:table w-full">
-        <thead>
+        <thead class="bg-[#74B9E7] text-black">
           <tr>
             <th>ID Pedido</th>
             <th>Usuario</th>
@@ -20,7 +20,7 @@
         <tbody>
           <tr v-if="loading"><td colspan="6" class="text-center py-8">Cargando pedidos...</td></tr>
           <tr v-else-if="pedidos.length === 0"><td colspan="6" class="text-center py-8">No hay pedidos para mostrar.</td></tr>
-          <tr v-else v-for="pedido in pedidos" :key="pedido.id" class="table-row">
+          <tr v-else v-for="pedido in pedidos" :key="pedido.id">
             <td>#{{ pedido.id }}</td>
             <td>{{ pedido.usuario.nombreCompleto }}</td>
             <td>{{ formatDate(pedido.fecha) }}</td>
@@ -71,7 +71,7 @@
       </div>
     </div>
     
- <div v-if="!loading && totalPages > 1" class="flex flex-col items-center justify-center mt-4">
+    <div v-if="!loading && totalPages > 1" class="flex flex-col items-center justify-center mt-4">
         <p class="text-gray-700">
             Existen <span class="text-blue-500 font-semibold">{{ totalPedidos }}</span> pedidos
         </p>
@@ -95,21 +95,21 @@
             </button>
         </div>
     </div>
-    </div>
 
-  <div v-if="selectedPedido" class="modal-overlay" @click.self="closeDetailsModal">
-    <div class="modal-content">
-      <h2 class="modal-title">Detalles del Pedido #{{ selectedPedido.id }}</h2>
-      <p><strong>Usuario:</strong> {{ selectedPedido.usuario.nombreCompleto }}</p>
-      <p><strong>Fecha:</strong> {{ formatDate(selectedPedido.fecha) }}</p>
-      <h3 class="details-subtitle">Productos Canjeados:</h3>
-      <ul class="product-list">
-        <li v-for="detalle in selectedPedido.detalles" :key="detalle.id">
-          {{ detalle.cantidad }} x {{ detalle.producto.nombre }} ({{ detalle.puntosUnitarios }} pts c/u)
-        </li>
-      </ul>
-      <div class="modal-actions">
-        <button @click="closeDetailsModal" class="btn btn-primary">Cerrar</button>
+    <div v-if="selectedPedido" class="modal-overlay" @click.self="closeDetailsModal">
+      <div class="modal-content">
+        <h2 class="modal-title">Detalles del Pedido #{{ selectedPedido.id }}</h2>
+        <p><strong>Usuario:</strong> {{ selectedPedido.usuario.nombreCompleto }}</p>
+        <p><strong>Fecha:</strong> {{ formatDate(selectedPedido.fecha) }}</p>
+        <h3 class="details-subtitle">Productos Canjeados:</h3>
+        <ul class="product-list">
+          <li v-for="detalle in selectedPedido.detalles" :key="detalle.id">
+            {{ detalle.cantidad }} x {{ detalle.producto.nombre }} ({{ detalle.puntosUnitarios }} pts c/u)
+          </li>
+        </ul>
+        <div class="modal-actions">
+          <button @click="closeDetailsModal" class="btn btn-primary">Cerrar</button>
+        </div>
       </div>
     </div>
   </div>
@@ -120,6 +120,8 @@ import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import { PAGINATION } from '../../config';
+// CAMBIO: Se importa el archivo de estilos centralizado
+import '../../assets/css/AdminGestion.css';
 
 const pedidos = ref([]);
 const loading = ref(true);
@@ -202,44 +204,44 @@ onMounted(fetchPedidos);
 </script>
 
 <style scoped>
-.max-w-7xl { max-width: 80rem; width: 100%; margin: 0 auto; }
-.page-header { text-align: center; margin-bottom: 1.5rem; }
-.page-title { font-size: 1.8rem; font-weight: 700; color: var(--text); }
-.page-subtitle { color: var(--text-muted); }
-.table-container { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
-.hidden { display: none; }
-@media (min-width: 768px) { .md\:table { display: table; } .md\:hidden { display: none; } }
-table { width: 100%; border-collapse: collapse; }
-th, td { padding: 8px 15px; text-align: center; vertical-align: middle; }
-th { background-color: var(--table-header); color: white; font-weight: 600; }
-.table-row { border-bottom: 1px solid var(--border); }
-.cards-container { padding: 1rem; display: grid; gap: 1rem; }
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
-.card-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid var(--border); }
-.card-title { font-weight: 700; }
-.card-body { padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem; }
-.card-row { display: flex; justify-content: space-between; }
-.card-actions { display: flex; gap: 0.5rem; padding: 1rem; background-color: var(--surface-2); }
-.card-actions .btn-secondary, .card-actions .status-select { flex: 1; }
-.btn { padding: 0.5rem 1rem; border-radius: 6px; border: none; cursor: pointer; font-weight: 500; }
-.btn-primary { background-color: var(--primary); color: white; }
-.btn-secondary { background-color: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
-.actions-cell { display: flex; justify-content: center; gap: 0.5rem; }
-.status-select { background-color: var(--surface-2); color: var(--text); border: 1px solid var(--border); padding: 0.5rem; border-radius: 6px; cursor: pointer; }
-.badge { padding: 5px 12px; border-radius: 9999px; font-size: 0.8rem; font-weight: 600; color: white; }
-.badge.success { background-color: #22c55e; }
-.badge.success-dark { background-color: #15803d; }
-.badge.danger { background-color: #ef4444; }
-.badge.warning { background-color: #f59e0b; color: #1a202c; }
-.badge.info { background-color: #3b82f6; }
-.badge.secondary { background-color: #6b7280; }
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 1rem; }
-.modal-content { background: var(--surface); color: var(--text); padding: 2rem; border-radius: 8px; width: 90%; max-width: 500px; }
-.modal-title { font-size: 1.5rem; margin-bottom: 1.5rem; text-align: center; }
-.details-subtitle { font-size: 1.1rem; margin-top: 1.5rem; margin-bottom: 0.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
-.product-list { list-style: none; padding: 0; }
-.product-list li { padding: 0.5rem 0; border-bottom: 1px solid var(--border); }
-.product-list li:last-child { border-bottom: none; }
-.modal-actions { margin-top: 2rem; text-align: right; }
-.pagination-controls { display: flex; justify-content: center; align-items: center; gap: 1rem; padding: 1.5rem; }
+/* Los estilos específicos de esta tabla se mantienen aquí */
+.status-select {
+  background-color: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.badge.success-dark {
+  background-color: #15803d;
+}
+
+.modal-content p {
+  margin-bottom: 0.5rem;
+}
+
+.details-subtitle {
+  font-size: 1.1rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.product-list {
+  list-style: none;
+  padding: 0;
+}
+
+.product-list li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.product-list li:last-child {
+  border-bottom: none;
+}
 </style>

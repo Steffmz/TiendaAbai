@@ -1,4 +1,4 @@
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 // Obtener todos los pedidos con paginación
@@ -15,7 +15,12 @@ const getAllPedidos = async (req, res) => {
         take: limit,
         include: {
           usuario: { select: { nombreCompleto: true } },
-          detalles: { include: { producto: { select: { nombre: true } } } }
+          // CORRECCIÓN: Simplificamos la consulta para asegurar que traiga todo el producto
+          detalles: {
+            include: {
+              producto: true // Esto asegura que toda la info del producto venga con el detalle
+            }
+          }
         }
       }),
       prisma.pedido.count()
@@ -25,14 +30,13 @@ const getAllPedidos = async (req, res) => {
       pedidos,
       total: totalPedidos,
       page,
-      limit
+      limit,
     });
   } catch (error) {
     console.error("Error al obtener pedidos:", error);
-    res.status(500).json({ message: 'Error interno del servidor.' });
+    res.status(500).json({ message: "Error interno del servidor." });
   }
 };
-
 
 // Actualizar el estado de un pedido
 const updateEstadoPedido = async (req, res) => {
@@ -40,74 +44,100 @@ const updateEstadoPedido = async (req, res) => {
   const { estado } = req.body;
   const adminId = req.usuario.userId;
 
-  const estadosValidos = ["Pendiente", "Aprobado", "Enviado", "Entregado", "Cancelado", "Rechazado"];
+  const estadosValidos = [
+    "Pendiente",
+    "Aprobado",
+    "Enviado",
+    "Entregado",
+    "Cancelado",
+    "Rechazado",
+  ];
   if (!estado || !estadosValidos.includes(estado)) {
-    return res.status(400).json({ message: 'El estado proporcionado no es válido.' });
+    return res
+      .status(400)
+      .json({ message: "El estado proporcionado no es válido." });
   }
 
   try {
     const pedidoActualizado = await prisma.$transaction(async (tx) => {
       const pedido = await tx.pedido.findUnique({
         where: { id: parseInt(id) },
-        include: { detalles: true }
+        include: { detalles: true },
       });
 
       if (!pedido) {
-        throw new Error('Pedido no encontrado');
+        throw new Error("Pedido no encontrado");
       }
 
       const estadoAnterior = pedido.estado;
-      
-      if (['Cancelado', 'Rechazado'].includes(estado) && !['Cancelado', 'Rechazado'].includes(estadoAnterior)) {
+
+      if (
+        ["Cancelado", "Rechazado"].includes(estado) &&
+        !["Cancelado", "Rechazado"].includes(estadoAnterior)
+      ) {
         await tx.usuario.update({
           where: { id: pedido.usuarioId },
-          data: { puntosTotales: { increment: pedido.totalPuntos } }
+          data: { puntosTotales: { increment: pedido.totalPuntos } },
         });
 
         for (const detalle of pedido.detalles) {
           await tx.producto.update({
             where: { id: detalle.productoId },
-            data: { stock: { increment: detalle.cantidad } }
+            data: { stock: { increment: detalle.cantidad } },
           });
         }
-        
+
         await tx.historialPuntos.create({
           data: {
             puntos: pedido.totalPuntos,
-            tipo: 'AJUSTE',
-            descripcion: `Devolución por pedido #${pedido.id} ${estado.toLowerCase()}`,
+            tipo: "AJUSTE",
+            descripcion: `Devolución por pedido #${
+              pedido.id
+            } ${estado.toLowerCase()}`,
             beneficiarioId: pedido.usuarioId,
             adminCreadorId: adminId,
-          }
+          },
         });
       }
 
       const dataToUpdate = { estado };
-      if (['Aprobado', 'Rechazado', 'Cancelado'].includes(estado)) {
+      if (["Aprobado", "Rechazado", "Cancelado"].includes(estado)) {
         dataToUpdate.aprobadoPorAdminId = adminId;
         dataToUpdate.fechaAprobacion = new Date();
       }
-      
+
       const pedidoActualizado = await tx.pedido.update({
         where: { id: parseInt(id) },
         data: dataToUpdate,
       });
 
-      if (['Aprobado', 'Enviado', 'Rechazado', 'Cancelado'].includes(estado)) {
+      if (["Aprobado", "Enviado", "Rechazado", "Cancelado"].includes(estado)) {
         let titulo = `Tu pedido #${pedido.id} ha sido ${estado.toLowerCase()}.`;
         let mensaje = `Tu canje ha sido actualizado al estado: ${estado}.`;
         await tx.notificacion.create({
-          data: { titulo, mensaje, usuarioId: pedido.usuarioId, pedidoId: pedido.id }
+          data: {
+            titulo,
+            mensaje,
+            usuarioId: pedido.usuarioId,
+            pedidoId: pedido.id,
+          },
         });
       }
-      
+
       return pedidoActualizado;
     });
 
-    res.json({ message: 'El estado del pedido ha sido actualizado correctamente.', pedido: pedidoActualizado });
+    res.json({
+      message: "El estado del pedido ha sido actualizado correctamente.",
+      pedido: pedidoActualizado,
+    });
   } catch (error) {
     console.error(`Error al actualizar estado del pedido ${id}:`, error);
-    res.status(500).json({ message: error.message || 'Ocurrió un error al intentar actualizar el estado del pedido.' });
+    res.status(500).json({
+      message:
+        error.message ||
+        "Ocurrió un error al intentar actualizar el estado del pedido.",
+    });
   }
 };
 
@@ -117,19 +147,26 @@ const createPedido = async (req, res) => {
   const usuarioId = req.usuario.userId;
 
   if (!productoId || !cantidad || cantidad <= 0) {
-    return res.status(400).json({ message: "Se requiere un producto y una cantidad válida." });
+    return res
+      .status(400)
+      .json({ message: "Se requiere un producto y una cantidad válida." });
   }
 
   try {
     const resultado = await prisma.$transaction(async (tx) => {
-      const producto = await tx.producto.findUnique({ where: { id: parseInt(productoId) } });
+      const producto = await tx.producto.findUnique({
+        where: { id: parseInt(productoId) },
+      });
       if (!producto) throw new Error("Producto no encontrado.");
-      if (producto.stock < cantidad) throw new Error("No hay suficiente stock para este producto.");
+      if (producto.stock < cantidad)
+        throw new Error("No hay suficiente stock para este producto.");
 
       const usuario = await tx.usuario.findUnique({ where: { id: usuarioId } });
       const costoTotalPuntos = producto.precioPuntos * cantidad;
       if (usuario.puntosTotales < costoTotalPuntos) {
-        throw new Error("No tienes suficientes puntos para realizar este canje.");
+        throw new Error(
+          "No tienes suficientes puntos para realizar este canje."
+        );
       }
 
       await tx.usuario.update({
@@ -146,7 +183,7 @@ const createPedido = async (req, res) => {
         data: {
           usuarioId: usuarioId,
           totalPuntos: costoTotalPuntos,
-          estado: 'Pendiente',
+          estado: "Pendiente",
           detalles: {
             create: {
               productoId: parseInt(productoId),
@@ -157,35 +194,46 @@ const createPedido = async (req, res) => {
         },
       });
 
-      const admins = await tx.usuario.findMany({ where: { rol: 'Administrador' } });
-      const notificacionesAdmin = admins.map(admin => tx.notificacion.create({
-        data: {
-          titulo: 'Nuevo Pedido Recibido',
-          mensaje: `El usuario ${usuario.nombreCompleto} ha realizado un nuevo pedido (#${nuevoPedido.id}).`,
-          usuarioId: admin.id,
-          pedidoId: nuevoPedido.id
-        }
-      }));
+      const admins = await tx.usuario.findMany({
+        where: { rol: "Administrador" },
+      });
+      const notificacionesAdmin = admins.map((admin) =>
+        tx.notificacion.create({
+          data: {
+            titulo: "Nuevo Pedido Recibido",
+            mensaje: `El usuario ${usuario.nombreCompleto} ha realizado un nuevo pedido (#${nuevoPedido.id}).`,
+            usuarioId: admin.id,
+            pedidoId: nuevoPedido.id,
+          },
+        })
+      );
       await Promise.all(notificacionesAdmin);
 
       await tx.historialPuntos.create({
         data: {
           puntos: -costoTotalPuntos,
-          tipo: 'CANJE',
+          tipo: "CANJE",
           descripcion: `Canje de ${cantidad} x ${producto.nombre}`,
           beneficiarioId: usuarioId,
           origenId: nuevoPedido.id,
-        }
+        },
       });
 
       return nuevoPedido;
     });
 
-res.status(201).json({ message: '¡Canje realizado con éxito! Tu pedido ha sido procesado y está pendiente de aprobación.', pedido: resultado });
-
+    res.status(201).json({
+      message:
+        "¡Canje realizado con éxito! Tu pedido ha sido procesado y está pendiente de aprobación.",
+      pedido: resultado,
+    });
   } catch (error) {
     console.error("Error al crear el pedido:", error.message);
-    res.status(400).json({ message: error.message || "No se pudo procesar el canje. Por favor, inténtalo de nuevo." });
+    res.status(400).json({
+      message:
+        error.message ||
+        "No se pudo procesar el canje. Por favor, inténtalo de nuevo.",
+    });
   }
 };
 
@@ -194,24 +242,24 @@ const getMisPedidos = async (req, res) => {
   try {
     const pedidos = await prisma.pedido.findMany({
       where: { usuarioId: usuarioId },
-      orderBy: { fecha: 'desc' },
+      orderBy: { fecha: "desc" },
       include: {
         detalles: {
           include: {
             producto: {
               select: {
                 nombre: true,
-                imagenUrl: true
-              }
-            }
-          }
-        }
-      }
+                imagenUrl: true,
+              },
+            },
+          },
+        },
+      },
     });
     res.json(pedidos);
   } catch (error) {
     console.error("Error al obtener mis pedidos:", error);
-    res.status(500).json({ message: 'Error interno del servidor.' });
+    res.status(500).json({ message: "Error interno del servidor." });
   }
 };
 
@@ -231,14 +279,18 @@ const crearPedidoDesdeCarrito = async (req, res) => {
       let costoTotalPuntos = 0;
       for (const item of carritoItems) {
         if (item.producto.stock < item.cantidad) {
-          throw new Error(`No hay suficiente stock para ${item.producto.nombre}.`);
+          throw new Error(
+            `No hay suficiente stock para ${item.producto.nombre}.`
+          );
         }
         costoTotalPuntos += item.producto.precioPuntos * item.cantidad;
       }
 
       const usuario = await tx.usuario.findUnique({ where: { id: usuarioId } });
       if (usuario.puntosTotales < costoTotalPuntos) {
-        throw new Error("No tienes suficientes puntos para realizar este canje.");
+        throw new Error(
+          "No tienes suficientes puntos para realizar este canje."
+        );
       }
 
       await tx.usuario.update({
@@ -257,9 +309,9 @@ const crearPedidoDesdeCarrito = async (req, res) => {
         data: {
           usuarioId,
           totalPuntos: costoTotalPuntos,
-          estado: 'Pendiente',
+          estado: "Pendiente",
           detalles: {
-            create: carritoItems.map(item => ({
+            create: carritoItems.map((item) => ({
               productoId: item.productoId,
               cantidad: item.cantidad,
               puntosUnitarios: item.producto.precioPuntos,
@@ -267,34 +319,39 @@ const crearPedidoDesdeCarrito = async (req, res) => {
           },
         },
       });
-      
+
       await tx.historialPuntos.create({
-          data: {
-              puntos: -costoTotalPuntos,
-              tipo: 'CANJE',
-              descripcion: `Canje del pedido #${nuevoPedido.id}`,
-              beneficiarioId: usuarioId,
-              origenId: nuevoPedido.id,
-          }
+        data: {
+          puntos: -costoTotalPuntos,
+          tipo: "CANJE",
+          descripcion: `Canje del pedido #${nuevoPedido.id}`,
+          beneficiarioId: usuarioId,
+          origenId: nuevoPedido.id,
+        },
       });
-      
+
       await tx.carrito.deleteMany({ where: { usuarioId } });
 
       return nuevoPedido;
     });
 
-    res.status(201).json({ message: '¡Canje realizado con éxito! Tu pedido está pendiente de aprobación.', pedido: resultado });
-
+    res.status(201).json({
+      message:
+        "¡Canje realizado con éxito! Tu pedido está pendiente de aprobación.",
+      pedido: resultado,
+    });
   } catch (error) {
     console.error("Error al crear el pedido desde el carrito:", error.message);
-    res.status(400).json({ message: error.message || "Error interno del servidor." });
+    res
+      .status(400)
+      .json({ message: error.message || "Error interno del servidor." });
   }
 };
 
 module.exports = {
   getAllPedidos,
-  updateEstadoPedido, 
+  updateEstadoPedido,
   createPedido,
   crearPedidoDesdeCarrito,
-  getMisPedidos
+  getMisPedidos,
 };
