@@ -22,31 +22,24 @@ import FullCalendar from '@fullcalendar/vue3';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 
-// --- LÓGICA RESPONSIVE MEJORADA ---
-
 const isMobile = ref(window.innerWidth <= 768);
 
-// Función para definir la barra de herramientas según el tamaño de la pantalla
 const getHeaderToolbar = () => {
   return isMobile.value
     ? { left: 'prev,next', center: 'title', right: '' }
     : { left: 'prev,next today', center: 'title', right: 'dayGridMonth,dayGridWeek' };
 };
 
-// Función que se ejecuta cuando el usuario cambia el tamaño de la ventana
 const handleResize = () => {
   isMobile.value = window.innerWidth <= 768;
-  // Actualizamos las opciones del calendario dinámicamente
   calendarOptions.value.headerToolbar = getHeaderToolbar();
   calendarOptions.value.height = isMobile.value ? 'auto' : 650;
 };
 
-// --- FIN DE LA LÓGICA RESPONSIVE ---
-
 const calendarOptions = ref({
   plugins: [dayGridPlugin, interactionPlugin],
   initialView: 'dayGridMonth',
-  headerToolbar: getHeaderToolbar(), // Usa la función para la configuración inicial
+  headerToolbar: getHeaderToolbar(),
   events: [],
   weekends: true,
   locale: 'es',
@@ -61,10 +54,9 @@ const calendarOptions = ref({
   aspectRatio: isMobile.value ? 0.7 : 1.35,
 });
 
-// Función para ajustar la fecha final para que sea inclusiva en la vista
 const adjustEndDateForCalendar = (endDateString) => {
     const date = new Date(endDateString);
-    date.setUTCDate(date.getUTCDate() + 1); // Añade un día para que el evento cubra hasta el final del día
+    date.setUTCDate(date.getUTCDate() + 1);
     return date.toISOString().split('T')[0];
 };
 
@@ -79,7 +71,7 @@ async function fetchCampaigns() {
       id: campana.id,
       title: campana.titulo,
       start: campana.fechaInicio.split('T')[0],
-      end: adjustEndDateForCalendar(campana.fechaFin), // Usamos el ajuste aquí
+      end: adjustEndDateForCalendar(campana.fechaFin),
       allDay: true,
       backgroundColor: campana.aprobada ? '#3b82f6' : '#f59e0b',
       borderColor: campana.aprobada ? '#3b82f6' : '#f59e0b'
@@ -90,7 +82,6 @@ async function fetchCampaigns() {
 }
 
 function handleEventClick(clickInfo) {
-  // Para mostrar la fecha de finalización correcta, revertimos el ajuste
   const endDate = new Date(clickInfo.event.end);
   endDate.setUTCDate(endDate.getUTCDate() - 1);
 
@@ -106,7 +97,6 @@ function handleEventClick(clickInfo) {
   });
 }
 
-// Añadimos y eliminamos el "escucha" de cambio de tamaño
 onMounted(() => {
   fetchCampaigns();
   window.addEventListener('resize', handleResize);
@@ -118,7 +108,6 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-/* Tus estilos se mantienen intactos */
 .calendar-container {
   width: 100%;
   max-width: 1100px;

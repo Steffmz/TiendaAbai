@@ -1,4 +1,4 @@
-/* Contenedor principal de la página de login */
+/* frontend/src/components/login/Login.css */
 .login-container {
   width: 100vw;
   height: 100vh;
@@ -10,7 +10,6 @@
   position: relative;
 }
 
-/* Fondo animado */
 .electro-background {
   position: absolute;
   top: 0;
@@ -27,7 +26,6 @@
   height: 100%;
 }
 
-/* Contenedor del formulario */
 .login-wrapper {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -81,7 +79,6 @@
   margin-bottom: 0.5rem;
 }
 
-/* Formularios */
 .input-group {
   margin-bottom: 1rem;
   text-align: left;
@@ -138,7 +135,6 @@
   filter: brightness(1.1);
 }
 
-/* Enlaces */
 .forgot-link, .register-link a {
   color: var(--primary);
   text-decoration: none;
@@ -157,7 +153,6 @@
   font-size: 0.9rem;
 }
 
-/* Mensaje de error */
 .error-text {
   color: #ef4444;
   background-color: rgba(239, 68, 68, 0.1);
@@ -168,7 +163,6 @@
   font-size: 0.9rem;
 }
 
-/* Modal */
 .modal {
   position: fixed;
   z-index: 100;
@@ -202,7 +196,6 @@
   cursor: pointer;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .login-left {
     display: none;
