@@ -65,27 +65,27 @@ onMounted(fetchUserData);
 </script>
 
 <style scoped>
-/* 2. Los estilos ahora son mucho más simples, solo definen el layout principal */
 .employee-layout {
-  width: 100%;
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
   background-color: var(--bg);
-  /* Dejamos espacio para la barra de navegación que es fija */
-  padding-top: 80px; /* Altura de la nueva topbar en desktop */
-}
-
-/* Ajuste para la altura de la topbar en móvil */
-@media (max-width: 768px) {
-  .employee-layout {
-    padding-top: 70px;
-  }
 }
 
 .main-content {
+  flex-grow: 1; /* Permite que el contenido principal crezca */
   width: 100%;
-  max-width: 1280px; /* 80rem */
-  margin-left: auto;
-  margin-right: auto;
+  max-width: 1280px;
+  margin: 0 auto;
   padding: 2rem;
+  padding-top: 100px; /* 80px de la topbar + 20px de espacio */
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding-top: 90px; /* 70px de la topbar + 20px de espacio */
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
 }
 </style>

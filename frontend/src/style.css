@@ -470,3 +470,14 @@ html.dark .cart-badge {
   background-color: #ef4444;
   color: white;
 }
+/* --- REFUERZO ADICIONAL MODO NOCHE --- */
+html.dark .bg-white {
+  background-color: var(--surface) !important;
+}
+
+html.dark .text-black,
+html.dark .text-gray-800,
+html.dark .text-gray-700,
+html.dark .text-gray-600 {
+  color: var(--text) !important;
+}
