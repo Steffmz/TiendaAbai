@@ -1,6 +1,10 @@
 <template>
   <div class="cart-container max-w-7xl w-full mx-auto">
-    <h1>Mi Carrito de Canjes</h1>
+    <div class="page-header">
+      <h1 class="page-title">Mi Carrito de Canjes</h1>
+      <p class="page-subtitle">Revisa tus productos y confirma el canje de tus puntos.</p>
+    </div>
+
     <div v-if="loading" class="text-center">Cargando carrito...</div>
     <div v-else-if="carrito.length === 0" class="empty-cart">
       <p>Tu carrito está vacío.</p>
@@ -11,8 +15,8 @@
         <div v-for="item in carrito" :key="item.id" class="cart-item">
           <img :src="`${API_BASE_URL}${item.producto.imagenUrl}`" :alt="item.producto.nombre" class="item-image" />
           <div class="item-details">
-            <h3>{{ item.producto.nombre }}</h3>
-            <p>{{ item.producto.precioPuntos }} puntos</p>
+            <h3 class="item-name">{{ item.producto.nombre }}</h3>
+            <p class="item-points">{{ item.producto.precioPuntos }} puntos c/u</p>
           </div>
           <div class="item-quantity">
             <span>Cantidad: {{ item.cantidad }}</span>
@@ -133,5 +137,28 @@ h1 {
   cursor: pointer;
   font-size: 1rem;
   margin-top: 1rem;
+}
+.cart-container { max-width: 1200px; margin: auto; padding: 2rem; }
+.page-header { text-align: center; margin-bottom: 2rem; }
+.page-title { font-size: 2rem; font-weight: bold; }
+.page-subtitle { color: #666; }
+.cart-content { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; }
+.cart-item { display: flex; align-items: center; gap: 1.5rem; padding: 1rem; background: white; border-radius: 8px; margin-bottom: 1rem; }
+.item-image { width: 80px; height: 80px; object-fit: cover; border-radius: 4px; }
+.item-details { flex-grow: 1; }
+.btn-remove { background: #ef4444; color: white; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; }
+.cart-summary { background: white; padding: 1.5rem; border-radius: 8px; height: fit-content; }
+.btn-checkout { width: 100%; padding: 1rem; background-color: #2b7fff; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; margin-top: 1rem; }
+
+@media (max-width: 768px) {
+  .cart-content {
+    grid-template-columns: 1fr;
+  }
+  .cart-item {
+    flex-wrap: wrap;
+  }
+  .item-details {
+    flex-basis: 100%;
+  }
 }
 </style>

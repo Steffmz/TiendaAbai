@@ -375,11 +375,7 @@ html.dark .categories-table {
   transition: all 1s cubic-bezier(0.55, -0.44, 0.95, 0.73);
   object-fit: cover;
 }
-/* =================================
-   ESTILOS GLOBALES PARA BOTONES Y BADGES
-   ================================= */
 
-/* Botones genéricos del Admin */
 .btn { 
   padding: 0.5rem 1rem; 
   border: none; 
@@ -413,7 +409,7 @@ html.dark .categories-table {
 .badge.info { background-color: rgba(59, 130, 246, 0.2); color: #1e40af; }
 
 /* En modo oscuro, los badges necesitan colores más claros */
-.dark .badge.success { color: #6ee7b7; }
-.dark .badge.danger { color: #fca5a5; }
-.dark .badge.warning { color: #fcd34d; }
-.dark .badge.info { color: #93c5fd; }
+html.dark .badge.success { color: #6ee7b7; }
+html.dark .badge.danger { color: #fca5a5; }
+html.dark .badge.warning { color: #fcd34d; }
+html.dark .badge.info { color: #93c5fd; }

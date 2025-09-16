@@ -22,7 +22,7 @@
   transition: padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   padding-left: var(--sidebar-width);
   height: 100vh;
-  overflow: hidden;
+  overflow: hidden; /* Esto previene el scroll en el contenedor principal */
 }
 
 .main-content.collapsed {
@@ -31,7 +31,7 @@
 
 .page-content {
   flex-grow: 1;
-  overflow-y: auto;
+  overflow-y: auto; /* Permite el scroll solo en el área de contenido */
   padding: 2rem;
   background-color: var(--background-color);
 }
