@@ -1,0 +1,116 @@
+/* Inspirado en Topbar.css pero adaptado para el layout de empleado */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--topbar-bg);  
+  padding: 1rem 2rem;
+  height: 80px;
+  border-bottom: 4px solid var(--accent);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: background 0.3s ease, color 0.3s ease;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+}
+
+.logo img {
+  height: 50px;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.nav-links {
+  display: none; /* Oculto en móvil por defecto */
+}
+
+@media (min-width: 768px) {
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+  }
+  .nav-links a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 0;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .nav-links a:hover {
+    border-bottom-color: var(--accent);
+    opacity: 0.9;
+  }
+  .nav-links a.router-link-exact-active {
+    border-bottom-color: white;
+    font-weight: 600;
+  }
+}
+
+.actions {
+  display: flex;
+  gap: 1.2rem;
+  align-items: center;
+}
+
+.points-badge { 
+  background-color: rgba(255, 255, 255, 0.2); 
+  padding: 0.4rem 0.8rem; 
+  border-radius: 9999px; 
+  font-weight: 600; 
+  font-size: 0.9rem;
+  color: white;
+  white-space: nowrap;
+}
+
+.actions .iconify,
+.notification-icon-wrapper .iconify {
+  width: 26px;
+  height: 26px;
+  color: white; 
+  cursor: pointer;
+  transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.actions .iconify:hover,
+.notification-icon-wrapper:hover .iconify {
+  transform: scale(1.1);
+  color: var(--accent);
+}
+
+.notification-icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  color: white;
+  text-decoration: none;
+}
+.topbar-badge {
+  position: absolute;
+  top: -5px;
+  right: -8px;
+  background-color: #ef4444;
+  color: white;
+  border-radius: 50%;
+  padding: 0.1em 0.4em;
+  font-size: 0.7rem;
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .topbar {
+    padding: 0.5rem 1rem; 
+    height: 70px;
+  }
+  .points-badge {
+    display: none;
+  }
+  .logo img {
+    height: 40px;
+  }
+  .actions {
+    gap: 0.8rem; 
+  }
+}

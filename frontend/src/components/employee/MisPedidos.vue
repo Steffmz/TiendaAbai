@@ -18,7 +18,7 @@
 
       <div v-else class="pedidos-list">
         <div v-for="pedido in pedidos" :key="pedido.id" class="pedido-card">
-          
+
           <div class="pedido-header">
             <div>
               <h2 class="pedido-id">Pedido #{{ pedido.id }}</h2>
@@ -26,15 +26,12 @@
             </div>
             <span :class="['badge', getStatusClass(pedido.estado)]">{{ pedido.estado }}</span>
           </div>
-          
+
           <div class="pedido-body">
             <div v-for="detalle in pedido.detalles" :key="detalle.id" class="producto-item">
-              <img 
-                :src="`${API_BASE_URL}${detalle.producto.imagenUrl}`" 
-                :alt="detalle.producto.nombre" 
+              <img :src="`${API_BASE_URL}${detalle.producto.imagenUrl}`" :alt="detalle.producto.nombre"
                 class="producto-img"
-                @error="$event.target.src = 'https://placehold.co/100x100/e2e8f0/a0aec0?text=Img'"
-              />
+                @error="$event.target.src = 'https://placehold.co/100x100/e2e8f0/a0aec0?text=Img'" />
               <div class="producto-info">
                 <p class="producto-nombre">{{ detalle.producto.nombre }}</p>
                 <p class="producto-cantidad">Cantidad: {{ detalle.cantidad }}</p>
@@ -42,7 +39,7 @@
               <p class="producto-puntos">{{ detalle.puntosUnitarios * detalle.cantidad }} pts</p>
             </div>
           </div>
-          
+
           <div class="pedido-footer">
             <span>Total del Pedido:</span>
             <span class="total-puntos">{{ pedido.totalPuntos }} Puntos</span>
@@ -73,7 +70,7 @@ const fetchPedidos = async () => {
     const { data } = await axios.get(`${API_BASE_URL}/api/pedidos/mis-pedidos`, getAuthHeaders());
     pedidos.value = data;
   } catch (error) {
-    Swal.fire('Error', 'No se pudo cargar tu historial de pedidos.', 'error');
+    Swal.fire('Error', 'No pudimos cargar tu historial de pedidos. Por favor, intenta recargar la página.', 'error');
   } finally {
     loading.value = false;
   }
@@ -102,8 +99,10 @@ onMounted(fetchPedidos);
 /* Contenedor principal que centra todo */
 .mis-pedidos-container {
   display: flex;
-  flex-direction: column; /* Apila los hijos verticalmente */
-  align-items: center; /* Centra los hijos horizontalmente */
+  flex-direction: column;
+  /* Apila los hijos verticalmente */
+  align-items: center;
+  /* Centra los hijos horizontalmente */
   width: 100%;
   max-width: 900px;
   margin: 0 auto;
@@ -142,14 +141,14 @@ onMounted(fetchPedidos);
   background: var(--surface, white);
   border: 1px solid var(--border);
   border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
   overflow: hidden;
   transition: box-shadow 0.3s, transform 0.3s;
 }
 
 .pedido-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
 .pedido-header {
@@ -231,7 +230,8 @@ onMounted(fetchPedidos);
   color: var(--primary);
 }
 
-.loading-state, .empty-state {
+.loading-state,
+.empty-state {
   text-align: center;
   padding: 3rem;
   background-color: var(--surface-2);
@@ -252,11 +252,37 @@ onMounted(fetchPedidos);
 }
 
 /* Badge Styles */
-.badge { padding: 5px 12px; border-radius: 9999px; font-size: 0.8rem; font-weight: 600; color: white; text-align: center; }
-.badge.success { background-color: #22c55e; }
-.badge.success-dark { background-color: #15803d; }
-.badge.danger { background-color: #ef4444; }
-.badge.warning { background-color: #f59e0b; color: #1a202c; }
-.badge.info { background-color: #3b82f6; }
-.badge.secondary { background-color: #6b7280; }
+.badge {
+  padding: 5px 12px;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: white;
+  text-align: center;
+}
+
+.badge.success {
+  background-color: #22c55e;
+}
+
+.badge.success-dark {
+  background-color: #15803d;
+}
+
+.badge.danger {
+  background-color: #ef4444;
+}
+
+.badge.warning {
+  background-color: #f59e0b;
+  color: #1a202c;
+}
+
+.badge.info {
+  background-color: #3b82f6;
+}
+
+.badge.secondary {
+  background-color: #6b7280;
+}
 </style>

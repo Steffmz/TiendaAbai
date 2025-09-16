@@ -1,3 +1,5 @@
+/* frontend/src/assets/css/AdminGestion.css */
+
 /* --- Contenedores y Layout --- */
 .page-container {
   padding: 1.5rem;
@@ -60,7 +62,7 @@ th, td {
 th { background-color: #74b9e7; color: black; font-weight: 600; }
 tbody tr {
   border-bottom: 1px solid var(--border);
-  transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s; /* Transición suave */
+  transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s;
 }
 
 tbody tr:last-child {
@@ -69,8 +71,8 @@ tbody tr:last-child {
 
 tbody tr:hover {
   background-color: var(--surface-2);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.05); /* Sombra sutil */
-  transform: translateY(-1px); /* Efecto de elevación */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  transform: translateY(-1px);
 }
 
 .table-image { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; margin: 0 auto; }
@@ -92,13 +94,13 @@ tbody tr:hover {
   border: 1px solid var(--border);
   border-radius: 12px;
   overflow: hidden;
-  transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s; /* Transición suave */
+  transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s;
 }
 
 .card:hover {
   background-color: var(--surface-2);
-  box-shadow: 0 6px 12px rgba(0,0,0,0.1); /* Sombra más pronunciada */
-  transform: translateY(-2px); /* Efecto de elevación mayor */
+  box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
 }
 
 .card-header { display: flex; align-items: center; gap: 1rem; padding: 1rem; border-bottom: 1px solid var(--border); }
@@ -121,7 +123,7 @@ tbody tr:hover {
     flex-shrink: 0;
 }
 
-/* --- Botones de Acción (como en Usuarios) --- */
+/* --- Botones de Acción --- */
 .actions-cell button, .card-actions button {
   padding: 6px 12px;
   font-size: 0.85rem;
@@ -141,10 +143,9 @@ tbody tr:hover {
 .modal-content { background: var(--surface); padding: 2rem; border-radius: 12px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
 .modal-title { font-size: 1.5rem; font-weight: 600; text-align: center; margin-bottom: 1.5rem; }
 .modal-actions { margin-top: 2rem; display: flex; justify-content: flex-end; gap: 1rem; }
-/* Botón principal de acciones (ej. "Nueva Campaña", "Nuevo Usuario") */
 .btn-new-item {
-  background-color: #FFB93B; /* Color naranja/amarillo */
-  color: #000; /* Texto negro */
+  background-color: #FFB93B;
+  color: #000;
   font-weight: 600;
   padding: 0.6rem 1.2rem;
   border-radius: 0.5rem;
@@ -152,16 +153,16 @@ tbody tr:hover {
   transition: all 0.2s ease-in-out;
   border: none;
   cursor: pointer;
-  white-space: nowrap; /* Evita que el texto se rompa */
+  white-space: nowrap;
 }
 
 .btn-new-item:hover {
-  background-color: #e6a733; /* Un tono un poco más oscuro al pasar el ratón */
+  background-color: #e6a733;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
 .dark .btn-new-item {
-  background-color: #e6a733; /* Color naranja/amarillo para dark mode */
+  background-color: #e6a733;
   color: #fff;
 }
 

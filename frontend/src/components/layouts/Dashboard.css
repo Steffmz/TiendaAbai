@@ -1,7 +1,8 @@
+/* frontend/src/components/layouts/Dashboard.css */
 :root {
   --sidebar-width: 280px;
   --sidebar-width-collapsed: 80px;
-  --topbar-height: 80px; /* Asegúrate que coincida con la altura real de tu Topbar */
+  --topbar-height: 80px;
   --background-color: var(--bg, #f4f7fa);
   --transition: all 0.3s ease-in-out;
 }
@@ -10,39 +11,36 @@
   display: flex;
   width: 100vw;
   height: 100vh;
-  overflow: hidden; /* Evita el scroll en el contenedor principal (de tu rama) */
+  overflow: hidden;
 }
 
 .main-content {
   position: relative;
-  flex-grow: 1; /* Ocupa el espacio restante (de tu rama) */
+  flex-grow: 1;
   display: flex;
-  flex-direction: column; /* Apila el Topbar sobre el page-content (de tu rama) */
+  flex-direction: column;
   transition: padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   padding-left: var(--sidebar-width);
-  height: 100vh; /* Ocupa toda la altura de la ventana (de tu rama) */
-  overflow: hidden; /* Evita que este contenedor tenga scroll (de tu rama) */
+  height: 100vh;
+  overflow: hidden; /* Esto previene el scroll en el contenedor principal */
 }
 
 .main-content.collapsed {
   padding-left: var(--sidebar-width-collapsed);
 }
 
-/* El área de contenido es la que debe tener scroll (de tu rama) */
 .page-content {
   flex-grow: 1;
-  overflow-y: auto;
+  overflow-y: auto; /* Permite el scroll solo en el área de contenido */
   padding: 2rem;
   background-color: var(--background-color);
 }
 
-/* Media query unificada */
 @media (max-width: 768px) {
   .main-content {
-    padding-left: 0; /* Unifica la regla de ambas ramas */
+    padding-left: 0;
   }
 
-  /* Mejora para bloquear el scroll detrás del sidebar en móvil (de Gaviota) */
   .main-content.sidebar-open {
     position: fixed;
     width: 100%;
@@ -51,7 +49,6 @@
   }
 }
 
-/* Overlay para el sidebar en móvil (de Gaviota) */
 .overlay {
   position: fixed;
   top: 0;
@@ -59,5 +56,5 @@
   width: 100%;
   height: 100%;
   background: rgba(0,0,0,0.5);
-  z-index: 900; /* Se asegura que esté debajo del sidebar */
+  z-index: 900;
 }

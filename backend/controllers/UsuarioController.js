@@ -86,15 +86,18 @@ exports.createUsuario = async (req, res) => {
     const { contrasena: _, ...usuarioSinContrasena } = nuevoUsuario;
     res.status(201).json(usuarioSinContrasena);
   } catch (error) {
-    if (error.code === "P2002") {
-      return res
-        .status(409)
-        .json({
-          message: `El campo '${error.meta.target[0]}' ya está en uso.`,
-        });
+    if (error.code === "P2002" && error.meta?.target) {
+      if (error.meta.target.includes('email')) {
+        return res.status(409).json({ message: 'El correo electrónico ingresado ya está registrado.' });
+      }
+      if (error.meta.target.includes('cedula')) {
+        return res.status(409).json({ message: 'La cédula ingresada ya está registrada.' });
+      }
+      return res.status(409).json({ message: 'Alguno de los datos ingresados ya está en uso.' });
     }
+    
     console.error("Error al crear usuario:", error);
-    res.status(500).json({ message: "Error interno del servidor." });
+    res.status(500).json({ message: "Ocurrió un error inesperado al crear el usuario." });
   }
 };
 
@@ -238,9 +241,7 @@ exports.updateMiPerfil = async (req, res) => {
     }
 
     if (Object.keys(dataToUpdate).length === 0) {
-      return res
-        .status(400)
-        .json({ message: "No se proporcionaron datos para actualizar." });
+      return res.status(400).json({ message: 'No has realizado ningún cambio para actualizar.' });
     }
 
     await prisma.usuario.update({
@@ -248,17 +249,13 @@ exports.updateMiPerfil = async (req, res) => {
       data: dataToUpdate,
     });
 
-    res.status(200).json({ message: "Perfil actualizado correctamente." });
+    res.status(200).json({ message: 'Tu perfil ha sido actualizado correctamente.' });
   } catch (error) {
     console.error("Error al actualizar perfil:", error);
-    if (error.code === "P2002") {
-      return res
-        .status(409)
-        .json({ message: "El email ya está en uso por otro usuario." });
+    if (error.code === 'P2002') {
+      return res.status(409).json({ message: 'El correo electrónico ingresado ya está en uso por otra cuenta.' });
     }
-    res
-      .status(500)
-      .json({ message: "Error interno del servidor al actualizar el perfil." });
+    res.status(500).json({ message: 'Ocurrió un error inesperado al actualizar tu perfil.' });
   }
 };
 exports.ajustarPuntos = async (req, res) => {
@@ -266,10 +263,8 @@ exports.ajustarPuntos = async (req, res) => {
   const { puntos, descripcion } = req.body;
   const adminId = req.usuario.userId;
 
-  if (typeof puntos !== "number" || !descripcion) {
-    return res
-      .status(400)
-      .json({ message: "Se requieren puntos (número) y una descripción." });
+  if (typeof puntos !== 'number' || !descripcion) {
+    return res.status(400).json({ message: 'Debes ingresar una cantidad de puntos y una descripción para el ajuste.' });
   }
 
   try {
@@ -291,13 +286,10 @@ exports.ajustarPuntos = async (req, res) => {
       return usuario;
     });
 
-    res.json({
-      message: "Puntos ajustados correctamente.",
-      usuario: usuarioActualizado,
-    });
+  res.json({ message: 'Los puntos del usuario han sido ajustados correctamente.', usuario: usuarioActualizado });
   } catch (error) {
     console.error(`Error al ajustar puntos para el usuario ${id}:`, error);
-    res.status(500).json({ message: "Error al ajustar los puntos." });
+    res.status(500).json({ message: 'Ocurrió un error al intentar ajustar los puntos.' });
   }
 };
 exports.getMiPerfil = async (req, res) => {

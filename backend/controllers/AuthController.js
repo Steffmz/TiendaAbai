@@ -99,8 +99,7 @@ const forgotPassword = async (req, res) => {
         const usuario = await prisma.usuario.findUnique({ where: { email } });
 
         if (!usuario) {
-            // No revelamos si el usuario existe o no por seguridad
-            return res.status(200).json({ message: 'Si existe una cuenta con este correo, recibirás un enlace para reestablecer tu contraseña.' });
+            return res.status(200).json({ message: 'Si tu correo está registrado, recibirás un enlace para restablecer tu contraseña.' });
         }
 
         // Generar un token de reseteo seguro

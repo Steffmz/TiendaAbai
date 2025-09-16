@@ -375,11 +375,7 @@ html.dark .categories-table {
   transition: all 1s cubic-bezier(0.55, -0.44, 0.95, 0.73);
   object-fit: cover;
 }
-/* =================================
-   ESTILOS GLOBALES PARA BOTONES Y BADGES
-   ================================= */
 
-/* Botones genéricos del Admin */
 .btn { 
   padding: 0.5rem 1rem; 
   border: none; 
@@ -413,7 +409,75 @@ html.dark .categories-table {
 .badge.info { background-color: rgba(59, 130, 246, 0.2); color: #1e40af; }
 
 /* En modo oscuro, los badges necesitan colores más claros */
-.dark .badge.success { color: #6ee7b7; }
-.dark .badge.danger { color: #fca5a5; }
-.dark .badge.warning { color: #fcd34d; }
-.dark .badge.info { color: #93c5fd; }
+html.dark .badge.success { color: #6ee7b7; }
+html.dark .badge.danger { color: #fca5a5; }
+html.dark .badge.warning { color: #fcd34d; }
+html.dark .badge.info { color: #93c5fd; }
+/* --- REFUERZO MODO NOCHE --- */
+
+/* Fondos generales que a veces se quedan blancos */
+html.dark .bg-white,
+html.dark .bg-gray-50,
+html.dark .bg-gray-100 {
+  background-color: var(--surface) !important;
+}
+
+/* Tarjetas y Paneles */
+html.dark .profile-card,
+html.dark .cart-item,
+html.dark .cart-summary,
+html.dark .pedido-card,
+html.dark .product-card,
+html.dark .empty-cart,
+html.dark .empty-state,
+html.dark .profile-container .profile-card {
+  background-color: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+
+/* Textos específicos */
+html.dark .page-title,
+html.dark .page-subtitle,
+html.dark .user-name,
+html.dark .item-name,
+html.dark .cart-summary h2 {
+  color: var(--text) !important;
+}
+
+html.dark .user-email,
+html.dark .item-points {
+  color: var(--text-muted) !important;
+}
+
+/* Botones específicos que no son globales */
+html.dark .btn-edit {
+  background-color: #d97706;
+}
+html.dark .btn-edit:hover {
+  background-color: #b45309;
+}
+html.dark .btn-remove {
+  color: #fca5a5;
+}
+html.dark .btn-checkout {
+  background-color: var(--primary);
+  color: var(--primary-contrast);
+}
+
+/* Badges del carrito y notificaciones */
+html.dark .topbar-badge,
+html.dark .cart-badge {
+  background-color: #ef4444;
+  color: white;
+}
+/* --- REFUERZO ADICIONAL MODO NOCHE --- */
+html.dark .bg-white {
+  background-color: var(--surface) !important;
+}
+
+html.dark .text-black,
+html.dark .text-gray-800,
+html.dark .text-gray-700,
+html.dark .text-gray-600 {
+  color: var(--text) !important;
+}

@@ -71,7 +71,6 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* --- ESTILOS RESPONSIVE PARA EL PANEL DE NOTIFICACIONES --- */
 .notifications-panel {
   position: absolute;
   top: 70px; /* Distancia desde la barra de navegación */
