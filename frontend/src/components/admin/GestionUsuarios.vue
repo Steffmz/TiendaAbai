@@ -1,25 +1,29 @@
 <template>
   <div class="max-w-7xl w-full mx-auto">
+    <!-- Header -->
     <div class="page-header">
       <h1 class="page-title">Gestión de Usuarios</h1>
       <p class="page-subtitle">Administra los usuarios del sistema.</p>
     </div>
 
+    <!-- Barra de acciones -->
     <div class="w-full flex justify-center mb-6">
-      <div class="flex flex-col md:flex-row items-center gap-3 w-full max-w-3xl">
-        <input v-model="searchQuery" type="text" placeholder="Buscar por nombre o cédula..." class="w-64 md:flex-1 px-3 py-2 border border-yellow-400 rounded-lg text-blue-800 bg-blue-50
-               focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-200
-               text-sm shadow-sm transition-all duration-200" />
+        <div class="flex flex-col md:flex-row items-center gap-3 w-full max-w-3xl">
+          <input v-model="searchQuery" type="text" placeholder="Buscar por nombre o cédula..."
+            class="w-64 md:flex-1 px-3 py-2 border border-yellow-400 rounded-lg text-blue-800 bg-blue-50
+                  focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-200
+                  text-sm shadow-sm transition-all duration-200" />
 
-        <button @click="openModal()" class="px-5 py-2 bg-[#FFB93B] text-black rounded-lg font-semibold shadow-md
-               hover:bg-[#74B9E7] transition-all duration-200 hover:shadow-lg">
-          + Nuevo Usuario
-        </button>
-      </div>
+          <button @click="openModal()"
+            class="px-5 py-2 bg-[#FFB93B] text-black rounded-lg font-semibold shadow-md
+                  hover:bg-[#74B9E7] transition-all duration-200 hover:shadow-lg">
+            + Nuevo Usuario
+          </button>
+        </div>
     </div>
 
-    <div
-      class="hidden md:block rounded-xl border border-gray-200 shadow-sm mb-2 w-full max-w-7xl mx-auto overflow-hidden">
+    <!-- Vista Desktop - Tabla -->
+    <div class="hidden md:block rounded-xl border border-gray-200 shadow-sm mb-2 w-full max-w-7xl mx-auto overflow-hidden">
       <table class="w-full border-collapse">
         <thead class="bg-[#74B9E7] text-black">
           <tr>
@@ -33,10 +37,15 @@
           </tr>
         </thead>
         <tbody>
+          <!-- Skeletons mientras carga -->
           <template v-if="loading">
             <tr>
               <td colspan="7" class="p-0">
-                <div v-for="i in 6" :key="i" class="flex items-center p-4 gap-4 border-b border-[var(--border)]">
+                <div
+                  v-for="i in 5"
+                  :key="i"
+                  class="flex items-center p-4 gap-4 border-b border-[var(--border)]"
+                >
                   <BaseSkeleton width="150px" height="24px" radius="6px" />
                   <BaseSkeleton width="100px" height="24px" radius="6px" />
                   <BaseSkeleton width="50px" height="24px" radius="6px" />
@@ -52,46 +61,59 @@
             </tr>
           </template>
 
-          <template v-else-if="usuarios.length > 0">
-            <tr v-for="usuario in usuarios" :key="usuario.id">
+          <!-- Usuarios -->
+          <template v-else-if="filteredUsuarios.length > 0">
+            <tr v-for="usuario in filteredUsuarios" :key="usuario.id">
               <td>{{ usuario.nombreCompleto }}</td>
               <td>{{ usuario.cedula }}</td>
               <td>{{ usuario.puntosTotales }}</td>
               <td>{{ usuario.email }}</td>
               <td>{{ usuario.rol }}</td>
               <td>
-                <span :class="['badge', usuario.activo ? 'success' : 'danger']">
+                <span
+                  :class="['badge', usuario.activo ? 'success' : 'danger']"
+                >
                   {{ usuario.activo ? "Activo" : "Inactivo" }}
                 </span>
               </td>
               <td class="actions-cell">
-                <button @click="openModal(usuario)"
-                  class="bg-blue-100 text-black hover:bg-blue-200 px-3 py-1 rounded-md text-sm font-medium transition-colors duration-150">
+                <button
+                  @click="openModal(usuario)"
+                  class="btn-edit"
+                >
                   Editar
                 </button>
-                <button @click="openPuntosModal(usuario)"
-                  class="bg-blue-100 text-black hover:bg-blue-200 px-3 py-1 rounded-md text-sm font-medium transition-colors duration-150">
+                <button
+                  @click="openPuntosModal(usuario)"
+                  class="btn-edit"
+                >
                   Puntos
                 </button>
-                <button @click="toggleStatus(usuario)" :class="[usuario.activo
-                  ? 'bg-red-100 hover:bg-red-200'
-                  : 'bg-green-100 hover:bg-green-200',
-                  'text-black px-3 py-1 rounded-md text-sm font-medium transition-colors duration-150']">
-                  {{ usuario.activo ? 'Desactivar' : 'Activar' }}
+                <button
+                  @click="toggleStatus(usuario)"
+                  :class="usuario.activo ? 'btn-danger' : 'btn-edit'"
+                >
+                  {{ usuario.activo ? "Desactivar" : "Activar" }}
                 </button>
-                <button @click="deleteUsuario(usuario)"
-                  class="bg-red-100 text-black hover:bg-red-200 px-3 py-1 rounded-md text-sm font-medium transition-colors duration-150">
+                <button
+                  @click="deleteUsuario(usuario)"
+                  class="btn-danger"
+                >
                   Eliminar
                 </button>
               </td>
             </tr>
           </template>
 
+          <!-- Estado vacío -->
           <template v-else>
             <tr>
               <td colspan="7">
-                <EmptyState icon="mdi:account-search-outline" title="No se encontraron usuarios"
-                  message="Prueba con otro término de búsqueda o crea un nuevo usuario." />
+                <EmptyState
+                  icon="mdi:account-search-outline"
+                  title="No se encontraron usuarios"
+                  message="Prueba con otro término de búsqueda o crea un nuevo usuario."
+                />
               </td>
             </tr>
           </template>
@@ -99,6 +121,7 @@
       </table>
     </div>
 
+    <!-- Vista Mobile - Cards -->
     <div class="block md:hidden">
       <template v-if="loading">
         <div v-for="i in 5" :key="i" class="mobile-card mb-4">
@@ -112,15 +135,18 @@
         </div>
       </template>
 
-      <template v-else-if="usuarios.length > 0">
-        <div v-for="usuario in usuarios" :key="usuario.id" class="mobile-card">
+      <!-- Cards de usuarios -->
+      <template v-else-if="filteredUsuarios.length > 0">
+        <div v-for="usuario in filteredUsuarios" :key="usuario.id" class="mobile-card">
           <div class="mobile-card-header">
             <h3 class="mobile-card-title">{{ usuario.nombreCompleto }}</h3>
-            <span :class="['badge', usuario.activo ? 'success' : 'danger']">
+            <span
+              :class="['badge', usuario.activo ? 'success' : 'danger']"
+            >
               {{ usuario.activo ? "Activo" : "Inactivo" }}
             </span>
           </div>
-
+          
           <div class="mobile-card-content">
             <div class="mobile-info-item">
               <span class="mobile-label">Cédula:</span>
@@ -141,107 +167,109 @@
           </div>
 
           <div class="mobile-card-actions">
-            <button @click="openModal(usuario)"
-              class="bg-blue-100 text-black hover:bg-blue-200 px-3 py-1 rounded-md text-sm font-medium transition-colors duration-150">
-              Editar
-            </button>
-            <button @click="openPuntosModal(usuario)"
-              class="bg-blue-100 text-black hover:bg-blue-200 px-3 py-1 rounded-md text-sm font-medium transition-colors duration-150">
+            <button @click="openModal(usuario)" class="btn-edit">Editar</button>
+            <button @click="openPuntosModal(usuario)" class="btn-edit">
               Puntos
             </button>
-            <button @click="toggleStatus(usuario)" :class="[usuario.activo
-              ? 'bg-red-100 text-red-800'
-              : 'bg-green-100 text-green-800',
-              'text-black px-3 py-1 rounded-md text-sm font-medium transition-colors duration-150']">
-              {{ usuario.activo ? 'Desactivar' : 'Activar' }}
+            <button
+              @click="toggleStatus(usuario)"
+              :class="usuario.activo ? 'btn-danger' : 'btn-edit'"
+            >
+              {{ usuario.activo ? "Desactivar" : "Activar" }}
             </button>
-            <button @click="deleteUsuario(usuario)"
-              class="bg-red-100 text-black hover:bg-red-200 px-3 py-1 rounded-md text-sm font-medium transition-colors duration-150">
+            <button @click="deleteUsuario(usuario)" class="btn-danger">
               Eliminar
             </button>
           </div>
         </div>
       </template>
 
+      <!-- Estado vacío para mobile -->
       <template v-else>
         <div class="mobile-empty">
-          <EmptyState icon="mdi:account-search-outline" title="No se encontraron usuarios"
-            message="Prueba con otro término de búsqueda o crea un nuevo usuario." />
+          <EmptyState
+            icon="mdi:account-search-outline"
+            title="No se encontraron usuarios"
+            message="Prueba con otro término de búsqueda o crea un nuevo usuario."
+          />
         </div>
       </template>
     </div>
 
-    <div v-if="!loading && totalPages > 1" class="flex flex-col items-center justify-center mt-4">
-      <p class="text-gray-700">
-        Existen <span class="text-blue-500 font-semibold">{{ totalUsers }}</span> usuarios
-      </p>
-      <div class="flex items-center mt-2 space-x-1">
-        <button @click="prevPage" :disabled="currentPage === 1"
-          class="w-8 h-8 flex items-center justify-center rounded-md bg-[#fffef9] border border-gray-200 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
-          ←
-        </button>
-        <button v-for="pagina in paginasVisibles" :key="pagina" @click="goToPage(pagina)" :class="[
-          'w-8 h-8 flex items-center justify-center rounded-md border font-medium',
-          currentPage === pagina
-            ? 'bg-blue-500 text-white border-blue-500'
-            : 'bg-[#fffef9] border-gray-200 text-gray-600 hover:bg-gray-100',
-          pagina === '...' ? 'cursor-default' : ''
-        ]">
-          {{ pagina }}
-        </button>
-        <button @click="nextPage" :disabled="currentPage === totalPages"
-          class="w-8 h-8 flex items-center justify-center rounded-md bg-[#fffef9] border border-gray-200 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
-          →
-        </button>
-      </div>
+    <!-- Paginación -->
+    <div v-if="!loading && totalPages > 1" class="pagination-controls">
+      <button
+        @click="prevPage"
+        :disabled="currentPage === 1"
+        class="btn btn-secondary"
+      >
+        Anterior
+      </button>
+      <span>Página {{ currentPage }} de {{ totalPages }}</span>
+      <button
+        @click="nextPage"
+        :disabled="currentPage === totalPages"
+        class="btn btn-secondary"
+      >
+        Siguiente
+      </button>
     </div>
 
-    <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
+    <!-- Modal Crear/Editar -->
+   <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
       <div class="modal-content">
         <h2 class="modal-title">{{ isEditMode ? 'Editar Usuario' : 'Crear Usuario' }}</h2>
-        <form @submit.prevent="saveUsuario" novalidate>
+        <form @submit.prevent="saveUsuario">
           <div class="form-grid">
-            <div class="form-group">
-              <label>Nombre Completo</label>
-          <input v-model="form.nombreCompleto" type="text" required
+             <!-- Nombre -->
+        <div class="form-group">
+          <label>Nombre Completo</label>
+          <input
+            v-model="form.nombreCompleto"
+            type="text"
+            required
             @input="form.nombreCompleto = capitalizeWords(form.nombreCompleto)"
-            @keydown.enter.prevent="focusNextInput" />
+          />
         </div>
+             <!-- Cédula -->
         <div class="form-group">
           <label>Cédula</label>
-          <input v-model="form.cedula" type="text" required :disabled="isEditMode" pattern="^[0-9]{5,15}$"
-            maxlength="15" title="La cédula debe tener entre 5 y 15 dígitos y solo números"
+          <input
+            v-model="form.cedula"
+            type="text"
+            required
+            :disabled="isEditMode"
+            pattern="^[0-9]{5,15}$"
+            maxlength="15"
+            title="La cédula debe tener entre 5 y 15 dígitos y solo números"
             @input="form.cedula = form.cedula.replace(/[^0-9]/g, '')"
-            @keydown.enter.prevent="focusNextInput" />
+          />
         </div>
-        <div class="form-group">
-          <label>Email</label>
-          <input v-model="form.email" type="email" required @keydown.enter.prevent="focusNextInput" />
-        </div>
-        <div class="form-group">
+            <div class="form-group"><label>Email</label><input v-model="form.email" type="email" required /></div>
+            <div class="form-group">
           <label>Sede</label>
-          <input v-model="form.sede" type="text" required @keydown.enter.prevent="focusNextInput" />
+          <input v-model="form.sede" type="text" required />
         </div>
+            <!-- Contraseña (solo en crear) -->
         <div class="form-group" v-if="!isEditMode">
           <label>Contraseña</label>
-          <input v-model="form.contrasena" type="password" required maxlength="16" pattern="^(?=.*[0-9]).{1,16}$"
+          <input
+            v-model="form.contrasena"
+            type="password"
+            required
+            maxlength="16"
+            pattern="^(?=.*[0-9]).{1,16}$"
             title="La contraseña debe tener máximo 16 caracteres e incluir al menos un dígito"
-            @keydown.enter.prevent="focusNextInput" />
+          />
         </div>
             <div class="form-group"><label>Rol</label><select v-model="form.rol" required>
                 <option value="Empleado">Empleado</option>
                 <option value="Administrador">Administrador</option>
               </select></div>
-            <div class="form-group"><label>Cargo</label><select v-model.number="form.cargoId" required>
-                <option disabled value="">Selecciona un cargo</option>
-                <option v-for="cargo in cargos" :key="cargo.id" :value="cargo.id">{{ cargo.nombre }}</option>
-              </select></div>
-            <div class="form-group"><label>Centro de Costos</label><select v-model.number="form.centroDeCostosId"
-                required>
-                <option disabled value="">Selecciona un centro</option>
-                <option v-for="centro in centrosDeCostos" :key="centro.id" :value="centro.id">{{ centro.nombre }}
-                </option>
-              </select></div>
+            <div class="form-group"><label>Cargo ID</label><input v-model.number="form.cargoId" type="number"
+                placeholder="ID del Cargo existente" required /></div>
+            <div class="form-group"><label>Centro de Costos ID</label><input v-model.number="form.centroDeCostosId"
+                type="number" placeholder="ID del C. de Costos existente" required /></div>
           </div>
           <div class="modal-actions">
             <button type="button" @click="closeModal" class="btn btn-secondary">Cancelar</button>
@@ -251,17 +279,30 @@
       </div>
     </div>
 
-    <BaseModal :show="showPuntosModal" :title="`Ajustar Puntos a ${formPuntos.nombreCompleto}`"
-      @close="closePuntosModal" width="500px">
+    <!-- Modal Ajustar Puntos -->
+    <BaseModal
+      :show="showPuntosModal"
+      :title="`Ajustar Puntos a ${formPuntos.nombreCompleto}`"
+      @close="closePuntosModal"
+      width="500px"
+    >
       <form id="puntosForm" @submit.prevent="savePuntos">
         <div class="form-group">
           <label>Puntos a Añadir/Quitar</label>
-          <input v-model.number="formPuntos.puntos" type="number" required
-            placeholder="Ej: 100 para añadir, -50 para quitar" />
+          <input
+            v-model.number="formPuntos.puntos"
+            type="number"
+            required
+            placeholder="Ej: 100 para añadir, -50 para quitar"
+          />
         </div>
         <div class="form-group">
           <label>Motivo del Ajuste</label>
-          <textarea v-model="formPuntos.descripcion" required placeholder="Ej: Bono por desempeño Q3" />
+          <textarea
+            v-model="formPuntos.descripcion"
+            required
+            placeholder="Ej: Bono por desempeño Q3"
+          />
         </div>
       </form>
       <template #actions>
@@ -277,13 +318,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from "vue";
+// El script que ya tenías en tu rama, que es el más completo.
+import { ref, onMounted, computed } from "vue";
 import axios from "axios";
 import Swal from "sweetalert2";
 import BaseModal from "../shared/BaseModal.vue";
 import BaseSkeleton from "../shared/BaseSkeleton.vue";
 import EmptyState from "../shared/EmptyState.vue";
-import { PAGINATION } from "../../config";
 
 const usuarios = ref([]);
 const loading = ref(true);
@@ -299,34 +340,28 @@ const cargos = ref([]);
 const centrosDeCostos = ref([]);
 const currentPage = ref(1);
 const totalUsers = ref(0);
-const usersPerPage = ref(PAGINATION.USERS);
+const usersPerPage = ref(10); // Puedes ajustar este número si quieres menos items por página
 const totalPages = computed(() => Math.ceil(totalUsers.value / usersPerPage.value));
-
-const getAuthHeaders = () => ({ headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` } });
+const getAuthHeaders = () => ({ headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` }});
 
 const fetchData = async () => {
   loading.value = true;
   try {
-    const params = new URLSearchParams({
-      page: currentPage.value,
-      limit: usersPerPage.value,
-      search: searchQuery.value
-    });
+    const params = new URLSearchParams({ page: currentPage.value, limit: usersPerPage.value });
     const usuariosRes = await axios.get(`${API_URL}?${params.toString()}`, getAuthHeaders());
     usuarios.value = usuariosRes.data.usuarios;
     totalUsers.value = usuariosRes.data.total;
-
-    if (cargos.value.length === 0) {
-      const [cargosRes, centrosRes] = await Promise.all([
-        axios.get(`${ADMIN_DATA_URL}/cargos`, getAuthHeaders()),
-        axios.get(`${ADMIN_DATA_URL}/centros-de-costos`, getAuthHeaders()),
-      ]);
-      cargos.value = cargosRes.data;
-      centrosDeCostos.value = centrosRes.data;
+    if(cargos.value.length === 0) {
+        const [cargosRes, centrosRes] = await Promise.all([
+            axios.get(`${ADMIN_DATA_URL}/cargos`, getAuthHeaders()),
+            axios.get(`${ADMIN_DATA_URL}/centros-de-costos`, getAuthHeaders()),
+        ]);
+        cargos.value = cargosRes.data;
+        centrosDeCostos.value = centrosRes.data;
     }
   } catch (error) {
     console.error("Error al cargar datos:", error);
-    Swal.fire("Error", "No se pudieron cargar los datos de los usuarios. Por favor, intente de nuevo más tarde.", "error");
+    Swal.fire("Error", "No se pudieron cargar los datos necesarios.", "error");
   } finally {
     loading.value = false;
   }
@@ -339,62 +374,33 @@ const capitalizeWords = (text) => {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
+const capitalizeCargo = () => {
+  if (form.cargoId && cargos.length) {
+    const cargo = cargos.find(c => c.id === form.cargoId);
+    if (cargo) {
+      cargo.nombre = capitalizeWords(cargo.nombre);
+    }
+  }
+};
+
 const nextPage = () => {
   if (currentPage.value < totalPages.value) {
     currentPage.value++;
     fetchData();
   }
 };
-
 const prevPage = () => {
   if (currentPage.value > 1) {
     currentPage.value--;
     fetchData();
   }
 };
-
-let searchTimeout;
-watch(searchQuery, () => {
-  currentPage.value = 1;
-  clearTimeout(searchTimeout);
-  searchTimeout = setTimeout(() => {
-    fetchData();
-  }, 300);
-});
-
-const paginasVisibles = computed(() => {
-  const total = totalPages.value;
-  const actual = currentPage.value;
-  const rango = 1;
-  const paginas = [];
-
-  if (total <= 7) {
-    for (let i = 1; i <= total; i++) paginas.push(i);
-    return paginas;
-  }
-
-  paginas.push(1);
-  if (actual > rango + 2) paginas.push('...');
-  for (let i = Math.max(2, actual - rango); i <= Math.min(total - 1, actual + rango); i++) {
-    paginas.push(i);
-  }
-  if (actual < total - rango - 1) paginas.push('...');
-  paginas.push(total);
-
-  return paginas;
-});
-
-const goToPage = (pagina) => {
-  if (typeof pagina === 'number') {
-    currentPage.value = pagina;
-    fetchData();
-  }
-};
-
 onMounted(fetchData);
 
 const filteredUsuarios = computed(() => {
-  return usuarios.value;
+  if (!searchQuery.value) return usuarios.value;
+  const lowerCaseQuery = searchQuery.value.toLowerCase();
+  return usuarios.value.filter(u => u.nombreCompleto.toLowerCase().includes(lowerCaseQuery) || u.cedula.includes(lowerCaseQuery));
 });
 
 const openModal = (usuario = null) => {
@@ -413,17 +419,17 @@ const saveUsuario = async () => {
   try {
     if (isEditMode.value) {
       await axios.put(`${API_URL}/${form.value.id}`, form.value, getAuthHeaders());
-      Swal.fire("¡Éxito!", "El usuario ha sido actualizado correctamente.", "success");
+      Swal.fire("Éxito", "Usuario actualizado.", "success");
     } else {
       await axios.post(API_URL, form.value, getAuthHeaders());
-      Swal.fire("¡Éxito!", "El nuevo usuario ha sido creado.", "success");
+      Swal.fire("Éxito", "Usuario creado.", "success");
     }
     closeModal();
-    await fetchData();
+    fetchData();
   } catch (error) {
-    let errorHtml = error.response?.data?.message || 'No se pudo guardar el usuario. Verifique los datos e intente nuevamente.';
+    let errorHtml = error.response?.data?.message || 'No se pudo guardar el usuario.';
     if (error.response?.data?.errors) {
-      errorHtml = '<ul style="text-align: left; list-style-position: inside;">' + error.response.data.errors.map(e => `<li>${e.message}</li>`).join('') + '</ul>';
+        errorHtml = '<ul style="text-align: left; list-style-position: inside;">' + error.response.data.errors.map(e => `<li>${e.message}</li>`).join('') + '</ul>';
     }
     Swal.fire({ icon: "error", title: "Error", html: errorHtml });
   }
@@ -437,11 +443,11 @@ const closePuntosModal = () => { showPuntosModal.value = false; };
 const savePuntos = async () => {
   try {
     await axios.post(`${API_URL}/${formPuntos.value.id}/puntos`, { puntos: formPuntos.value.puntos, descripcion: formPuntos.value.descripcion }, getAuthHeaders());
-    Swal.fire("¡Éxito!", "Los puntos del usuario han sido ajustados.", "success");
+    Swal.fire("Éxito", "Puntos ajustados.", "success");
     closePuntosModal();
-    await fetchData();
+    fetchData();
   } catch (error) {
-    Swal.fire("Error", error.response?.data?.message || "No se pudo realizar el ajuste de puntos.", "error");
+    Swal.fire("Error", error.response?.data?.message || "No se pudo ajustar los puntos.", "error");
   }
 };
 
@@ -451,7 +457,7 @@ const toggleStatus = async (usuario) => {
     try {
       await axios.patch(`${API_URL}/${usuario.id}/toggle-status`, {}, getAuthHeaders());
       Swal.fire("Éxito", "Estado actualizado.", "success");
-      await fetchData();
+      fetchData();
     } catch (error) {
       Swal.fire("Error", "No se pudo actualizar el estado.", "error");
     }
@@ -465,7 +471,7 @@ const deleteUsuario = async (usuario) => {
     icon: 'error',
     showCancelButton: true,
     confirmButtonColor: '#d33',
-    confirmButtonText: 'Sí, eliminar',
+    confirmButtonText: 'Sí, eliminar', 
     cancelButtonText: 'Cancelar'
   });
   if (result.isConfirmed) {
@@ -475,29 +481,12 @@ const deleteUsuario = async (usuario) => {
       if (usuarios.value.length === 1 && currentPage.value > 1) {
         currentPage.value--;
       }
-      await fetchData();
+      fetchData();
     } catch (error) {
       Swal.fire("Error", error.response?.data?.message || "No se pudo eliminar.", "error");
     }
   }
 };
-// ... al final de tu <script setup>
-
-const focusNextInput = (event) => {
-  const form = event.target.form;
-  if (!form) return;
-
-  const focusable = Array.from(
-    form.querySelectorAll('input, select, textarea, button')
-  ).filter(el => !el.disabled && el.offsetParent !== null); // Filtra elementos visibles y habilitados
-
-  const index = focusable.indexOf(event.target);
-
-  if (index !== -1 && index < focusable.length - 1) {
-    const nextElement = focusable[index + 1];
-    nextElement.focus();
-  }
-};
 </script>
 
-<style src="../../assets/css/AdminGestion.css"></style>
+<style src="./Usuarios.css"></style>

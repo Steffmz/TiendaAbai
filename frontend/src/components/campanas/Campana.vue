@@ -64,10 +64,10 @@
                         Ver
                       </button>
                     </td>
-                    <td data-label="Puntos" class="px-3 py-3 text-blue-700 font-semibold text-center">
+                    <td data-label="Puntos" class="px-3 py-3 text-green-500 font-semibold text-center">
                       {{ campana.puntos ?? '-' }}
                     </td>
-                    <td data-label="Descuento" class="px-3 py-3 text-green-600 font-semibold text-center">
+                    <td data-label="Descuento" class="px-3 py-3 text-green-500 font-semibold text-center">
                       {{ campana.descuento !== null && campana.descuento !== undefined ? campana.descuento + '%' : '-' }}
                     </td>
                     <td data-label="Productos" class="px-4 py-2 text-center">
@@ -359,4 +359,4 @@ const {
 } = useCampana()
 </script>
 
-<style src="../../assets/css/AdminGestion.css"></style>
+<style src="../campanas/Campana.css"></style>

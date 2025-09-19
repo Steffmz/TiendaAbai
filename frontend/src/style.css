@@ -5,8 +5,14 @@ html, body {
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
+  overflow-x: hidden;  
+  overflow-y: auto !important; 
+  height: 100%;
 }
-
+.main-content {
+  overflow-y: auto !important;
+  height: 100vh;
+}
 
 /* VARIABLES DE COLOR BASE*/
 :root {
@@ -33,25 +39,30 @@ html, body {
   --table-header: #74a8cf;
 }
 
-/* VARIABLES MODO OSCURO */
+/* --- VARIABLES MODO OSCURO MEJORADAS --- */
 html.dark {
-  --bg: #334155;
-  --surface: #334155;
-  --surface-2: #242b3d;
-  --border: #374151;
-  --text: #f1f5f9;
-  --text-muted: #94a3b8;
+  /* Fondos */
+  --bg: #1a1f2e;          
+  --surface: #242b3d;     
+  --surface-2: #2f3a4e;   
+  --border: #3c465a;
 
-  --primary: #5aa1ff;
-  --primary-contrast: #0a0c12;
+  /* Texto */
+  --text: #f8fafc;        
+  --text-muted: #ffffff;  
+
+
+  --primary: #3b82f6;      
+  --primary-contrast: #ffffff;
   --accent: #ffd34d;
   --success: #10b981;
   --warning: #f59e0b;
   --danger: #ef4444;
 
-  --sidebar-bg: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-  --sidebar-hover: rgba(255,255,255,.08);
-  --topbar-bg: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  /* Navegación */
+  --sidebar-bg: linear-gradient(135deg, #111827 0%, #1f2937 100%);
+  --sidebar-hover: rgba(255,255,255,.1);
+  --topbar-bg: linear-gradient(135deg, #1f2937 0%, #111827 100%);
   --table-header: #475569;
 }
 
@@ -73,20 +84,33 @@ html.dark .bg-gray-50,
 html.dark .bg-gray-100,
 html.dark .bg-slate-50,
 html.dark .bg-slate-100 {
-    background-color: var(--bg) !important;
+    background-color: var(--surface) !important;
     color: var(--text) !important;
 }
 
+/* TARJETAS, PANEL, MODALES */
 html.dark .card,
 html.dark .panel,
 html.dark .modal,
-html.dark .dropdown-menu {
+html.dark .dropdown-menu,
+html.dark .product-card,
+html.dark .profile-card {
     background-color: var(--surface) !important;
     color: var(--text) !important;
-    border-color: var(--border) !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
 }
 
-/* FORMULARIOS  */
+/* TARJETAS DE CAMPAÑA ESPECÍFICAMENTE */
+html.dark .bg-white.shadow-md,
+html.dark .bg-white.shadow-lg,
+html.dark [class*="bg-white"] {
+    background-color: var(--surface) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--border) !important;
+}
+
+/* FORMULARIOS */
 html.dark input,
 html.dark select,
 html.dark textarea,
@@ -96,10 +120,21 @@ html.dark .form-input {
     color: var(--text) !important;
     border-color: var(--border) !important;
 }
-
 html.dark input::placeholder,
 html.dark textarea::placeholder {
-    color: var(--text-muted) !important;
+    color: var(--text) !important;
+}
+
+/* SELECT ESPECÍFICO */
+html.dark select {
+    background-color: var(--surface-2) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--border) !important;
+}
+
+html.dark select option {
+    background-color: var(--surface-2) !important;
+    color: var(--text) !important;
 }
 
 /* TABLAS */
@@ -108,51 +143,46 @@ html.dark table {
     background-color: var(--surface) !important;
     color: var(--text) !important;
 }
-
 html.dark .table thead th,
 html.dark .table thead td,
 html.dark th,
 html.dark .bg-\[\#74B9E7\] {
-    background-color: #51A2FF !important;
+    background-color: #3b82f6 !important;
     color: #ffffff !important;
 }
-
-html.dark .table tbody tr,
-html.dark tbody tr {
+html.dark .table tbody tr {
     background-color: var(--surface) !important;
     color: var(--text) !important;
     border-bottom: 1px solid var(--border) !important;
 }
-
-html.dark .table tbody tr:nth-child(even),
-html.dark tbody tr:nth-child(even) {
+html.dark .table tbody tr:nth-child(even) {
     background-color: var(--surface-2) !important;
 }
-
-html.dark .table tbody tr:hover,
-html.dark tbody tr:hover {
-    background-color: rgba(94, 161, 255, 0.1) !important;
-}
-
-html.dark .table td,
-html.dark td {
-    color: var(--text) !important;
-    border-color: var(--border) !important;
+html.dark .table tbody tr:hover {
+    background-color: rgba(59, 130, 246, 0.15) !important;
 }
 
 /* BADGES */
 html.dark .badge.success,
 html.dark .badge:contains("Activo"),
-html.dark .badge[data-status="active"] {
-    background-color: rgba(16, 185, 129, 0.2) !important;
-    color: #10b981 !important;
+html.dark .badge[data-status="active"],
+html.dark .bg-yellow-400 {
+    background-color: rgba(245, 158, 11, 0.25) !important;
+    color: #fcd34d !important;
 }
-
 html.dark .badge.danger,
 html.dark .badge:contains("Inactivo"),
 html.dark .badge[data-status="inactive"] {
-    background-color: rgba(239, 68, 68, 0.2) !important;
-    color: #ef4444 !important;
+    background-color: rgba(239, 68, 68, 0.25) !important;
+    color: #fca5a5 !important;
+}
+html.dark .badge.warning {
+    background-color: rgba(245, 158, 11, 0.25) !important;
+    color: #fcd34d !important;
+}
+html.dark .badge.info {
+    background-color: rgba(59, 130, 246, 0.25) !important;
+    color: #93c5fd !important;
 }
 
 /* BOTONES */
@@ -162,63 +192,28 @@ html.dark button {
     font-weight: 500;
     border-radius: 6px;
 }
-
 html.dark .btn-primary,
-html.dark .btn.primary {
+html.dark .btn.primary,
+html.dark .bg-blue-500 {
     background-color: var(--primary) !important;
     color: #ffffff !important;
     border-color: var(--primary) !important;
+    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.5) !important;
 }
-
 html.dark .btn-secondary,
 html.dark .btn.secondary {
     background-color: var(--surface-2) !important;
-    color: #ffffff !important;
-    border-color: var(--border) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--border) !important;
 }
+html.dark .btn-success { background-color: var(--success) !important; color: #ffffff !important; }
+html.dark .btn-warning { background-color: var(--warning) !important; color: #000 !important; }
+html.dark .btn-danger  { background-color: var(--danger) !important; color: #ffffff !important; }
 
-html.dark .btn-warning,
-html.dark .btn.warning {
-    background-color: var(--warning) !important;
-    color: #000000 !important;
-    border-color: var(--warning) !important;
-}
-
-html.dark .btn-success,
-html.dark .btn.success {
-    background-color: var(--success) !important;
-    color: #ffffff !important;
-}
-
-html.dark .btn-danger,
-html.dark .btn.danger {
-    background-color: var(--danger) !important;
-    color: #ffffff !important;
-}
-
-html.dark .btn.outline,
-html.dark .btn-outline {
-    background-color: transparent !important;
-    color: var(--primary) !important;
-    border-color: var(--primary) !important;
-}
-
-html.dark button[class*="editar"],
-html.dark button[class*="edit"] {
-    background-color: var(--primary) !important;
-    color: #ffffff !important;
-}
-
-html.dark button[class*="eliminar"],
-html.dark button[class*="delete"] {
-    background-color: var(--danger) !important;
-    color: #ffffff !important;
-}
-
-html.dark button[class*="catalogo"],
-html.dark button[class*="catalog"] {
-    background-color: var(--surface-2) !important;
-    color: #ffffff !important;
+/* HOVER PARA BOTONES */
+html.dark .bg-blue-500:hover,
+html.dark .hover\:bg-blue-600:hover {
+    background-color: #1d4ed8 !important;
 }
 
 /* NAVEGACIÓN */
@@ -228,19 +223,16 @@ html.dark .side-nav {
     background: var(--sidebar-bg) !important;
     color: var(--text) !important;
 }
-
 html.dark .topbar,
 html.dark .header,
 html.dark .navbar {
     background: var(--topbar-bg) !important;
     color: var(--text) !important;
 }
-
 html.dark .nav-link,
 html.dark .sidebar-link {
     color: rgba(255, 255, 255, 0.9) !important;
 }
-
 html.dark .nav-link:hover,
 html.dark .sidebar-link:hover {
     background-color: var(--sidebar-hover) !important;
@@ -250,20 +242,17 @@ html.dark .sidebar-link:hover {
 html.dark .pagination {
     background-color: var(--surface) !important;
 }
-
 html.dark .pagination .page-link,
 html.dark .pagination button {
     background-color: var(--surface-2) !important;
     color: var(--text) !important;
     border-color: var(--border) !important;
 }
-
 html.dark .pagination .page-link:hover,
 html.dark .pagination button:hover {
     background-color: var(--primary) !important;
     color: #ffffff !important;
 }
-
 html.dark .pagination .page-link.active,
 html.dark .pagination button.active {
     background-color: var(--primary) !important;
@@ -277,207 +266,156 @@ html.dark .search-input {
     color: var(--text) !important;
     border-color: var(--border) !important;
 }
-
 html.dark h1, html.dark h2, html.dark h3, html.dark h4, html.dark h5, html.dark h6 {
     color: var(--text) !important;
 }
-
 html.dark .text-muted,
-html.dark .muted {
+html.dark .muted,
+html.dark .text-gray-500,
+html.dark .text-gray-600,
+html.dark .text-gray-800 {
     color: var(--text-muted) !important;
 }
 
-/* ICONOS Y SCROLLBARS */
+/* CLASES ESPECÍFICAS DE TAILWIND */
+html.dark .text-gray-800 {
+    color: var(--text) !important;
+}
+
+html.dark .text-gray-600 {
+    color: var(--text-muted) !important;
+}
+
+html.dark .text-gray-500 {
+    color: var(--text-muted) !important;
+}
+
+html.dark .text-black {
+    color: var(--text) !important;
+}
+
+html.dark .text-white {
+    color: #ffffff !important;
+}
+
+html.dark label,
+html.dark .form-label {
+  color: var(--text) !important;   
+  font-weight: 500;                
+}
+
+/* ICONOS Y SCROLLBAR */
 html.dark .icon,
 html.dark i {
     color: var(--text-muted);
 }
-
-html.dark img[src*="placeholder"],
-html.dark .placeholder-img {
-    filter: brightness(0.7) contrast(1.2);
-}
-
 html.dark ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
 }
-
 html.dark ::-webkit-scrollbar-track {
     background: var(--surface-2);
 }
-
 html.dark ::-webkit-scrollbar-thumb {
     background: var(--border);
     border-radius: 4px;
 }
-
 html.dark ::-webkit-scrollbar-thumb:hover {
     background: var(--text-muted);
 }
 
-/* TABLA CONTENEDOR */
-html.dark .table-container,
-html.dark .data-table,
-html.dark .categories-table {
-    background-color: var(--surface) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 8px;
+/* AJUSTES ESPECÍFICOS PARA CAMPAÑAS */
+html.dark .shadow-md,
+html.dark .shadow-lg {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4) !important;
 }
 
-/* AJUSTES ESPECÍFICOS MODAL */
-.modal {
+html.dark .rounded-2xl,
+html.dark .rounded-lg {
+    border: 1px solid var(--border) !important;
+}
+
+/* ESTADOS DE HOVER */
+html.dark .hover\:shadow-lg:hover {
+    box-shadow: 0 10px 20px rgba(0,0,0,0.6) !important;
+}
+
+/* DROPDOWN Y SELECT MEJORADOS */
+html.dark select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23a1accd' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;
+    background-position: right 0.5rem center !important;
+    background-repeat: no-repeat !important;
+    background-size: 1.5em 1.5em !important;
+    padding-right: 2.5rem !important;
+}
+
+/* AJUSTES PARA ELEMENTOS CON CLASES ESPECÍFICAS */
+html.dark .max-w-7xl,
+html.dark .w-full,
+html.dark .mx-auto,
+html.dark .px-4,
+html.dark .sm\:px-6,
+html.dark .lg\:px-8 {
+    background-color: transparent !important;
+}
+
+/* ESPACIADO Y PADDING */
+html.dark .py-10,
+html.dark .space-y-12,
+html.dark .mb-8,
+html.dark .mt-8,
+html.dark .mt-10 {
+    background-color: transparent !important;
+}
+
+/* GRID Y FLEXBOX */
+html.dark .grid,
+html.dark .flex,
+html.dark .grid-cols-1,
+html.dark .sm\:grid-cols-2,
+html.dark .md\:grid-cols-3,
+html.dark .gap-6,
+html.dark .gap-2 {
+    background-color: transparent !important;
+}
+
+/* --- SweetAlert2 (modo claro/oscuro) --- */
+.swal2-popup {
   background-color: var(--surface) !important;
   color: var(--text) !important;
   border: 1px solid var(--border) !important;
-  border-radius: 12px !important;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.3) !important;
-  padding: 1.5rem !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.3) !important;
 }
 
-.modal input,
-.modal textarea,
-.modal select {
-  background-color: var(--surface-2) !important;
+.swal2-title {
   color: var(--text) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 8px !important;
-  padding: 0.5rem 0.75rem !important;
+  font-weight: 700 !important;
 }
 
-.modal input::placeholder,
-.modal textarea::placeholder {
+.swal2-html-container {
   color: var(--text-muted) !important;
 }
 
-.modal .close,
-.modal button.close {
-  background: transparent !important;
-  border: none !important;
-  color: var(--text) !important;
-  font-size: 1.5rem !important;
-  cursor: pointer;
-}
-
-.modal .btn-primary {
+.swal2-confirm {
   background-color: var(--primary) !important;
   color: var(--primary-contrast) !important;
-  border-radius: 8px !important;
-  padding: 0.6rem 1.2rem !important;
-  font-weight: 600 !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 0 2px 6px rgba(59,130,246,0.5) !important;
 }
 
-.fly-to-cart-clone {
-  position: fixed;
-  z-index: 9999;
-  border-radius: 50%;
-  opacity: 0.8;
-  transition: all 1s cubic-bezier(0.55, -0.44, 0.95, 0.73);
-  object-fit: cover;
-}
-
-.btn { 
-  padding: 0.5rem 1rem; 
-  border: none; 
-  border-radius: 6px; 
-  cursor: pointer; 
-  font-weight: 500;
-  transition: filter 0.2s;
-}
-.btn:hover {
-  filter: brightness(0.95);
-}
-
-.btn-primary { background-color: var(--primary); color: var(--primary-contrast); }
-.btn-secondary { background-color: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
-.btn-edit { background-color: #f59e0b; color: white; }
-.btn-danger { background-color: #ef4444; color: white; }
-.btn-success { background-color: #22c55e; color: white; }
-.btn-info { background-color: #3b82f6; color: white; }
-
-
-/* Badges de estado */
-.badge { 
-  padding: 4px 10px; 
-  border-radius: 12px; 
-  font-size: 0.8em; 
-  font-weight: 600; 
-}
-.badge.success { background-color: rgba(34, 197, 94, 0.2); color: #166534; }
-.badge.danger { background-color: rgba(239, 68, 68, 0.2); color: #991b1b; }
-.badge.warning { background-color: rgba(245, 158, 11, 0.2); color: #92400e; }
-.badge.info { background-color: rgba(59, 130, 246, 0.2); color: #1e40af; }
-
-/* En modo oscuro, los badges necesitan colores más claros */
-html.dark .badge.success { color: #6ee7b7; }
-html.dark .badge.danger { color: #fca5a5; }
-html.dark .badge.warning { color: #fcd34d; }
-html.dark .badge.info { color: #93c5fd; }
-/* --- REFUERZO MODO NOCHE --- */
-
-/* Fondos generales que a veces se quedan blancos */
-html.dark .bg-white,
-html.dark .bg-gray-50,
-html.dark .bg-gray-100 {
-  background-color: var(--surface) !important;
-}
-
-/* Tarjetas y Paneles */
-html.dark .profile-card,
-html.dark .cart-item,
-html.dark .cart-summary,
-html.dark .pedido-card,
-html.dark .product-card,
-html.dark .empty-cart,
-html.dark .empty-state,
-html.dark .profile-container .profile-card {
-  background-color: var(--surface) !important;
-  border-color: var(--border) !important;
-}
-
-/* Textos específicos */
-html.dark .page-title,
-html.dark .page-subtitle,
-html.dark .user-name,
-html.dark .item-name,
-html.dark .cart-summary h2 {
+.swal2-cancel {
+  background-color: var(--surface-2) !important;
   color: var(--text) !important;
+  border-radius: 0.5rem !important;
+  border: 1px solid var(--border) !important;
 }
 
-html.dark .user-email,
-html.dark .item-points {
-  color: var(--text-muted) !important;
+.swal2-confirm:hover {
+  background-color: #1d4ed8 !important;
 }
 
-/* Botones específicos que no son globales */
-html.dark .btn-edit {
-  background-color: #d97706;
-}
-html.dark .btn-edit:hover {
-  background-color: #b45309;
-}
-html.dark .btn-remove {
-  color: #fca5a5;
-}
-html.dark .btn-checkout {
-  background-color: var(--primary);
-  color: var(--primary-contrast);
-}
-
-/* Badges del carrito y notificaciones */
-html.dark .topbar-badge,
-html.dark .cart-badge {
-  background-color: #ef4444;
-  color: white;
-}
-/* --- REFUERZO ADICIONAL MODO NOCHE --- */
-html.dark .bg-white {
+.swal2-cancel:hover {
   background-color: var(--surface) !important;
 }
 
-html.dark .text-black,
-html.dark .text-gray-800,
-html.dark .text-gray-700,
-html.dark .text-gray-600 {
-  color: var(--text) !important;
-}

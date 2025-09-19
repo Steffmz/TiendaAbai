@@ -117,11 +117,28 @@
           <div class="form-group"><label>Nombre *</label><input v-model="form.nombre" type="text" required /></div>
           <div class="form-group"><label>Descripción</label><textarea v-model="form.descripcion" rows="3"></textarea>
           </div>
-          <div class="form-grid">
-            <div><label>Precio (puntos) *</label><input v-model="form.precioPuntos" type="number" min="1" required />
-            </div>
-            <div><label>Stock *</label><input v-model="form.stock" type="number" min="0" required /></div>
+         <div class="form-grid grid grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="form-label">Precio (puntos) *</label>
+            <input
+              v-model="form.precioPuntos"
+              type="number"
+              min="1"
+              required
+              class="form-input"
+            />
           </div>
+          <div class="form-group">
+            <label class="form-label">Stock *</label>
+            <input
+              v-model="form.stock"
+              type="number"
+              min="0"
+              required
+              class="form-input"
+            />
+          </div>
+        </div>
           <div class="form-group">
             <label>Imagen</label>
             <input type="file" @change="handleImageUpload" accept="image/*" class="file-input" />
@@ -299,4 +316,3 @@ if (result.isConfirmed) {
 };
 </script>
 
-<style src="../../assets/css/AdminGestion.css"></style>
