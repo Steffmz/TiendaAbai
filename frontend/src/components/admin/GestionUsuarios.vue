@@ -8,22 +8,28 @@
 
     <!-- Barra de acciones -->
     <div class="w-full flex justify-center mb-6">
-        <div class="flex flex-col md:flex-row items-center gap-3 w-full max-w-3xl">
-          <input v-model="searchQuery" type="text" placeholder="Buscar por nombre o cédula..."
-            class="w-64 md:flex-1 px-3 py-2 border border-yellow-400 rounded-lg text-blue-800 bg-blue-50
+      <div class="flex flex-col md:flex-row items-center gap-3 w-full max-w-3xl">
+        <input v-model="searchQuery" type="text" placeholder="Buscar por nombre o cédula..." class="w-64 md:flex-1 px-3 py-2 border border-yellow-400 rounded-lg text-blue-800 bg-blue-50
                   focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-200
                   text-sm shadow-sm transition-all duration-200" />
 
-          <button @click="openModal()"
-            class="px-5 py-2 bg-[#FFB93B] text-black rounded-lg font-semibold shadow-md
+        <button @click="triggerFileInput" class="px-5 py-2 bg-green-500 text-white rounded-lg font-semibold shadow-md
+               hover:bg-green-600 transition-all duration-200 hover:shadow-lg">
+          Importar Excel
+        </button>
+        <input type="file" ref="fileInput" @change="handleFileUpload" style="display: none" accept=".xlsx, .xls" />
+
+
+        <button @click="openModal()" class="px-5 py-2 bg-[#FFB93B] text-black rounded-lg font-semibold shadow-md
                   hover:bg-[#74B9E7] transition-all duration-200 hover:shadow-lg">
-            + Nuevo Usuario
-          </button>
-        </div>
+          + Nuevo Usuario
+        </button>
+      </div>
     </div>
 
     <!-- Vista Desktop - Tabla -->
-    <div class="hidden md:block rounded-xl border border-gray-200 shadow-sm mb-2 w-full max-w-7xl mx-auto overflow-hidden">
+    <div
+      class="hidden md:block rounded-xl border border-gray-200 shadow-sm mb-2 w-full max-w-7xl mx-auto overflow-hidden">
       <table class="w-full border-collapse">
         <thead class="bg-[#74B9E7] text-black">
           <tr>
@@ -41,11 +47,7 @@
           <template v-if="loading">
             <tr>
               <td colspan="7" class="p-0">
-                <div
-                  v-for="i in 5"
-                  :key="i"
-                  class="flex items-center p-4 gap-4 border-b border-[var(--border)]"
-                >
+                <div v-for="i in 5" :key="i" class="flex items-center p-4 gap-4 border-b border-[var(--border)]">
                   <BaseSkeleton width="150px" height="24px" radius="6px" />
                   <BaseSkeleton width="100px" height="24px" radius="6px" />
                   <BaseSkeleton width="50px" height="24px" radius="6px" />
@@ -62,43 +64,29 @@
           </template>
 
           <!-- Usuarios -->
-          <template v-else-if="filteredUsuarios.length > 0">
-            <tr v-for="usuario in filteredUsuarios" :key="usuario.id">
+          <template v-else-if="usuarios.length > 0">
+            <tr v-for="usuario in usuarios" :key="usuario.id">
               <td>{{ usuario.nombreCompleto }}</td>
               <td>{{ usuario.cedula }}</td>
               <td>{{ usuario.puntosTotales }}</td>
               <td>{{ usuario.email }}</td>
               <td>{{ usuario.rol }}</td>
               <td>
-                <span
-                  :class="['badge', usuario.activo ? 'success' : 'danger']"
-                >
+                <span :class="['badge', usuario.activo ? 'success' : 'danger']">
                   {{ usuario.activo ? "Activo" : "Inactivo" }}
                 </span>
               </td>
               <td class="actions-cell">
-                <button
-                  @click="openModal(usuario)"
-                  class="btn-edit"
-                >
+                <button @click="openModal(usuario)" class="btn-edit">
                   Editar
                 </button>
-                <button
-                  @click="openPuntosModal(usuario)"
-                  class="btn-edit"
-                >
+                <button @click="openPuntosModal(usuario)" class="btn-edit">
                   Puntos
                 </button>
-                <button
-                  @click="toggleStatus(usuario)"
-                  :class="usuario.activo ? 'btn-danger' : 'btn-edit'"
-                >
+                <button @click="toggleStatus(usuario)" :class="usuario.activo ? 'btn-danger' : 'btn-edit'">
                   {{ usuario.activo ? "Desactivar" : "Activar" }}
                 </button>
-                <button
-                  @click="deleteUsuario(usuario)"
-                  class="btn-danger"
-                >
+                <button @click="deleteUsuario(usuario)" class="btn-danger">
                   Eliminar
                 </button>
               </td>
@@ -109,11 +97,8 @@
           <template v-else>
             <tr>
               <td colspan="7">
-                <EmptyState
-                  icon="mdi:account-search-outline"
-                  title="No se encontraron usuarios"
-                  message="Prueba con otro término de búsqueda o crea un nuevo usuario."
-                />
+                <EmptyState icon="mdi:account-search-outline" title="No se encontraron usuarios"
+                  message="Prueba con otro término de búsqueda o crea un nuevo usuario." />
               </td>
             </tr>
           </template>
@@ -136,17 +121,15 @@
       </template>
 
       <!-- Cards de usuarios -->
-      <template v-else-if="filteredUsuarios.length > 0">
-        <div v-for="usuario in filteredUsuarios" :key="usuario.id" class="mobile-card">
+      <template v-else-if="usuarios.length > 0">
+        <div v-for="usuario in usuarios" :key="usuario.id" class="mobile-card">
           <div class="mobile-card-header">
             <h3 class="mobile-card-title">{{ usuario.nombreCompleto }}</h3>
-            <span
-              :class="['badge', usuario.activo ? 'success' : 'danger']"
-            >
+            <span :class="['badge', usuario.activo ? 'success' : 'danger']">
               {{ usuario.activo ? "Activo" : "Inactivo" }}
             </span>
           </div>
-          
+
           <div class="mobile-card-content">
             <div class="mobile-info-item">
               <span class="mobile-label">Cédula:</span>
@@ -171,10 +154,7 @@
             <button @click="openPuntosModal(usuario)" class="btn-edit">
               Puntos
             </button>
-            <button
-              @click="toggleStatus(usuario)"
-              :class="usuario.activo ? 'btn-danger' : 'btn-edit'"
-            >
+            <button @click="toggleStatus(usuario)" :class="usuario.activo ? 'btn-danger' : 'btn-edit'">
               {{ usuario.activo ? "Desactivar" : "Activar" }}
             </button>
             <button @click="deleteUsuario(usuario)" class="btn-danger">
@@ -187,81 +167,68 @@
       <!-- Estado vacío para mobile -->
       <template v-else>
         <div class="mobile-empty">
-          <EmptyState
-            icon="mdi:account-search-outline"
-            title="No se encontraron usuarios"
-            message="Prueba con otro término de búsqueda o crea un nuevo usuario."
-          />
+          <EmptyState icon="mdi:account-search-outline" title="No se encontraron usuarios"
+            message="Prueba con otro término de búsqueda o crea un nuevo usuario." />
         </div>
       </template>
     </div>
 
     <!-- Paginación -->
-    <div v-if="!loading && totalPages > 1" class="pagination-controls">
-      <button
-        @click="prevPage"
-        :disabled="currentPage === 1"
-        class="btn btn-secondary"
-      >
-        Anterior
+<div v-if="!loading && totalPages > 1" class="flex flex-col items-center justify-center mt-4">
+  <p class="text-gray-700">
+      Existen <span class="text-blue-500 font-semibold">{{ totalUsers }}</span> usuarios
+  </p>
+  <div class="flex items-center mt-2 space-x-1">
+      <button @click="prevPage" :disabled="currentPage === 1"
+        class="w-8 h-8 flex items-center justify-center rounded-md bg-[#fffef9] border border-gray-200 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+        ←
       </button>
-      <span>Página {{ currentPage }} de {{ totalPages }}</span>
-      <button
-        @click="nextPage"
-        :disabled="currentPage === totalPages"
-        class="btn btn-secondary"
-      >
-        Siguiente
+      <button v-for="pagina in paginasVisibles" :key="pagina" @click="goToPage(pagina)" :class="[
+        'w-8 h-8 flex items-center justify-center rounded-md border font-medium',
+        currentPage === pagina
+          ? 'bg-blue-500 text-white border-blue-500'
+          : 'bg-[#fffef9] border-gray-200 text-gray-600 hover:bg-gray-100',
+        pagina === '...' ? 'cursor-default' : ''
+      ]">
+        {{ pagina }}
       </button>
-    </div>
+      <button @click="nextPage" :disabled="currentPage === totalPages"
+        class="w-8 h-8 flex items-center justify-center rounded-md bg-[#fffef9] border border-gray-200 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+        →
+      </button>
+  </div>
+</div>
 
     <!-- Modal Crear/Editar -->
-   <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
+    <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
       <div class="modal-content">
         <h2 class="modal-title">{{ isEditMode ? 'Editar Usuario' : 'Crear Usuario' }}</h2>
         <form @submit.prevent="saveUsuario">
           <div class="form-grid">
-             <!-- Nombre -->
-        <div class="form-group">
-          <label>Nombre Completo</label>
-          <input
-            v-model="form.nombreCompleto"
-            type="text"
-            required
-            @input="form.nombreCompleto = capitalizeWords(form.nombreCompleto)"
-          />
-        </div>
-             <!-- Cédula -->
-        <div class="form-group">
-          <label>Cédula</label>
-          <input
-            v-model="form.cedula"
-            type="text"
-            required
-            :disabled="isEditMode"
-            pattern="^[0-9]{5,15}$"
-            maxlength="15"
-            title="La cédula debe tener entre 5 y 15 dígitos y solo números"
-            @input="form.cedula = form.cedula.replace(/[^0-9]/g, '')"
-          />
-        </div>
+            <!-- Nombre -->
+            <div class="form-group">
+              <label>Nombre Completo</label>
+              <input v-model="form.nombreCompleto" type="text" required
+                @input="form.nombreCompleto = capitalizeWords(form.nombreCompleto)" />
+            </div>
+            <!-- Cédula -->
+            <div class="form-group">
+              <label>Cédula</label>
+              <input v-model="form.cedula" type="text" required :disabled="isEditMode" pattern="^[0-9]{5,15}$"
+                maxlength="15" title="La cédula debe tener entre 5 y 15 dígitos y solo números"
+                @input="form.cedula = form.cedula.replace(/[^0-9]/g, '')" />
+            </div>
             <div class="form-group"><label>Email</label><input v-model="form.email" type="email" required /></div>
             <div class="form-group">
-          <label>Sede</label>
-          <input v-model="form.sede" type="text" required />
-        </div>
+              <label>Sede</label>
+              <input v-model="form.sede" type="text" required />
+            </div>
             <!-- Contraseña (solo en crear) -->
-        <div class="form-group" v-if="!isEditMode">
-          <label>Contraseña</label>
-          <input
-            v-model="form.contrasena"
-            type="password"
-            required
-            maxlength="16"
-            pattern="^(?=.*[0-9]).{1,16}$"
-            title="La contraseña debe tener máximo 16 caracteres e incluir al menos un dígito"
-          />
-        </div>
+            <div class="form-group" v-if="!isEditMode">
+              <label>Contraseña</label>
+              <input v-model="form.contrasena" type="password" required maxlength="16" pattern="^(?=.*[0-9]).{1,16}$"
+                title="La contraseña debe tener máximo 16 caracteres e incluir al menos un dígito" />
+            </div>
             <div class="form-group"><label>Rol</label><select v-model="form.rol" required>
                 <option value="Empleado">Empleado</option>
                 <option value="Administrador">Administrador</option>
@@ -280,29 +247,17 @@
     </div>
 
     <!-- Modal Ajustar Puntos -->
-    <BaseModal
-      :show="showPuntosModal"
-      :title="`Ajustar Puntos a ${formPuntos.nombreCompleto}`"
-      @close="closePuntosModal"
-      width="500px"
-    >
+    <BaseModal :show="showPuntosModal" :title="`Ajustar Puntos a ${formPuntos.nombreCompleto}`"
+      @close="closePuntosModal" width="500px">
       <form id="puntosForm" @submit.prevent="savePuntos">
         <div class="form-group">
           <label>Puntos a Añadir/Quitar</label>
-          <input
-            v-model.number="formPuntos.puntos"
-            type="number"
-            required
-            placeholder="Ej: 100 para añadir, -50 para quitar"
-          />
+          <input v-model.number="formPuntos.puntos" type="number" required
+            placeholder="Ej: 100 para añadir, -50 para quitar" />
         </div>
         <div class="form-group">
           <label>Motivo del Ajuste</label>
-          <textarea
-            v-model="formPuntos.descripcion"
-            required
-            placeholder="Ej: Bono por desempeño Q3"
-          />
+          <textarea v-model="formPuntos.descripcion" required placeholder="Ej: Bono por desempeño Q3" />
         </div>
       </form>
       <template #actions>
@@ -318,8 +273,7 @@
 </template>
 
 <script setup>
-// El script que ya tenías en tu rama, que es el más completo.
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue"; // Importar 'watch'
 import axios from "axios";
 import Swal from "sweetalert2";
 import BaseModal from "../shared/BaseModal.vue";
@@ -340,18 +294,26 @@ const cargos = ref([]);
 const centrosDeCostos = ref([]);
 const currentPage = ref(1);
 const totalUsers = ref(0);
-const usersPerPage = ref(10); // Puedes ajustar este número si quieres menos items por página
+const usersPerPage = ref(6); // Se mantiene en 6
 const totalPages = computed(() => Math.ceil(totalUsers.value / usersPerPage.value));
 const getAuthHeaders = () => ({ headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` }});
 
+// 1. MODIFICACIÓN: La función de carga ahora incluye el término de búsqueda
 const fetchData = async () => {
   loading.value = true;
   try {
-    const params = new URLSearchParams({ page: currentPage.value, limit: usersPerPage.value });
+    const params = new URLSearchParams({
+      page: currentPage.value,
+      limit: usersPerPage.value,
+      search: searchQuery.value, // Enviamos el valor del input al backend
+    });
+
     const usuariosRes = await axios.get(`${API_URL}?${params.toString()}`, getAuthHeaders());
     usuarios.value = usuariosRes.data.usuarios;
     totalUsers.value = usuariosRes.data.total;
-    if(cargos.value.length === 0) {
+    
+    // El resto de la lógica se mantiene
+    if(cargos.value.length === 0 && centrosDeCostos.value.length === 0) {
         const [cargosRes, centrosRes] = await Promise.all([
             axios.get(`${ADMIN_DATA_URL}/cargos`, getAuthHeaders()),
             axios.get(`${ADMIN_DATA_URL}/centros-de-costos`, getAuthHeaders()),
@@ -367,16 +329,25 @@ const fetchData = async () => {
   }
 };
 
+// 2. NUEVO: Se añade un "watcher" para la barra de búsqueda
+let searchTimeout;
+watch(searchQuery, () => {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    currentPage.value = 1; // Reseteamos a la página 1 en cada nueva búsqueda
+    fetchData();
+  }, 300); // Espera 300ms después de que el usuario deja de escribir
+});
+
+
 const capitalizeWords = (text) => {
   if (!text) return '';
-  return text
-    .toLowerCase()
-    .replace(/\b\w/g, (char) => char.toUpperCase());
+  return text.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
 const capitalizeCargo = () => {
-  if (form.cargoId && cargos.length) {
-    const cargo = cargos.find(c => c.id === form.cargoId);
+  if (form.value.cargoId && cargos.value.length) {
+    const cargo = cargos.value.find(c => c.id === form.value.cargoId);
     if (cargo) {
       cargo.nombre = capitalizeWords(cargo.nombre);
     }
@@ -397,11 +368,8 @@ const prevPage = () => {
 };
 onMounted(fetchData);
 
-const filteredUsuarios = computed(() => {
-  if (!searchQuery.value) return usuarios.value;
-  const lowerCaseQuery = searchQuery.value.toLowerCase();
-  return usuarios.value.filter(u => u.nombreCompleto.toLowerCase().includes(lowerCaseQuery) || u.cedula.includes(lowerCaseQuery));
-});
+// 3. ELIMINACIÓN: Ya no necesitamos filtrar en el frontend
+// const filteredUsuarios = computed(() => { ... });
 
 const openModal = (usuario = null) => {
   if (usuario) {
@@ -486,6 +454,36 @@ const deleteUsuario = async (usuario) => {
       Swal.fire("Error", error.response?.data?.message || "No se pudo eliminar.", "error");
     }
   }
+};
+
+// Funciones para el nuevo paginador visual
+const paginasVisibles = computed(() => {
+    const total = totalPages.value;
+    const actual = currentPage.value;
+    const rango = 1;
+    const paginas = [];
+
+    if (total <= 7) {
+      for (let i = 1; i <= total; i++) paginas.push(i);
+      return paginas;
+    }
+
+    paginas.push(1);
+    if (actual > rango + 2) paginas.push('...');
+    for (let i = Math.max(2, actual - rango); i <= Math.min(total - 1, actual + rango); i++) {
+      paginas.push(i);
+    }
+    if (actual < total - rango - 1) paginas.push('...');
+    paginas.push(total);
+
+    return paginas;
+});
+
+const goToPage = (pagina) => {
+    if (typeof pagina === 'number' && pagina !== currentPage.value) {
+        currentPage.value = pagina;
+        fetchData();
+    }
 };
 </script>
 

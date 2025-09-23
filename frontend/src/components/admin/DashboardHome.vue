@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard-container">
   
-    <h1 class="page-title">Dashboard Principal</h1>
+    <h1 class="page-title">Informacion General</h1>
 
     <div v-if="loading" class="loading-state">
       Cargando estadísticas...
