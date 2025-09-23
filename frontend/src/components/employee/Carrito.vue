@@ -44,7 +44,6 @@
 </template>
 
 <script setup>
-// En <script setup> de Carrito.vue
 import { onMounted, defineEmits } from 'vue';
 import { useCartStore } from '../../stores/cartStore';
 import { storeToRefs } from 'pinia';
@@ -52,10 +51,7 @@ import { storeToRefs } from 'pinia';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const emit = defineEmits(['redemption-successful']);
 
-// Instanciamos el store
 const cartStore = useCartStore();
-
-// Usamos storeToRefs para mantener la reactividad al desestructurar
 const { items: carrito, loading, totalItems, totalPuntos } = storeToRefs(cartStore);
 const { eliminarDelCarrito, procesarCanje, fetchCarrito } = cartStore;
 
@@ -103,7 +99,7 @@ onMounted(fetchCarrito);
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 2rem;
-  align-items: flex-start; /* Alinea los items al inicio */
+  align-items: flex-start;
 }
 
 .cart-items {
@@ -114,13 +110,14 @@ onMounted(fetchCarrito);
 
 .cart-item {
   display: grid;
-  grid-template-columns: auto 1fr auto auto;
+  grid-template-columns: auto 1fr auto auto auto;
   gap: 1.5rem;
   align-items: center;
   padding: 1rem;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 8px;
+  position: relative;
 }
 
 .item-image {
@@ -146,10 +143,16 @@ onMounted(fetchCarrito);
   background: transparent;
   color: var(--danger);
   border: none;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   cursor: pointer;
-  padding: 0;
   line-height: 1;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.btn-remove:hover {
+  background: rgba(255, 0, 0, 0.1);
+  transform: scale(1.1);
 }
 
 .cart-summary {
@@ -157,8 +160,8 @@ onMounted(fetchCarrito);
   padding: 1.5rem;
   border-radius: 8px;
   border: 1px solid var(--border);
-  position: sticky; /* Se mantiene visible al hacer scroll */
-  top: 100px; /* 80px de la topbar + 20px de margen */
+  position: sticky;
+  top: 100px;
 }
 
 .cart-summary h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
@@ -176,6 +179,11 @@ onMounted(fetchCarrito);
   font-size: 1rem;
   font-weight: 600;
   margin-top: 1rem;
+  transition: background 0.3s ease;
+}
+.btn-checkout:hover {
+  background-color: #facc15; /* Amarillo */
+  color: #000;
 }
 
 /* --- Responsive --- */
@@ -196,7 +204,7 @@ onMounted(fetchCarrito);
     margin-top: -0.5rem;
   }
   .item-quantity {
-    display: none; /* Ocultamos la cantidad para simplificar */
+    display: none;
   }
 }
 </style>

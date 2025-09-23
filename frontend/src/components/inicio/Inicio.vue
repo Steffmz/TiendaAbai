@@ -67,10 +67,38 @@
       <InicioLogueado v-else />
     </main>
 
-    <footer
-      class="text-white py-6 mt-auto"
-      style="background: linear-gradient(135deg, #74B9E7 0%, #2B7FFF 100%);"
-    >
+     <footer
+        class="text-white py-6 mt-auto"
+        style="background: linear-gradient(135deg, #74B9E7 0%, #2B7FFF 100%);"
+        >
+        <div class="flex justify-center space-x-6">
+          <!-- Facebook -->
+          <a
+            href="https://facebook.com/tu_pagina"
+            target="_blank"
+            class="hover:scale-110 transition-transform"
+          >
+            <span class="iconify text-3xl" data-icon="mdi:facebook" style="color: #ffffff;"></span>
+          </a>
+
+          <!-- Instagram -->
+          <a
+            href="https://instagram.com/tu_pagina"
+            target="_blank"
+            class="hover:scale-110 transition-transform"
+          >
+            <span class="iconify text-3xl" data-icon="mdi:instagram" style="color: #ffffff;"></span>
+          </a>
+
+          <!-- TikTok -->
+          <a
+            href="https://www.tiktok.com/@tu_pagina"
+            target="_blank"
+            class="hover:scale-110 transition-transform"
+          >
+            <span class="iconify text-3xl" data-icon="ic:baseline-tiktok" style="color: #ffffff;"></span>
+          </a>
+        </div>
       </footer>
   </div>
 </template>
