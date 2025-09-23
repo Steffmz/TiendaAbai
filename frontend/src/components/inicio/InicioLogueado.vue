@@ -2,7 +2,7 @@
   <div class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8">
     <div class="py-10 space-y-16">
       <section class="text-center">
-        <h2 class="text-3xl font-bold text-gray-800 mb-8">Categorías</h2>
+        <h2 class="text-3xl font-bold text-[var(--text)] mb-8">Categorías</h2>
         <div v-if="loading" class="text-center text-gray-500">Cargando categorías...</div>
         <div v-else-if="categorias.length === 0" class="text-center text-gray-500">
           <p>No hay categorías con productos disponibles en este momento.</p>
@@ -26,7 +26,7 @@
       </section>
 
       <section v-if="categoriaSeleccionadaId" class="text-center">
-        <h3 class="text-3xl font-bold text-gray-800 mb-8 capitalize">Productos de {{ categoriaSeleccionadaNombre }}</h3>
+        <h3 class="text-3xl font-bold text-[var(--text)] mb-8 capitalize">Productos de {{ categoriaSeleccionadaNombre }}</h3>
         <div v-if="loadingProductos" class="text-center text-gray-500 mt-10">Cargando productos...</div>
         <div v-else-if="productosPaginados.length > 0">
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -42,7 +42,7 @@
                 class="w-full h-40 object-cover rounded-t-xl"
               />
               <div class="p-4 flex-grow flex flex-col">
-                <h3 class="text-lg font-semibold text-gray-800">{{ producto.nombre }}</h3>
+                <h3 class="text-lg font-semibold text-[var(--text)]">{{ producto.nombre }}</h3>
                 <p class="text-indigo-600 font-bold my-2">{{ producto.precioPuntos }} Puntos</p>
                 <button
                   @click="cartStore.agregarAlCarrito(producto.id, $event)"
@@ -64,7 +64,7 @@
       </section>
 
       <section>
-        <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">Campañas Activas</h2>
+        <h2 class="text-3xl font-bold text-[var(--text)] mb-8 text-center">Campañas Activas</h2>
         <div v-if="loading" class="text-center text-gray-500">Cargando campañas...</div>
         <div v-else-if="campanasFiltradas.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           <div
@@ -75,7 +75,7 @@
             <div class="p-6 flex flex-col justify-between h-full">
               <div>
                 <div class="flex justify-between items-start mb-3">
-                  <h3 class="text-lg font-semibold text-gray-800">{{ campana.titulo }}</h3>
+                  <h3 class="text-lg font-semibold text-[var(--text)]">{{ campana.titulo }}</h3>
                   <span class="px-3 py-1 text-xs rounded-full font-medium bg-yellow-400 text-black">Activa</span>
                 </div>
                 <p class="text-sm text-gray-600 mb-6 line-clamp-3">{{ campana.descripcion }}</p>
@@ -199,18 +199,18 @@ const verCampana = (campana) => {
   @apply transform -translate-y-1;
 }
 .category-icon-wrapper {
-  @apply w-20 h-20 flex items-center justify-center rounded-full shadow-md bg-white border-2 border-transparent transition-all duration-200;
+  @apply w-20 h-20 flex items-center justify-center rounded-full shadow-md bg-[var(--surface)] border-2 border-transparent transition-all duration-200;
 }
 .category-icon-wrapper.selected {
   @apply border-blue-500 scale-110 shadow-lg;
 }
 .category-name {
-  @apply mt-2 text-gray-700 font-medium;
+  @apply mt-2 text-[var(--text-muted)] font-medium;
 }
 
 /* Estilos para las tarjetas de campaña y productos */
 .campaign-card, .product-card {
-  @apply bg-white rounded-xl shadow-md flex flex-col transition-all duration-300;
+  @apply bg-[var(--surface)] rounded-xl shadow-md flex flex-col transition-all duration-300;
 }
 .campaign-card:hover, .product-card:hover {
   @apply shadow-xl -translate-y-1;

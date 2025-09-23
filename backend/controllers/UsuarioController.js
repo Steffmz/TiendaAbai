@@ -1,6 +1,7 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const bcrypt = require("bcryptjs");
+const xlsx = require('xlsx');
 
 exports.getAllUsuarios = async (req, res) => {
   const adminId = req.usuario.userId;
@@ -309,5 +310,94 @@ exports.getMiPerfil = async (req, res) => {
     res.json(usuario);
   } catch (error) {
     res.status(500).json({ message: "Error al obtener el perfil." });
+  }
+};
+exports.importarUsuarios = async (req, res) => {
+  // 1. Validar que se haya subido un archivo
+  if (!req.file) {
+    return res.status(400).json({ message: 'No se ha subido ningún archivo.' });
+  }
+
+  try {
+    // 2. Leer el archivo Excel desde la memoria
+    const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const usuariosDesdeExcel = xlsx.utils.sheet_to_json(worksheet);
+
+    if (usuariosDesdeExcel.length === 0) {
+      return res.status(400).json({ message: 'El archivo Excel está vacío o tiene un formato incorrecto.' });
+    }
+
+    let creados = 0;
+    const errores = [];
+
+    // 3. Procesar cada usuario del Excel dentro de una transacción
+    await prisma.$transaction(async (tx) => {
+      for (const [index, usuarioData] of usuariosDesdeExcel.entries()) {
+        const { Cedula, NombreCompleto, Email, Sede, Cargo, CentroDeCostos } = usuarioData;
+
+        // Validar campos obligatorios
+        if (!Cedula || !NombreCompleto || !Email || !Sede || !Cargo || !CentroDeCostos) {
+          errores.push(`Fila ${index + 2}: Faltan datos obligatorios.`);
+          continue;
+        }
+
+        // Verificar si el usuario ya existe por cédula o email
+        const cedulaStr = String(Cedula);
+        const existe = await tx.usuario.findFirst({
+          where: { OR: [{ cedula: cedulaStr }, { email: Email }] },
+        });
+
+        if (existe) {
+          errores.push(`Fila ${index + 2}: Usuario con cédula ${cedulaStr} o email ${Email} ya existe.`);
+          continue;
+        }
+
+        // 4. Contraseña temporal (cédula) y hasheo
+        const contrasenaTemporal = cedulaStr;
+        const hashedPassword = await bcrypt.hash(contrasenaTemporal, 10);
+
+        // 5. Buscar o crear Cargo y Centro de Costos
+        const [cargoRecord, centroRecord] = await Promise.all([
+          tx.cargos.upsert({
+            where: { nombre: Cargo },
+            update: {},
+            create: { nombre: Cargo },
+          }),
+          tx.centroDeCostos.upsert({
+            where: { nombre: CentroDeCostos },
+            update: {},
+            create: { nombre: CentroDeCostos },
+          })
+        ]);
+
+        // Crear el usuario
+        await tx.usuario.create({
+          data: {
+            cedula: cedulaStr,
+            nombreCompleto: NombreCompleto,
+            email: Email,
+            sede: Sede,
+            contrasena: hashedPassword,
+            rol: 'Empleado',
+            cargoId: cargoRecord.id,
+            centroDeCostosId: centroRecord.id,
+            activo: true
+          },
+        });
+        creados++;
+      }
+    });
+
+    res.status(200).json({
+      message: 'Importación finalizada.',
+      creados,
+      errores,
+    });
+
+  } catch (error) {
+    console.error("Error en la importación:", error);
+    res.status(500).json({ message: 'Ocurrió un error inesperado durante la importación.' });
   }
 };
