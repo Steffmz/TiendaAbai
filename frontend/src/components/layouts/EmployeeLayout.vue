@@ -79,8 +79,10 @@ onMounted(fetchUserData);
   width: 100%;
   max-width: 1280px;
   margin: 0 auto;
+  
+  /* ✅ ESTOS ESTILOS SE MUEVEN AQUÍ */
   padding: 2rem;
-  padding-top: 100px;
+  padding-top: 100px; /* Espacio para el Topbar fijo */
 }
 
 @media (max-width: 768px) {

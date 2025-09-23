@@ -1,8 +1,5 @@
 <template>
-  <footer
-    class="text-white py-6 mt-auto"
-    style="background: linear-gradient(135deg, #74B9E7 0%, #2B7FFF 100%);"
-  >
+  <footer class="app-footer">
     <div class="max-w-7xl mx-auto px-12 text-center">
       <div class="flex justify-center space-x-6 mb-4">
         <a
@@ -43,3 +40,13 @@
 <script setup>
 // No se necesita lógica de script para este componente.
 </script>
+
+<style scoped>
+.app-footer {
+  color: white;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+  margin-top: auto;
+  /* El color de fondo se manejará en el style.css global */
+}
+</style>

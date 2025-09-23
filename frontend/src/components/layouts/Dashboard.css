@@ -2,7 +2,6 @@
 :root {
   --sidebar-width: 280px;
   --sidebar-width-collapsed: 80px;
-  --topbar-height: 80px;
   --background-color: var(--bg, #f4f7fa);
   --transition: all 0.3s ease-in-out;
 }
@@ -11,21 +10,19 @@
   display: flex;
   width: 100vw;
   height: 100vh;
-  overflow: hidden;
+  overflow: hidden; /* Previene el scroll en el nivel más alto */
 }
 
 .main-content {
-  position: relative;
   flex-grow: 1;
   display: flex;
   flex-direction: column;
+  position: relative;
   transition: padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   padding-left: var(--sidebar-width);
   
-  /* ✅ CORRECCIÓN CLAVE:
-     Añadimos 'overflow: hidden' para asegurar que este contenedor
-     no genere un scroll propio y contenga a sus hijos correctamente. */
-  overflow: hidden;
+  /* CLAVE 1: Asegura que este contenedor no pueda ser más alto que la ventana */
+  overflow: hidden; 
 }
 
 .main-content.collapsed {
@@ -33,21 +30,25 @@
 }
 
 .page-content {
-  flex-grow: 1; /* Crecerá para ocupar el espacio entre el Topbar y el Footer */
-  overflow-y: auto; /* Este será el ÚNICO contenedor con scroll vertical */
+  /* CLAVE 2: Hace que esta área crezca para ocupar todo el espacio disponible */
+  flex-grow: 1; 
+  /* CLAVE 3: Este será el ÚNICO contenedor con scroll vertical */
+  overflow-y: auto; 
   padding: 2rem;
   background-color: var(--background-color);
 }
 
+/* CLAVE 4: Asegura que el Topbar y el Footer no se estiren ni se encojan */
+.main-content > .topbar,
 .main-content > footer {
-  flex-shrink: 0; /* Evita que el footer se encoja */
+  flex-shrink: 0;
 }
 
+/* --- Responsive y Overlay (sin cambios) --- */
 @media (max-width: 768px) {
   .main-content {
     padding-left: 0;
   }
-
   .main-content.sidebar-open {
     position: fixed;
     width: 100%;

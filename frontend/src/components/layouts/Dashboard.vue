@@ -22,7 +22,6 @@
       <div class="page-content">
         <router-view />
       </div>
-      <Footer />
     </div>
 
     <ProfileModal 

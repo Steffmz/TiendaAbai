@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Arimo:ital,wght@0,400..700;1,400..700&family=Dosis:wght@200..800&family=Quicksand&display=swap');
 
+/* --- ESTILOS GLOBALES CORREGIDOS --- */
 html {
   font-family: "Quicksand", sans-serif;
   font-optical-sizing: auto;
@@ -20,7 +21,7 @@ body {
   min-height: 100vh;
 }
 
-/* VARIABLES DE COLOR BASE*/
+/* --- VARIABLES DE COLOR (Sin cambios) --- */
 :root {
   /* superficies y texto */
   --bg: #f5f7fb; 
@@ -45,9 +46,10 @@ body {
   --table-header: #74a8cf;
 }
 
-/* --- VARIABLES MODO OSCURO MEJORADAS --- */
+/* --- VARIABLES MODO OSCURO (Sin cambios) --- */
 html.dark {
-  /* Fondos */
+  /* ... (todas tus variables de modo oscuro se quedan igual) ... */
+   /* Fondos */
   --bg: #1a1f2e;          
   --surface: #242b3d;     
   --surface-2: #2f3a4e;   
@@ -72,7 +74,8 @@ html.dark {
   --table-header: #475569;
 }
 
-/* BASE Y CONTENEDORES */
+/* --- ESTILOS ESPECÍFICOS MODO OSCURO (Sin cambios) --- */
+/* ... (el resto de tus estilos para html.dark, sweetalert, etc. se quedan igual) ... */
 html.dark,
 html.dark body,
 html.dark #app,
@@ -423,5 +426,14 @@ html.dark .gap-2 {
 
 .swal2-cancel:hover {
   background-color: var(--surface) !important;
+}   
+/* --- ESTILOS PARA EL FOOTER --- */
+.app-footer {
+  background: linear-gradient(135deg, #74B9E7 0%, #2B7FFF 100%);
+  transition: background 0.3s ease;
 }
 
+/* Footer en modo oscuro */
+html.dark .app-footer {
+  background: var(--sidebar-bg); /* Reutilizamos el gradiente oscuro del sidebar */
+}
