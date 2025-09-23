@@ -28,8 +28,7 @@
     </div>
 
     <!-- Vista Desktop - Tabla -->
-    <div
-      class="hidden md:block rounded-xl border border-gray-200 shadow-sm mb-2 w-full max-w-7xl mx-auto overflow-hidden">
+    <div class="table-container">
       <table class="w-full border-collapse">
         <thead class="bg-[#74B9E7] text-black">
           <tr>
@@ -47,7 +46,7 @@
           <template v-if="loading">
             <tr>
               <td colspan="7" class="p-0">
-                <div v-for="i in 5" :key="i" class="flex items-center p-4 gap-4 border-b border-[var(--border)]">
+                <div v-for="i in 6" :key="i" class="flex items-center p-4 gap-4 border-b border-[var(--border)]">
                   <BaseSkeleton width="150px" height="24px" radius="6px" />
                   <BaseSkeleton width="100px" height="24px" radius="6px" />
                   <BaseSkeleton width="50px" height="24px" radius="6px" />
@@ -77,18 +76,12 @@
                 </span>
               </td>
               <td class="actions-cell">
-                <button @click="openModal(usuario)" class="btn-edit">
-                  Editar
-                </button>
-                <button @click="openPuntosModal(usuario)" class="btn-edit">
-                  Puntos
-                </button>
+                <button @click="openModal(usuario)" class="btn-edit">Editar</button>
+                <button @click="openPuntosModal(usuario)" class="btn-edit">Puntos</button>
                 <button @click="toggleStatus(usuario)" :class="usuario.activo ? 'btn-danger' : 'btn-edit'">
                   {{ usuario.activo ? "Desactivar" : "Activar" }}
                 </button>
-                <button @click="deleteUsuario(usuario)" class="btn-danger">
-                  Eliminar
-                </button>
+                <button @click="deleteUsuario(usuario)" class="btn-danger">Eliminar</button>
               </td>
             </tr>
           </template>
@@ -106,17 +99,27 @@
       </table>
     </div>
 
-    <!-- Vista Mobile - Cards -->
-    <div class="block md:hidden">
+    <!-- ✅ VISTA MOBILE MEJORADA - Cards -->
+    <div class="cards-container">
+      <!-- Skeletons para móvil -->
       <template v-if="loading">
-        <div v-for="i in 5" :key="i" class="mobile-card mb-4">
-          <BaseSkeleton width="100%" height="20px" radius="4px" class="mb-2" />
-          <BaseSkeleton width="60%" height="16px" radius="4px" class="mb-2" />
-          <BaseSkeleton width="40%" height="16px" radius="4px" class="mb-3" />
-          <div class="flex gap-2">
-            <BaseSkeleton width="70px" height="28px" radius="4px" />
-            <BaseSkeleton width="70px" height="28px" radius="4px" />
-          </div>
+        <div v-for="i in 6" :key="i" class="mobile-card">
+           <div class="mobile-card-header">
+             <BaseSkeleton width="140px" height="20px" radius="4px" />
+             <BaseSkeleton width="70px" height="22px" radius="99px" />
+           </div>
+           <div class="mobile-card-content">
+              <div v-for="j in 4" :key="j" class="mobile-info-item">
+                <BaseSkeleton width="60px" height="16px" radius="4px" />
+                <BaseSkeleton width="100px" height="16px" radius="4px" />
+              </div>
+           </div>
+           <div class="mobile-card-actions">
+             <BaseSkeleton width="100%" height="32px" radius="6px" />
+             <BaseSkeleton width="100%" height="32px" radius="6px" />
+             <BaseSkeleton width="100%" height="32px" radius="6px" />
+             <BaseSkeleton width="100%" height="32px" radius="6px" />
+           </div>
         </div>
       </template>
 
@@ -133,7 +136,7 @@
           <div class="mobile-card-content">
             <div class="mobile-info-item">
               <span class="mobile-label">Cédula:</span>
-              <span>{{ usuario.cedula }}</span>
+              <span class="mobile-value">{{ usuario.cedula }}</span>
             </div>
             <div class="mobile-info-item">
               <span class="mobile-label">Email:</span>
@@ -141,7 +144,7 @@
             </div>
             <div class="mobile-info-item">
               <span class="mobile-label">Rol:</span>
-              <span>{{ usuario.rol }}</span>
+              <span class="mobile-value">{{ usuario.rol }}</span>
             </div>
             <div class="mobile-info-item">
               <span class="mobile-label">Puntos:</span>
@@ -151,53 +154,47 @@
 
           <div class="mobile-card-actions">
             <button @click="openModal(usuario)" class="btn-edit">Editar</button>
-            <button @click="openPuntosModal(usuario)" class="btn-edit">
-              Puntos
-            </button>
+            <button @click="openPuntosModal(usuario)" class="btn-edit">Puntos</button>
             <button @click="toggleStatus(usuario)" :class="usuario.activo ? 'btn-danger' : 'btn-edit'">
               {{ usuario.activo ? "Desactivar" : "Activar" }}
             </button>
-            <button @click="deleteUsuario(usuario)" class="btn-danger">
-              Eliminar
-            </button>
+            <button @click="deleteUsuario(usuario)" class="btn-danger">Eliminar</button>
           </div>
         </div>
       </template>
 
       <!-- Estado vacío para mobile -->
       <template v-else>
-        <div class="mobile-empty">
-          <EmptyState icon="mdi:account-search-outline" title="No se encontraron usuarios"
-            message="Prueba con otro término de búsqueda o crea un nuevo usuario." />
-        </div>
+        <EmptyState icon="mdi:account-search-outline" title="No se encontraron usuarios"
+          message="Prueba con otro término de búsqueda o crea un nuevo usuario." />
       </template>
     </div>
 
     <!-- Paginación -->
-<div v-if="!loading && totalPages > 1" class="flex flex-col items-center justify-center mt-4">
-  <p class="text-gray-700">
-      Existen <span class="text-blue-500 font-semibold">{{ totalUsers }}</span> usuarios
-  </p>
-  <div class="flex items-center mt-2 space-x-1">
-      <button @click="prevPage" :disabled="currentPage === 1"
-        class="w-8 h-8 flex items-center justify-center rounded-md bg-[#fffef9] border border-gray-200 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
-        ←
-      </button>
-      <button v-for="pagina in paginasVisibles" :key="pagina" @click="goToPage(pagina)" :class="[
-        'w-8 h-8 flex items-center justify-center rounded-md border font-medium',
-        currentPage === pagina
-          ? 'bg-blue-500 text-white border-blue-500'
-          : 'bg-[#fffef9] border-gray-200 text-gray-600 hover:bg-gray-100',
-        pagina === '...' ? 'cursor-default' : ''
-      ]">
-        {{ pagina }}
-      </button>
-      <button @click="nextPage" :disabled="currentPage === totalPages"
-        class="w-8 h-8 flex items-center justify-center rounded-md bg-[#fffef9] border border-gray-200 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
-        →
-      </button>
-  </div>
-</div>
+    <div v-if="!loading && totalPages > 1" class="flex flex-col items-center justify-center mt-4">
+      <p class="text-gray-700">
+          Existen <span class="text-blue-500 font-semibold">{{ totalUsers }}</span> usuarios
+      </p>
+      <div class="flex items-center mt-2 space-x-1">
+          <button @click="prevPage" :disabled="currentPage === 1"
+            class="w-8 h-8 flex items-center justify-center rounded-md bg-[#fffef9] border border-gray-200 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+            ←
+          </button>
+          <button v-for="pagina in paginasVisibles" :key="pagina" @click="goToPage(pagina)" :class="[
+            'w-8 h-8 flex items-center justify-center rounded-md border font-medium',
+            currentPage === pagina
+              ? 'bg-blue-500 text-white border-blue-500'
+              : 'bg-[#fffef9] border-gray-200 text-gray-600 hover:bg-gray-100',
+            pagina === '...' ? 'cursor-default' : ''
+          ]">
+            {{ pagina }}
+          </button>
+          <button @click="nextPage" :disabled="currentPage === totalPages"
+            class="w-8 h-8 flex items-center justify-center rounded-md bg-[#fffef9] border border-gray-200 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+            →
+          </button>
+      </div>
+    </div>
 
     <!-- Modal Crear/Editar -->
     <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
@@ -205,38 +202,14 @@
         <h2 class="modal-title">{{ isEditMode ? 'Editar Usuario' : 'Crear Usuario' }}</h2>
         <form @submit.prevent="saveUsuario">
           <div class="form-grid">
-            <!-- Nombre -->
-            <div class="form-group">
-              <label>Nombre Completo</label>
-              <input v-model="form.nombreCompleto" type="text" required
-                @input="form.nombreCompleto = capitalizeWords(form.nombreCompleto)" />
-            </div>
-            <!-- Cédula -->
-            <div class="form-group">
-              <label>Cédula</label>
-              <input v-model="form.cedula" type="text" required :disabled="isEditMode" pattern="^[0-9]{5,15}$"
-                maxlength="15" title="La cédula debe tener entre 5 y 15 dígitos y solo números"
-                @input="form.cedula = form.cedula.replace(/[^0-9]/g, '')" />
-            </div>
+            <div class="form-group"><label>Nombre Completo</label><input v-model="form.nombreCompleto" type="text" required @input="form.nombreCompleto = capitalizeWords(form.nombreCompleto)" /></div>
+            <div class="form-group"><label>Cédula</label><input v-model="form.cedula" type="text" required :disabled="isEditMode" pattern="^[0-9]{5,15}$" maxlength="15" title="La cédula debe tener entre 5 y 15 dígitos y solo números" @input="form.cedula = form.cedula.replace(/[^0-9]/g, '')" /></div>
             <div class="form-group"><label>Email</label><input v-model="form.email" type="email" required /></div>
-            <div class="form-group">
-              <label>Sede</label>
-              <input v-model="form.sede" type="text" required />
-            </div>
-            <!-- Contraseña (solo en crear) -->
-            <div class="form-group" v-if="!isEditMode">
-              <label>Contraseña</label>
-              <input v-model="form.contrasena" type="password" required maxlength="16" pattern="^(?=.*[0-9]).{1,16}$"
-                title="La contraseña debe tener máximo 16 caracteres e incluir al menos un dígito" />
-            </div>
-            <div class="form-group"><label>Rol</label><select v-model="form.rol" required>
-                <option value="Empleado">Empleado</option>
-                <option value="Administrador">Administrador</option>
-              </select></div>
-            <div class="form-group"><label>Cargo ID</label><input v-model.number="form.cargoId" type="number"
-                placeholder="ID del Cargo existente" required /></div>
-            <div class="form-group"><label>Centro de Costos ID</label><input v-model.number="form.centroDeCostosId"
-                type="number" placeholder="ID del C. de Costos existente" required /></div>
+            <div class="form-group"><label>Sede</label><input v-model="form.sede" type="text" required /></div>
+            <div class="form-group" v-if="!isEditMode"><label>Contraseña</label><input v-model="form.contrasena" type="password" required maxlength="16" pattern="^(?=.*[0-9]).{1,16}$" title="La contraseña debe tener máximo 16 caracteres e incluir al menos un dígito" /></div>
+            <div class="form-group"><label>Rol</label><select v-model="form.rol" required><option value="Empleado">Empleado</option><option value="Administrador">Administrador</option></select></div>
+            <div class="form-group"><label>Cargo ID</label><input v-model.number="form.cargoId" type="number" placeholder="ID del Cargo existente" required /></div>
+            <div class="form-group"><label>Centro de Costos ID</label><input v-model.number="form.centroDeCostosId" type="number" placeholder="ID del C. de Costos existente" required /></div>
           </div>
           <div class="modal-actions">
             <button type="button" @click="closeModal" class="btn btn-secondary">Cancelar</button>
@@ -247,33 +220,21 @@
     </div>
 
     <!-- Modal Ajustar Puntos -->
-    <BaseModal :show="showPuntosModal" :title="`Ajustar Puntos a ${formPuntos.nombreCompleto}`"
-      @close="closePuntosModal" width="500px">
+    <BaseModal :show="showPuntosModal" :title="`Ajustar Puntos a ${formPuntos.nombreCompleto}`" @close="closePuntosModal" width="500px">
       <form id="puntosForm" @submit.prevent="savePuntos">
-        <div class="form-group">
-          <label>Puntos a Añadir/Quitar</label>
-          <input v-model.number="formPuntos.puntos" type="number" required
-            placeholder="Ej: 100 para añadir, -50 para quitar" />
-        </div>
-        <div class="form-group">
-          <label>Motivo del Ajuste</label>
-          <textarea v-model="formPuntos.descripcion" required placeholder="Ej: Bono por desempeño Q3" />
-        </div>
+        <div class="form-group"><label>Puntos a Añadir/Quitar</label><input v-model.number="formPuntos.puntos" type="number" required placeholder="Ej: 100 para añadir, -50 para quitar" /></div>
+        <div class="form-group"><label>Motivo del Ajuste</label><textarea v-model="formPuntos.descripcion" required placeholder="Ej: Bono por desempeño Q3" /></div>
       </form>
       <template #actions>
-        <button type="button" @click="closePuntosModal" class="btn btn-secondary">
-          Cancelar
-        </button>
-        <button type="submit" form="puntosForm" class="btn btn-primary">
-          Guardar Ajuste
-        </button>
+        <button type="button" @click="closePuntosModal" class="btn btn-secondary">Cancelar</button>
+        <button type="submit" form="puntosForm" class="btn btn-primary">Guardar Ajuste</button>
       </template>
     </BaseModal>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from "vue"; // Importar 'watch'
+import { ref, onMounted, computed, watch } from "vue";
 import axios from "axios";
 import Swal from "sweetalert2";
 import BaseModal from "../shared/BaseModal.vue";
@@ -294,25 +255,23 @@ const cargos = ref([]);
 const centrosDeCostos = ref([]);
 const currentPage = ref(1);
 const totalUsers = ref(0);
-const usersPerPage = ref(6); // Se mantiene en 6
+const usersPerPage = ref(6);
+const fileInput = ref(null);
 const totalPages = computed(() => Math.ceil(totalUsers.value / usersPerPage.value));
 const getAuthHeaders = () => ({ headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` }});
 
-// 1. MODIFICACIÓN: La función de carga ahora incluye el término de búsqueda
 const fetchData = async () => {
   loading.value = true;
   try {
     const params = new URLSearchParams({
       page: currentPage.value,
       limit: usersPerPage.value,
-      search: searchQuery.value, // Enviamos el valor del input al backend
+      search: searchQuery.value,
     });
-
     const usuariosRes = await axios.get(`${API_URL}?${params.toString()}`, getAuthHeaders());
     usuarios.value = usuariosRes.data.usuarios;
     totalUsers.value = usuariosRes.data.total;
     
-    // El resto de la lógica se mantiene
     if(cargos.value.length === 0 && centrosDeCostos.value.length === 0) {
         const [cargosRes, centrosRes] = await Promise.all([
             axios.get(`${ADMIN_DATA_URL}/cargos`, getAuthHeaders()),
@@ -329,47 +288,23 @@ const fetchData = async () => {
   }
 };
 
-// 2. NUEVO: Se añade un "watcher" para la barra de búsqueda
 let searchTimeout;
 watch(searchQuery, () => {
   clearTimeout(searchTimeout);
   searchTimeout = setTimeout(() => {
-    currentPage.value = 1; // Reseteamos a la página 1 en cada nueva búsqueda
+    currentPage.value = 1;
     fetchData();
-  }, 300); // Espera 300ms después de que el usuario deja de escribir
+  }, 300);
 });
-
 
 const capitalizeWords = (text) => {
   if (!text) return '';
   return text.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
-const capitalizeCargo = () => {
-  if (form.value.cargoId && cargos.value.length) {
-    const cargo = cargos.value.find(c => c.id === form.value.cargoId);
-    if (cargo) {
-      cargo.nombre = capitalizeWords(cargo.nombre);
-    }
-  }
-};
-
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++;
-    fetchData();
-  }
-};
-const prevPage = () => {
-  if (currentPage.value > 1) {
-    currentPage.value--;
-    fetchData();
-  }
-};
+const nextPage = () => { if (currentPage.value < totalPages.value) { currentPage.value++; fetchData(); }};
+const prevPage = () => { if (currentPage.value > 1) { currentPage.value--; fetchData(); }};
 onMounted(fetchData);
-
-// 3. ELIMINACIÓN: Ya no necesitamos filtrar en el frontend
-// const filteredUsuarios = computed(() => { ... });
 
 const openModal = (usuario = null) => {
   if (usuario) {
@@ -456,18 +391,15 @@ const deleteUsuario = async (usuario) => {
   }
 };
 
-// Funciones para el nuevo paginador visual
 const paginasVisibles = computed(() => {
     const total = totalPages.value;
     const actual = currentPage.value;
     const rango = 1;
     const paginas = [];
-
     if (total <= 7) {
       for (let i = 1; i <= total; i++) paginas.push(i);
       return paginas;
     }
-
     paginas.push(1);
     if (actual > rango + 2) paginas.push('...');
     for (let i = Math.max(2, actual - rango); i <= Math.min(total - 1, actual + rango); i++) {
@@ -475,7 +407,6 @@ const paginasVisibles = computed(() => {
     }
     if (actual < total - rango - 1) paginas.push('...');
     paginas.push(total);
-
     return paginas;
 });
 
@@ -484,6 +415,32 @@ const goToPage = (pagina) => {
         currentPage.value = pagina;
         fetchData();
     }
+};
+
+const triggerFileInput = () => {
+  fileInput.value.click();
+};
+
+const handleFileUpload = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+  const formData = new FormData();
+  formData.append('archivo', file);
+  Swal.fire({ title: 'Importando usuarios...', text: 'Por favor, espera.', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
+  try {
+    const { data } = await axios.post(`${API_URL}/importar`, formData, { headers: { 'Content-Type': 'multipart/form-data', 'Authorization': `Bearer ${localStorage.getItem("authToken")}` }});
+    await fetchData();
+    let successMessage = `Se crearon ${data.creados} usuarios nuevos.`;
+    if (data.errores && data.errores.length > 0) {
+      const erroresList = data.errores.map(e => `<li>${e}</li>`).join('');
+      successMessage += `<br><br><strong>Se encontraron ${data.errores.length} errores:</strong><br><ul style="text-align: left; font-size: 0.8em; max-height: 150px; overflow-y: auto;">${erroresList}</ul>`;
+    }
+    Swal.fire({ icon: 'success', title: 'Proceso Completado', html: successMessage });
+  } catch (error) {
+    Swal.fire('Error', error.response?.data?.message || 'No se pudo importar el archivo.', 'error');
+  } finally {
+    event.target.value = '';
+  }
 };
 </script>
 
