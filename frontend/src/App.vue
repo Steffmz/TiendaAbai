@@ -36,13 +36,7 @@ body {
   min-height: 100vh;
 }
 
-/* Estilo para el contenido de la página, aplica el padding superior aquí */
-.page-content {
-  flex-grow: 1;
-  padding: 2rem; /* Este es el padding general que queremos */
-  padding-top: calc(70px + 2rem); /* Suma la altura del navbar (70px) + el padding deseado */
-  overflow-y: auto;
-}
+/* ❌ SE ELIMINÓ EL ESTILO '.page-content' DE AQUÍ ❌ */
 
 /* Utilidad para centrar contenido */
 .mx-auto {

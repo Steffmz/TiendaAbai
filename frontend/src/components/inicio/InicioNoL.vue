@@ -159,7 +159,6 @@
 </template>
 
 <script setup>
-// ... (el script no necesita cambios, la solución es solo en el template)
 import { ref, computed, onMounted } from "vue";
 import { Icon } from "@iconify/vue";
 import Swal from "sweetalert2";
