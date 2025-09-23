@@ -21,8 +21,11 @@
   flex-direction: column;
   transition: padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   padding-left: var(--sidebar-width);
-  height: 100vh;
-  overflow: hidden; /* Esto previene el scroll en el contenedor principal */
+  
+  /* ✅ CORRECCIÓN CLAVE:
+     Añadimos 'overflow: hidden' para asegurar que este contenedor
+     no genere un scroll propio y contenga a sus hijos correctamente. */
+  overflow: hidden;
 }
 
 .main-content.collapsed {
@@ -30,10 +33,14 @@
 }
 
 .page-content {
-  flex-grow: 1;
-  overflow-y: auto; /* Permite el scroll solo en el área de contenido */
+  flex-grow: 1; /* Crecerá para ocupar el espacio entre el Topbar y el Footer */
+  overflow-y: auto; /* Este será el ÚNICO contenedor con scroll vertical */
   padding: 2rem;
   background-color: var(--background-color);
+}
+
+.main-content > footer {
+  flex-shrink: 0; /* Evita que el footer se encoja */
 }
 
 @media (max-width: 768px) {

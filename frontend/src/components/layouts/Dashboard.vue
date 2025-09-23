@@ -22,6 +22,7 @@
       <div class="page-content">
         <router-view />
       </div>
+      <Footer />
     </div>
 
     <ProfileModal 
@@ -45,6 +46,8 @@ import Sidebar from '../menu/Sidebar.vue'
 import Topbar from '../menu/Topbar.vue'
 import ProfileModal from '../admin/ProfileModal.vue'
 import NotificationsPanel from '../shared/NotificationsPanel.vue'
+// ✅ SE IMPORTA EL NUEVO COMPONENTE
+import Footer from '../shared/Footer.vue'
 
 const isCollapsed = ref(false)     
 const sidebarOpen = ref(false)     
@@ -64,16 +67,13 @@ const resetStatesOnResize = () => {
   }
 }
 
-// Función para manejar el toggle desde el botón dentro del sidebar (PC)
 const handleSidebarToggle = () => {
   if (!isMobile()) {
     isCollapsed.value = !isCollapsed.value
   }
 }
 
-// Función para manejar el toggle desde el topbar (móvil)
 const handleMobileSidebarToggle = () => {
-
   if (isMobile()) {
     sidebarOpen.value = !sidebarOpen.value
   }

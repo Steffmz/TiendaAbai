@@ -62,44 +62,12 @@
     </div>
     </section>
 
-    <main class="max-w-7xl mx-auto px-12 py-10 space-y-12">
+    <main class="max-w-7xl mx-auto px-12 py-10 space-y-12 flex-grow">
       <InicioNoL v-if="!isLoggedIn" />
       <InicioLogueado v-else />
     </main>
 
-     <footer
-        class="text-white py-6 mt-auto"
-        style="background: linear-gradient(135deg, #74B9E7 0%, #2B7FFF 100%);"
-        >
-        <div class="flex justify-center space-x-6">
-          <!-- Facebook -->
-          <a
-            href="https://facebook.com/tu_pagina"
-            target="_blank"
-            class="hover:scale-110 transition-transform"
-          >
-            <span class="iconify text-3xl" data-icon="mdi:facebook" style="color: #ffffff;"></span>
-          </a>
-
-          <!-- Instagram -->
-          <a
-            href="https://instagram.com/tu_pagina"
-            target="_blank"
-            class="hover:scale-110 transition-transform"
-          >
-            <span class="iconify text-3xl" data-icon="mdi:instagram" style="color: #ffffff;"></span>
-          </a>
-
-          <!-- TikTok -->
-          <a
-            href="https://www.tiktok.com/@tu_pagina"
-            target="_blank"
-            class="hover:scale-110 transition-transform"
-          >
-            <span class="iconify text-3xl" data-icon="ic:baseline-tiktok" style="color: #ffffff;"></span>
-          </a>
-        </div>
-      </footer>
+    <Footer />
   </div>
 </template>
 
@@ -111,6 +79,8 @@ import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import InicioNoL from "./InicioNoL.vue";
 import InicioLogueado from "./InicioLogueado.vue";
+// ✅ SE IMPORTA EL NUEVO COMPONENTE
+import Footer from '../shared/Footer.vue';
 
 const router = useRouter();
 const isLoggedIn = ref(false);
@@ -120,7 +90,7 @@ const checkLoginStatus = async () => {
   const token = localStorage.getItem("authToken");
   if (token) {
     try {
-      jwtDecode(token); // Solo para validar que no esté corrupto
+      jwtDecode(token);
       const response = await axios.get('http://localhost:3000/api/perfil', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -143,7 +113,6 @@ const logout = () => {
   localStorage.removeItem("authToken");
   isLoggedIn.value = false;
   usuario.value = null;
-  // Refrescamos la página para asegurar que la vista pública se cargue correctamente
   window.location.reload();
 };
 
@@ -151,5 +120,8 @@ onMounted(checkLoginStatus);
 </script>
 
 <style scoped>
+.main-content {
+  flex-grow: 1; /* Asegura que el contenido principal ocupe el espacio disponible */
+}
 .points-badge { background-color: rgba(255, 255, 255, 0.2); padding: 0.4rem 0.8rem; border-radius: 9999px; font-weight: 600; font-size: 0.9rem; }
 </style>
