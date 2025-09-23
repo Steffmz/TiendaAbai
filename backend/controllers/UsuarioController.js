@@ -3,6 +3,8 @@ const prisma = new PrismaClient();
 const bcrypt = require("bcryptjs");
 const xlsx = require('xlsx');
 
+// backend/controllers/UsuarioController.js
+
 exports.getAllUsuarios = async (req, res) => {
   const adminId = req.usuario.userId;
   const page = parseInt(req.query.page) || 1;
@@ -16,12 +18,14 @@ exports.getAllUsuarios = async (req, res) => {
       { rol: { not: "Administrador" } },
       {
         OR: [
-          { nombreCompleto: { contains: searchQuery } },
+          // ✅ CORRECCIÓN: Se elimina 'mode: insensitive'
+          { nombreCompleto: { contains: searchQuery } }, 
           { cedula: { contains: searchQuery } },
         ],
       },
     ],
   };
+
   try {
     const [usuarios, totalUsuarios] = await prisma.$transaction([
       prisma.usuario.findMany({

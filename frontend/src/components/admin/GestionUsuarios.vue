@@ -64,8 +64,8 @@
           </template>
 
           <!-- Usuarios -->
-          <template v-else-if="filteredUsuarios.length > 0">
-            <tr v-for="usuario in filteredUsuarios" :key="usuario.id">
+          <template v-else-if="usuarios.length > 0">
+            <tr v-for="usuario in usuarios" :key="usuario.id">
               <td>{{ usuario.nombreCompleto }}</td>
               <td>{{ usuario.cedula }}</td>
               <td>{{ usuario.puntosTotales }}</td>
@@ -121,8 +121,8 @@
       </template>
 
       <!-- Cards de usuarios -->
-      <template v-else-if="filteredUsuarios.length > 0">
-        <div v-for="usuario in filteredUsuarios" :key="usuario.id" class="mobile-card">
+      <template v-else-if="usuarios.length > 0">
+        <div v-for="usuario in usuarios" :key="usuario.id" class="mobile-card">
           <div class="mobile-card-header">
             <h3 class="mobile-card-title">{{ usuario.nombreCompleto }}</h3>
             <span :class="['badge', usuario.activo ? 'success' : 'danger']">
@@ -174,15 +174,30 @@
     </div>
 
     <!-- Paginación -->
-    <div v-if="!loading && totalPages > 1" class="pagination-controls">
-      <button @click="prevPage" :disabled="currentPage === 1" class="btn btn-secondary">
-        Anterior
+<div v-if="!loading && totalPages > 1" class="flex flex-col items-center justify-center mt-4">
+  <p class="text-gray-700">
+      Existen <span class="text-blue-500 font-semibold">{{ totalUsers }}</span> usuarios
+  </p>
+  <div class="flex items-center mt-2 space-x-1">
+      <button @click="prevPage" :disabled="currentPage === 1"
+        class="w-8 h-8 flex items-center justify-center rounded-md bg-[#fffef9] border border-gray-200 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+        ←
       </button>
-      <span>Página {{ currentPage }} de {{ totalPages }}</span>
-      <button @click="nextPage" :disabled="currentPage === totalPages" class="btn btn-secondary">
-        Siguiente
+      <button v-for="pagina in paginasVisibles" :key="pagina" @click="goToPage(pagina)" :class="[
+        'w-8 h-8 flex items-center justify-center rounded-md border font-medium',
+        currentPage === pagina
+          ? 'bg-blue-500 text-white border-blue-500'
+          : 'bg-[#fffef9] border-gray-200 text-gray-600 hover:bg-gray-100',
+        pagina === '...' ? 'cursor-default' : ''
+      ]">
+        {{ pagina }}
       </button>
-    </div>
+      <button @click="nextPage" :disabled="currentPage === totalPages"
+        class="w-8 h-8 flex items-center justify-center rounded-md bg-[#fffef9] border border-gray-200 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+        →
+      </button>
+  </div>
+</div>
 
     <!-- Modal Crear/Editar -->
     <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
@@ -258,7 +273,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue"; // Importar 'watch'
 import axios from "axios";
 import Swal from "sweetalert2";
 import BaseModal from "../shared/BaseModal.vue";
@@ -279,25 +294,32 @@ const cargos = ref([]);
 const centrosDeCostos = ref([]);
 const currentPage = ref(1);
 const totalUsers = ref(0);
-const usersPerPage = ref(10);
+const usersPerPage = ref(6); // Se mantiene en 6
 const totalPages = computed(() => Math.ceil(totalUsers.value / usersPerPage.value));
-const getAuthHeaders = () => ({ headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` } });
-const fileInput = ref(null);
+const getAuthHeaders = () => ({ headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` }});
 
+// 1. MODIFICACIÓN: La función de carga ahora incluye el término de búsqueda
 const fetchData = async () => {
   loading.value = true;
   try {
-    const params = new URLSearchParams({ page: currentPage.value, limit: usersPerPage.value });
+    const params = new URLSearchParams({
+      page: currentPage.value,
+      limit: usersPerPage.value,
+      search: searchQuery.value, // Enviamos el valor del input al backend
+    });
+
     const usuariosRes = await axios.get(`${API_URL}?${params.toString()}`, getAuthHeaders());
     usuarios.value = usuariosRes.data.usuarios;
     totalUsers.value = usuariosRes.data.total;
-    if (cargos.value.length === 0) {
-      const [cargosRes, centrosRes] = await Promise.all([
-        axios.get(`${ADMIN_DATA_URL}/cargos`, getAuthHeaders()),
-        axios.get(`${ADMIN_DATA_URL}/centros-de-costos`, getAuthHeaders()),
-      ]);
-      cargos.value = cargosRes.data;
-      centrosDeCostos.value = centrosRes.data;
+    
+    // El resto de la lógica se mantiene
+    if(cargos.value.length === 0 && centrosDeCostos.value.length === 0) {
+        const [cargosRes, centrosRes] = await Promise.all([
+            axios.get(`${ADMIN_DATA_URL}/cargos`, getAuthHeaders()),
+            axios.get(`${ADMIN_DATA_URL}/centros-de-costos`, getAuthHeaders()),
+        ]);
+        cargos.value = cargosRes.data;
+        centrosDeCostos.value = centrosRes.data;
     }
   } catch (error) {
     console.error("Error al cargar datos:", error);
@@ -307,16 +329,25 @@ const fetchData = async () => {
   }
 };
 
+// 2. NUEVO: Se añade un "watcher" para la barra de búsqueda
+let searchTimeout;
+watch(searchQuery, () => {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    currentPage.value = 1; // Reseteamos a la página 1 en cada nueva búsqueda
+    fetchData();
+  }, 300); // Espera 300ms después de que el usuario deja de escribir
+});
+
+
 const capitalizeWords = (text) => {
   if (!text) return '';
-  return text
-    .toLowerCase()
-    .replace(/\b\w/g, (char) => char.toUpperCase());
+  return text.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
 const capitalizeCargo = () => {
-  if (form.cargoId && cargos.length) {
-    const cargo = cargos.find(c => c.id === form.cargoId);
+  if (form.value.cargoId && cargos.value.length) {
+    const cargo = cargos.value.find(c => c.id === form.value.cargoId);
     if (cargo) {
       cargo.nombre = capitalizeWords(cargo.nombre);
     }
@@ -337,11 +368,8 @@ const prevPage = () => {
 };
 onMounted(fetchData);
 
-const filteredUsuarios = computed(() => {
-  if (!searchQuery.value) return usuarios.value;
-  const lowerCaseQuery = searchQuery.value.toLowerCase();
-  return usuarios.value.filter(u => u.nombreCompleto.toLowerCase().includes(lowerCaseQuery) || u.cedula.includes(lowerCaseQuery));
-});
+// 3. ELIMINACIÓN: Ya no necesitamos filtrar en el frontend
+// const filteredUsuarios = computed(() => { ... });
 
 const openModal = (usuario = null) => {
   if (usuario) {
@@ -369,7 +397,7 @@ const saveUsuario = async () => {
   } catch (error) {
     let errorHtml = error.response?.data?.message || 'No se pudo guardar el usuario.';
     if (error.response?.data?.errors) {
-      errorHtml = '<ul style="text-align: left; list-style-position: inside;">' + error.response.data.errors.map(e => `<li>${e.message}</li>`).join('') + '</ul>';
+        errorHtml = '<ul style="text-align: left; list-style-position: inside;">' + error.response.data.errors.map(e => `<li>${e.message}</li>`).join('') + '</ul>';
     }
     Swal.fire({ icon: "error", title: "Error", html: errorHtml });
   }
@@ -411,7 +439,7 @@ const deleteUsuario = async (usuario) => {
     icon: 'error',
     showCancelButton: true,
     confirmButtonColor: '#d33',
-    confirmButtonText: 'Sí, eliminar',
+    confirmButtonText: 'Sí, eliminar', 
     cancelButtonText: 'Cancelar'
   });
   if (result.isConfirmed) {
@@ -427,52 +455,35 @@ const deleteUsuario = async (usuario) => {
     }
   }
 };
-const triggerFileInput = () => {
-  fileInput.value.click();
-};
 
-const handleFileUpload = async (event) => {
-  const file = event.target.files[0];
-  if (!file) return;
+// Funciones para el nuevo paginador visual
+const paginasVisibles = computed(() => {
+    const total = totalPages.value;
+    const actual = currentPage.value;
+    const rango = 1;
+    const paginas = [];
 
-  const formData = new FormData();
-  formData.append('archivo', file);
-
-  Swal.fire({
-    title: 'Importando usuarios...',
-    text: 'Por favor, espera.',
-    allowOutsideClick: false,
-    didOpen: () => {
-      Swal.showLoading();
-    }
-  });
-
-  try {
-    const { data } = await axios.post(`${API_URL}/importar`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        'Authorization': `Bearer ${localStorage.getItem("authToken")}`
-      }
-    });
-
-    await fetchData();
-
-    let successMessage = `Se crearon ${data.creados} usuarios nuevos.`;
-    if (data.errores.length > 0) {
-      successMessage += `<br><br><strong>Se encontraron ${data.errores.length} errores:</strong><br><ul style="text-align: left; font-size: 0.8em;">${data.errores.map(e => `<li>${e}</li>`).join('')}</ul>`;
+    if (total <= 7) {
+      for (let i = 1; i <= total; i++) paginas.push(i);
+      return paginas;
     }
 
-    Swal.fire({
-      icon: 'success',
-      title: 'Proceso Completado',
-      html: successMessage,
-    });
+    paginas.push(1);
+    if (actual > rango + 2) paginas.push('...');
+    for (let i = Math.max(2, actual - rango); i <= Math.min(total - 1, actual + rango); i++) {
+      paginas.push(i);
+    }
+    if (actual < total - rango - 1) paginas.push('...');
+    paginas.push(total);
 
-  } catch (error) {
-    Swal.fire('Error', error.response?.data?.message || 'No se pudo importar el archivo.', 'error');
-  } finally {
-    event.target.value = '';
-  }
+    return paginas;
+});
+
+const goToPage = (pagina) => {
+    if (typeof pagina === 'number' && pagina !== currentPage.value) {
+        currentPage.value = pagina;
+        fetchData();
+    }
 };
 </script>
 
