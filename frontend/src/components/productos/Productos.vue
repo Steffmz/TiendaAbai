@@ -60,13 +60,26 @@
               <td><img :src="`${API_BASE_URL}${producto.imagenUrl}`" class="table-image" alt="Producto" /></td>
               <td>{{ producto.nombre }}</td>
               <td><button @click="mostrarDescripcionCompleta = producto.descripcion"
-                  class="btn btn-secondary text-xs px-2 py-1">Ver</button></td>
+                   class="bg-blue-100 hover:bg-blue-200 px-3 py-1 rounded-md text-sm text-blue-700 font-medium transition-colors">Ver</button></td>
               <td>{{ producto.precioPuntos }}</td>
               <td>{{ producto.stock }}</td>
               <td>
                 <div class="actions-cell">
                   <button @click="editarProducto(producto)" class="btn-edit">Editar</button>
-                  <button @click="eliminarProducto(producto)" class="btn-danger">Eliminar</button>
+                  <button
+                    v-if="producto.estado"
+                    @click="desactivarProducto(producto)"
+                    class="btn btn-danger"
+                  >
+                    Desactivar
+                  </button>
+                  <button
+                    v-else
+                    @click="activarProducto(producto)"
+                    class="btn btn-success"
+                  >
+                    Activar
+                  </button>
                 </div>
               </td>
             </tr>
@@ -98,8 +111,21 @@
           </div>
           <div class="card-actions">
             <button @click="editarProducto(producto)" class="btn-edit">Editar</button>
-            <button @click="eliminarProducto(producto)" class="btn-danger">Eliminar</button>
-          </div>
+            <button
+              v-if="producto.estado === 1"
+              @click="desactivarProducto(producto)"
+              class="btn btn-danger"
+            >
+              Desactivar
+            </button>
+            <button
+              v-else
+              @click="activarProducto(producto)"
+              class="btn btn-success"
+            >
+              Activar
+            </button>
+         </div>
         </div>
       </div>
     </div>
@@ -294,25 +320,36 @@ const guardarProducto = async () => {
   }
 };
 
-const eliminarProducto = async (producto) => {
+const desactivarProducto = async (producto) => {
   const result = await Swal.fire({
-    title: '¿Estás seguro?',
-    text: `Se eliminará el producto "${producto.nombre}".`,
+    title: '¿Desactivar producto?',
+    text: `El producto "${producto.nombre}" dejará de estar disponible.`,
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonText: 'Sí, eliminar',
+    confirmButtonText: 'Sí, desactivar',
     cancelButtonText: 'Cancelar'
   });
 
-if (result.isConfirmed) {
+  if (result.isConfirmed) {
     try {
-      await axios.delete(`${API_BASE_URL}/api/productos/${producto.id}`, getAuthHeaders());
-      Swal.fire('¡Eliminado!', 'El producto ha sido eliminado correctamente.', 'success');
+      await axios.patch(`${API_BASE_URL}/api/productos/${producto.id}/desactivar`, {}, getAuthHeaders());
+      Swal.fire('¡Desactivado!', 'El producto ha sido desactivado correctamente.', 'success');
       await cargarProductos();
     } catch (error) {
-      Swal.fire('Error', error.response?.data?.error || 'No se pudo eliminar el producto. Es posible que esté asociado a un pedido.', 'error');
+      Swal.fire('Error', error.response?.data?.error || 'No se pudo desactivar el producto.', 'error');
     }
   }
 };
+
+const activarProducto = async (producto) => {
+  try {
+    await axios.patch(`${API_BASE_URL}/api/productos/${producto.id}/activar`, {}, getAuthHeaders());
+    Swal.fire('¡Activado!', 'El producto ha sido activado correctamente.', 'success');
+    await cargarProductos();
+  } catch (error) {
+    Swal.fire('Error', error.response?.data?.error || 'No se pudo activar el producto.', 'error');
+  }
+};
+
 </script>
 

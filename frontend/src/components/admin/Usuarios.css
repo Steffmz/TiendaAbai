@@ -1,4 +1,4 @@
-/* --- Contenedores y Layout --- */
+
 .page-container {
   padding: 1.5rem;
   height: 100%;
@@ -6,18 +6,19 @@
   flex-direction: column;
 }
 
-/* --- Encabezado de Página --- */
+
 .page-header { text-align: center; margin-bottom: 1.5rem; }
 .page-title { font-size: 1.8rem; font-weight: 700; color: var(--text); }
 .page-subtitle { color: var(--text-muted); }
 
 /* --- Tabla (Desktop) --- */
 .table-container {
-  display: none; /* Oculto por defecto, se muestra en desktop */
+  display: none; 
   background: var(--surface);
   border-radius: 12px;
   border: 1px solid var(--border);
-  overflow: hidden; /* Evita que la tabla se desborde del contenedor redondeado */
+  overflow: hidden; 
+  
 }
 @media (min-width: 768px) {
   .table-container { display: block; }
@@ -32,7 +33,7 @@ tbody tr:hover { background-color: var(--surface-2); }
 .actions-cell { display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap; }
 
 
-/* --- ✅ NUEVOS Y MEJORADOS ESTILOS PARA TARJETAS (Móvil) --- */
+/* ---  (Móvil) --- */
 .cards-container {
   display: grid;
   gap: 1rem;
@@ -107,7 +108,6 @@ tbody tr:hover { background-color: var(--surface-2); }
   padding: 0.5rem;
 }
 
-/* --- Badges y Botones (Compartidos) --- */
 .badge {
   padding: 4px 10px;
   border-radius: 9999px;
@@ -132,7 +132,6 @@ tbody tr:hover { background-color: var(--surface-2); }
 .btn-danger { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
 .btn-danger:hover { background: #fecaca; }
 
-/* --- Modales --- */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 1rem; }
 .modal-content { background: var(--surface); padding: 2rem; border-radius: 12px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
 .modal-title { font-size: 1.5rem; font-weight: 600; text-align: center; margin-bottom: 1.5rem; }

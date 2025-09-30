@@ -41,8 +41,8 @@
               </thead>
               <tbody>
                 <tr v-for="(campana, index) in campanasPaginadas" :key="campana.id"
-                  :class="index % 2 === 0 ? 'bg-gray-50' : 'bg-white'"
-                  class="border-b border-gray-100 hover:bg-[#fac8012f] transition-colors duration-150">
+                  :class="index % 2 === 0 "
+                  class="   duration-150">
 
                   <td data-label="Imagen" class="px-3 py-3 text-center">
                       <div class="w-14 h-14 rounded-lg overflow-hidden border border-gray-200 shadow-sm mx-auto">

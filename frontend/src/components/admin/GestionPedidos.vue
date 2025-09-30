@@ -215,7 +215,7 @@ onMounted(fetchPedidos);
 }
 
 .badge.success-dark {
-  background-color: #15803d;
+  background-color: #15803c88;
 }
 
 .modal-content p {

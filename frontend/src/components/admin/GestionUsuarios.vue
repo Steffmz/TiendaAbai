@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-7xl w-full mx-auto">
+  <div class="w-full px-6 mx-auto">
     <!-- Header -->
     <div class="page-header">
       <h1 class="page-title">Gestión de Usuarios</h1>
@@ -37,6 +37,8 @@
             <th>Puntos</th>
             <th>Email</th>
             <th>Rol</th>
+            <th>Cargo</th>
+            <th>Centro de Costos</th>
             <th>Estado</th>
             <th>Acciones</th>
           </tr>
@@ -47,15 +49,17 @@
             <tr>
               <td colspan="7" class="p-0">
                 <div v-for="i in 6" :key="i" class="flex items-center p-4 gap-4 border-b border-[var(--border)]">
-                  <BaseSkeleton width="150px" height="24px" radius="6px" />
-                  <BaseSkeleton width="100px" height="24px" radius="6px" />
-                  <BaseSkeleton width="50px" height="24px" radius="6px" />
-                  <BaseSkeleton width="180px" height="24px" radius="6px" />
-                  <BaseSkeleton width="80px" height="24px" radius="6px" />
-                  <BaseSkeleton width="70px" height="24px" radius="6px" />
-                  <div class="flex-grow flex justify-center gap-2">
-                    <BaseSkeleton width="80px" height="32px" radius="6px" />
-                    <BaseSkeleton width="80px" height="32px" radius="6px" />
+              <BaseSkeleton width="150px" height="24px" radius="6px" />
+              <BaseSkeleton width="100px" height="24px" radius="6px" />
+              <BaseSkeleton width="50px" height="24px" radius="6px" />
+              <BaseSkeleton width="180px" height="24px" radius="6px" />
+              <BaseSkeleton width="80px" height="24px" radius="6px" />
+              <BaseSkeleton width="100px" height="24px" radius="6px" />
+              <BaseSkeleton width="120px" height="24px" radius="6px" />
+              <BaseSkeleton width="70px" height="24px" radius="6px" />
+              <div class="flex-grow flex justify-center gap-2">
+                <BaseSkeleton width="80px" height="32px" radius="6px" />
+                <BaseSkeleton width="80px" height="32px" radius="6px" />
                   </div>
                 </div>
               </td>
@@ -70,6 +74,8 @@
               <td>{{ usuario.puntosTotales }}</td>
               <td>{{ usuario.email }}</td>
               <td>{{ usuario.rol }}</td>
+              <td>{{ usuario.cargos?.nombre || '—' }}</td>
+              <td>{{ usuario.centroDeCostos?.nombre || '—' }}</td>
               <td>
                 <span :class="['badge', usuario.activo ? 'success' : 'danger']">
                   {{ usuario.activo ? "Activo" : "Inactivo" }}
@@ -150,6 +156,14 @@
               <span class="mobile-label">Puntos:</span>
               <span class="mobile-points">{{ usuario.puntosTotales }}</span>
             </div>
+            <div class="mobile-info-item">
+              <span class="mobile-label">Cargo:</span>
+              <span class="mobile-value">{{ usuario.cargos?.nombre || '—' }}</span>
+            </div>
+            <div class="mobile-info-item">
+              <span class="mobile-label">Centro de Costos:</span>
+              <span class="mobile-value">{{ usuario.centroDeCostos?.nombre || '—' }}</span>
+            </div>
           </div>
 
           <div class="mobile-card-actions">
@@ -208,8 +222,25 @@
             <div class="form-group"><label>Sede</label><input v-model="form.sede" type="text" required /></div>
             <div class="form-group" v-if="!isEditMode"><label>Contraseña</label><input v-model="form.contrasena" type="password" required maxlength="16" pattern="^(?=.*[0-9]).{1,16}$" title="La contraseña debe tener máximo 16 caracteres e incluir al menos un dígito" /></div>
             <div class="form-group"><label>Rol</label><select v-model="form.rol" required><option value="Empleado">Empleado</option><option value="Administrador">Administrador</option></select></div>
-            <div class="form-group"><label>Cargo ID</label><input v-model.number="form.cargoId" type="number" placeholder="ID del Cargo existente" required /></div>
-            <div class="form-group"><label>Centro de Costos ID</label><input v-model.number="form.centroDeCostosId" type="number" placeholder="ID del C. de Costos existente" required /></div>
+            <div class="form-group">
+          <label>Cargo</label>
+          <select v-model="form.cargoId" required>
+            <option disabled value="">Seleccione un cargo</option>
+            <option v-for="cargo in cargos" :key="cargo.id" :value="cargo.id">
+              {{ cargo.nombre }}
+            </option>
+          </select>
+        </div>
+            <div class="form-group">
+          <label>Centro de Costos</label>
+          <select v-model="form.centroDeCostosId" required>
+            <option disabled value="">Seleccione un centro de costos</option>
+            <option v-for="centro in centrosDeCostos" :key="centro.id" :value="centro.id">
+              {{ centro.nombre }}
+            </option>
+          </select>
+        </div>
+
           </div>
           <div class="modal-actions">
             <button type="button" @click="closeModal" class="btn btn-secondary">Cancelar</button>
