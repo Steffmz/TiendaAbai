@@ -33,7 +33,7 @@ model Usuario {
   historial_puntos_historial_puntos_beneficiarioIdTousuarios HistorialPuntos[] @relation("historial_puntos_beneficiarioIdTousuarios")
   notificaciones                                             Notificacion[]
   pedido_pedido_aprobadoPorAdminIdTousuarios                 Pedido[]          @relation("pedido_aprobadoPorAdminIdTousuarios")
-  pedidos                                                    Pedido[]
+  pedidos                                                    Pedido[] @relation("UsuarioToPedido")
   cargos                                                     cargos            @relation(fields: [cargoId], references: [id])
   centroDeCostos                                             CentroDeCostos    @relation("UsuarioToCentroDeCostos", fields: [centroDeCostosId], references: [id])
 
@@ -130,8 +130,8 @@ model Pedido {
   comentarioAdmin                              String?         @db.Text
   fechaAprobacion                              DateTime?
   notificaciones                               Notificacion[]
-  usuarios_pedido_aprobadoPorAdminIdTousuarios Usuario?        @relation("pedido_aprobadoPorAdminIdTousuarios", fields: [aprobadoPorAdminId], references: [id])
-  usuario                                      Usuario         @relation(fields: [usuarioId], references: [id], onDelete: NoAction)
+  aprobadoPor                                  Usuario?  @relation("pedido_aprobadoPorAdminIdTousuarios", fields: [aprobadoPorAdminId], references: [id]) // <-- CAMBIO AQUÍ
+  usuario                                      Usuario   @relation("UsuarioToPedido", fields: [usuarioId], references: [id], onDelete: NoAction)
   detalles                                     PedidoDetalle[]
 
   @@index([aprobadoPorAdminId], map: "pedido_aprobadoPorAdminId_fkey")

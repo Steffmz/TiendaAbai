@@ -94,12 +94,18 @@ const routes = [
         path: "productos/:categoriaId",
         name: "AdminProductos",
         component: Productos,
-        props: true, // Esto permite que el ID de la categoría llegue como prop al componente
+        props: true,
       },
 
       { path: "campanas", name: "Campana", component: Campana },
       { path: "calendario", name: "Calendario", component: Calendario },
       { path: "pedidos", name: "GestionPedidos", component: GestionPedidos },
+      {
+        path: "recibo/:pedidoId",
+        name: "ReciboPedido",
+        component: () => import("../components/admin/ReciboPedido.vue"),
+        props: true,
+      },
     ],
   },
 

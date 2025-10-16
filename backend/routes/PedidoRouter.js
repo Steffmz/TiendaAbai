@@ -14,5 +14,7 @@ router.use(adminMiddleware);
 
 router.get('/', PedidoController.getAllPedidos);
 router.put('/:id/estado', PedidoController.updateEstadoPedido);
-
+// ...
+router.get('/:id', adminMiddleware, PedidoController.getPedidoById); // <-- AÑADE ESTA LÍNEA
+// ...
 module.exports = router;

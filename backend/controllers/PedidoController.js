@@ -365,6 +365,27 @@ const getMisPedidos = async (req, res) => {
     res.status(500).json({ message: "Error interno del servidor." });
   }
 };
+// Obtener un pedido por su ID con todos los detalles
+const getPedidoById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const pedido = await prisma.pedido.findUnique({
+      where: { id: parseInt(id) },
+      include: {
+        usuario: { select: { nombreCompleto: true } },
+        aprobadoPor: { select: { nombreCompleto: true } }, // <-- Esto ahora funcionará
+        detalles: { include: { producto: true } },
+      },
+    });
+    if (!pedido) {
+      return res.status(404).json({ message: "Pedido no encontrado." });
+    }
+    res.json(pedido);
+  } catch (error) {
+    console.error("Error al obtener el pedido:", error);
+    res.status(500).json({ message: "Error interno del servidor." });
+  }
+};
 
 module.exports = {
   getAllPedidos,
@@ -372,4 +393,5 @@ module.exports = {
   createPedido,
   crearPedidoDesdeCarrito,
   getMisPedidos,
+  getPedidoById
 };
