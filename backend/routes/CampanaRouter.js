@@ -7,20 +7,17 @@ const {
   getCampanaById,
   createCampana,
   updateCampana,
-  deleteCampana,
   asignarProducto,
-  quitarProducto
+  quitarProducto,
+  toggleEstadoCampana // <-- Importamos la nueva función
 } = require('../controllers/CampanaController');
 
 const router = express.Router();
 
-// Crear directorio uploads si no existe
 const uploadsDir = path.join(__dirname, '../../uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
-  console.log('📁 Directorio uploads creado:', uploadsDir);
 }
-
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -33,7 +30,6 @@ const storage = multer.diskStorage({
   }
 });
 
-// Filtro para solo permitir imágenes
 const fileFilter = (req, file, cb) => {
   if (file.mimetype.startsWith('image/')) {
     cb(null, true);
@@ -45,39 +41,27 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({ 
   storage,
   fileFilter,
-  limits: {
-    fileSize: 5 * 1024 * 1024, 
-    files: 1 
-  }
+  limits: { fileSize: 5 * 1024 * 1024 }
 });
 
-// Middleware para manejar errores de multer
 const handleMulterError = (err, req, res, next) => {
   if (err instanceof multer.MulterError) {
     if (err.code === 'LIMIT_FILE_SIZE') {
       return res.status(400).json({ error: 'El archivo es demasiado grande. Máximo 5MB.' });
     }
-    if (err.code === 'LIMIT_FILE_COUNT') {
-      return res.status(400).json({ error: 'Solo se permite subir un archivo a la vez.' });
-    }
-    if (err.code === 'LIMIT_UNEXPECTED_FILE') {
-      return res.status(400).json({ error: 'Campo de archivo inesperado.' });
-    }
   }
-  
   if (err.message === 'Solo se permiten archivos de imagen') {
-    return res.status(400).json({ error: 'Solo se permiten archivos de imagen (JPG, PNG, GIF, etc.).' });
+    return res.status(400).json({ error: 'Solo se permiten archivos de imagen.' });
   }
-  
   next(err);
 };
 
-//  Rutas
+// Definición de Rutas
 router.get('/', getCampanas);
 router.get('/:id', getCampanaById); 
 router.post('/', upload.single('imagen'), handleMulterError, createCampana);
 router.put('/:id', upload.single('imagen'), handleMulterError, updateCampana);
-router.delete('/:id', deleteCampana);
+router.patch('/:id/toggle-estado', toggleEstadoCampana); // <-- ✅ NUEVA RUTA
 router.post('/asignar-producto', asignarProducto);
 router.post('/quitar-producto', quitarProducto);
 

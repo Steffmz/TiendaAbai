@@ -14,86 +14,52 @@ export default function useCampana() {
   const filtro = ref("");
   const placeholder = "/img/no-image.png";
   const modalAbierto = ref(false);
-
   const modalSeleccionProductos = ref(false);
   const modalVerProductos = ref(false);
-
   const editando = ref(false);
   const mostrarDescripcion = ref(null);
   const previewImage = ref(null);
-
   const campanas = ref([]);
   const productos = ref([]);
   const productosSeleccionados = ref([]);
-
   const campanaActual = ref(null);
-
-  // Paginación
   const paginaActual = ref(1);
   const elementosPorPagina = PAGINATION.CAMPAIGNS;
-  const totalPaginas = computed(() =>
-    Math.ceil(campanasFiltradas.value.length / elementosPorPagina)
-  );
+  const totalPaginas = computed(() => Math.ceil(campanasFiltradas.value.length / elementosPorPagina));
 
   const paginasVisibles = computed(() => {
     const total = totalPaginas.value;
     const actual = paginaActual.value;
-    const rango = 1; // Cuántas páginas mostrar a cada lado de la actual
+    const rango = 1;
     const paginas = [];
 
     if (total <= 7) {
-      // Si hay 7 o menos páginas, muéstralas todas
-      for (let i = 1; i <= total; i++) {
-        paginas.push(i);
-      }
+      for (let i = 1; i <= total; i++) paginas.push(i);
       return paginas;
     }
 
-    // Lógica para muchas páginas
     paginas.push(1);
-    if (actual > rango + 2) {
-      paginas.push("...");
-    }
-    for (
-      let i = Math.max(2, actual - rango);
-      i <= Math.min(total - 1, actual + rango);
-      i++
-    ) {
+    if (actual > rango + 2) paginas.push("...");
+    for (let i = Math.max(2, actual - rango); i <= Math.min(total - 1, actual + rango); i++) {
       paginas.push(i);
     }
-    if (actual < total - rango - 1) {
-      paginas.push("...");
-    }
+    if (actual < total - rango - 1) paginas.push("...");
     paginas.push(total);
 
     return paginas;
   });
 
   const totalCampanas = computed(() => campanas.value.length);
+  const paginaAnterior = () => { if (paginaActual.value > 1) paginaActual.value--; };
+  const paginaSiguiente = () => { if (paginaActual.value < totalPaginas.value) paginaActual.value++; };
+  const irAPagina = (pagina) => { paginaActual.value = pagina; };
 
-  const paginaAnterior = () => {
-    if (paginaActual.value > 1) paginaActual.value--;
-  };
-  const paginaSiguiente = () => {
-    if (paginaActual.value < totalPaginas.value) paginaActual.value++;
-  };
-  const irAPagina = (pagina) => {
-    paginaActual.value = pagina;
-  };
-
-  const campanasFiltradas = computed(() =>
-    campanas.value.filter((c) =>
-      c.titulo.toLowerCase().includes(filtro.value.toLowerCase())
-    )
-  );
-
-  // Paginadas
+  const campanasFiltradas = computed(() => campanas.value.filter((c) => c.titulo.toLowerCase().includes(filtro.value.toLowerCase())));
   const campanasPaginadas = computed(() => {
     const inicio = (paginaActual.value - 1) * elementosPorPagina;
     return campanasFiltradas.value.slice(inicio, inicio + elementosPorPagina);
   });
 
-  // Formulario
   const formulario = ref({
     id: null,
     titulo: "",
@@ -101,28 +67,20 @@ export default function useCampana() {
     fechaInicio: "",
     fechaFin: "",
     aprobada: false,
-    puntos: null,
-    descuento: null,
     imagen: null,
   });
 
-  // Cargar campañas
   const cargarCampanas = async () => {
     try {
-      const token = localStorage.getItem("authToken");
-      const response = token
-        ? await axios.get(API_URL, getAuthHeaders())
-        : await axios.get(API_URL);
+      const response = await axios.get(API_URL, getAuthHeaders());
       campanas.value = response.data;
     } catch (err) {
       console.error("Error cargando campañas:", err);
     }
   };
 
-  // Cargar productos
   const cargarProductos = async () => {
     try {
-      // 3. AÑADE getAuthHeaders() A LA PETICIÓN
       const { data } = await axios.get(API_PRODUCTOS, getAuthHeaders());
       productos.value = data;
     } catch (err) {
@@ -135,29 +93,9 @@ export default function useCampana() {
     cargarProductos();
   });
 
-
   const guardarCampana = async () => {
-    if (
-      !formulario.value.titulo ||
-      !formulario.value.fechaInicio ||
-      !formulario.value.fechaFin
-    ) {
-      Swal.fire(
-        "Datos Incompletos",
-        "El título, la fecha de inicio y la fecha de fin son campos obligatorios.",
-        "warning"
-      );
-      return;
-    }
-
-    const fechaInicioValida = /^\d{4}-\d{2}-\d{2}$/.test(
-      formulario.value.fechaInicio
-    );
-    const fechaFinValida = /^\d{4}-\d{2}-\d{2}$/.test(
-      formulario.value.fechaFin
-    );
-    if (!fechaInicioValida || !fechaFinValida) {
-      Swal.fire("Error", "Las fechas deben tener formato YYYY-MM-DD", "error");
+    if (!formulario.value.titulo || !formulario.value.fechaInicio || !formulario.value.fechaFin) {
+      Swal.fire("Datos Incompletos", "El título y las fechas son obligatorios.", "warning");
       return;
     }
     try {
@@ -167,23 +105,13 @@ export default function useCampana() {
       formData.append("fechaInicio", formulario.value.fechaInicio);
       formData.append("fechaFin", formulario.value.fechaFin);
       formData.append("aprobada", formulario.value.aprobada);
-      formData.append("puntos", formulario.value.puntos);
-      formData.append("descuento", formulario.value.descuento);
-      if (formulario.value.imagen) {
-        formData.append("imagen", formulario.value.imagen);
-      }
-
+      if (formulario.value.imagen) formData.append("imagen", formulario.value.imagen);
       if (productosSeleccionados.value.length > 0) {
         const ids = productosSeleccionados.value.map((p) => p.id);
         formData.append("productosIds", JSON.stringify(ids));
       }
 
-      const config = {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-        },
-      };
+      const config = { headers: { "Content-Type": "multipart/form-data", Authorization: `Bearer ${localStorage.getItem("authToken")}` } };
 
       if (editando.value) {
         await axios.put(`${API_URL}/${formulario.value.id}`, formData, config);
@@ -193,86 +121,46 @@ export default function useCampana() {
 
       await cargarCampanas();
       cerrarModal();
-      Swal.fire(
-        "¡Éxito!",
-        `La campaña ha sido ${
-          editando.value ? "actualizada" : "creada"
-        } correctamente.`,
-        "success"
-      );
+      Swal.fire("¡Éxito!", `La campaña ha sido ${editando.value ? "actualizada" : "creada"}.`, "success");
     } catch (err) {
-      console.error("Error guardando campaña:", err);
-      Swal.fire(
-        "Error",
-        "No se pudo guardar la campaña. Por favor, revisa los datos.",
-        "error"
-      );
+      Swal.fire("Error", "No se pudo guardar la campaña.", "error");
     }
   };
 
-  // Eliminar Campaña
-  const eliminarCampana = async (campana) => {
+  // ✅ --- NUEVA FUNCIÓN PARA ACTIVAR/DESACTIVAR --- ✅
+  const toggleEstado = async (campana) => {
+    const accion = campana.aprobada ? 'desactivar' : 'activar';
     const result = await Swal.fire({
-      title: "¿Estás seguro?",
-      text: `Se eliminará la campaña "${campana.titulo}"`,
-      icon: "warning",
+      title: `¿Confirmas que quieres ${accion} la campaña?`,
+      text: `La campaña "${campana.titulo}" cambiará su estado.`,
+      icon: 'question',
       showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Sí, eliminar",
-      cancelButtonText: "Cancelar",
+      confirmButtonText: `Sí, ${accion}`,
+      cancelButtonText: 'Cancelar',
     });
-    if (!result.isConfirmed) return;
 
-    try {
-      await axios.delete(`${API_URL}/${campana.id}`, getAuthHeaders());
-      await cargarCampanas();
-      Swal.fire(
-        "¡Eliminada!",
-        "La campaña se ha eliminado correctamente.",
-        "success"
-      );
-    } catch (err) {
-      console.error("Error eliminando campaña:", err);
-      Swal.fire(
-        "Error",
-        "No se pudo eliminar la campaña. Es posible que tenga elementos asociados.",
-        "error"
-      );
+    if (result.isConfirmed) {
+      try {
+        await axios.patch(`${API_URL}/${campana.id}/toggle-estado`, {}, getAuthHeaders());
+        await cargarCampanas();
+        Swal.fire('¡Éxito!', `La campaña ha sido ${accion === 'activar' ? 'activada' : 'desactivada'}.`, 'success');
+      } catch (err) {
+        Swal.fire('Error', `No se pudo ${accion} la campaña.`, 'error');
+      }
     }
   };
 
-  const confirmarEliminar = (campana) => {
-    eliminarCampana(campana);
-  };
-
-  // Subida de imagen
   const manejarSubidaImagen = (event) => {
     const file = event.target.files[0];
     if (file) {
       formulario.value.imagen = file;
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        previewImage.value = e.target.result;
-      };
-      reader.readAsDataURL(file);
+      previewImage.value = URL.createObjectURL(file);
     }
   };
 
-  // Abrir modal nueva
   const abrirModalNueva = () => {
     editando.value = false;
-    formulario.value = {
-      id: null,
-      titulo: "",
-      descripcion: "",
-      fechaInicio: "",
-      fechaFin: "",
-      aprobada: false,
-      puntos: null,
-      descuento: null,
-      imagen: null,
-    };
+    formulario.value = { id: null, titulo: "", descripcion: "", fechaInicio: "", fechaFin: "", aprobada: false, imagen: null };
     productosSeleccionados.value = [];
     previewImage.value = null;
     modalAbierto.value = true;
@@ -280,82 +168,36 @@ export default function useCampana() {
 
   const abrirModalEditar = (campana) => {
     editando.value = true;
-    const fechaInicioFormateada = new Date(campana.fechaInicio)
-      .toISOString()
-      .split("T")[0];
-    const fechaFinFormateada = new Date(campana.fechaFin)
-      .toISOString()
-      .split("T")[0];
-
     formulario.value = {
       ...campana,
       imagen: null,
-      fechaInicio: fechaInicioFormateada,
-      fechaFin: fechaFinFormateada,
+      fechaInicio: new Date(campana.fechaInicio).toISOString().split("T")[0],
+      fechaFin: new Date(campana.fechaFin).toISOString().split("T")[0],
     };
-    previewImage.value = campana.imagenUrl
-      ? `http://localhost:3000${campana.imagenUrl}`
-      : null;
+    previewImage.value = campana.imagenUrl ? `http://localhost:3000${campana.imagenUrl}` : null;
     productosSeleccionados.value = campana.productos || [];
     modalAbierto.value = true;
   };
-
-  const abrirModalVerProductos = (campana) => {
-    campanaActual.value = campana;
-    modalVerProductos.value = true;
-  };
-
-  const cerrarModal = () => {
-    modalAbierto.value = false;
-  };
-
-  const isProductoSeleccionado = (producto) => {
-    return productosSeleccionados.value.some((p) => p.id === producto.id);
-  };
-
-  // Function to handle product selection
+  
+  const abrirModalVerProductos = (campana) => { campanaActual.value = campana; modalVerProductos.value = true; };
+  const cerrarModal = () => { modalAbierto.value = false; };
+  const isProductoSeleccionado = (producto) => productosSeleccionados.value.some((p) => p.id === producto.id);
   const toggleProductoSeleccionado = (producto) => {
-    const index = productosSeleccionados.value.findIndex(
-      (p) => p.id === producto.id
-    );
+    const index = productosSeleccionados.value.findIndex((p) => p.id === producto.id);
     if (index === -1) {
-      productosSeleccionados.value.push(producto); // Add product
+      productosSeleccionados.value.push(producto);
     } else {
-      productosSeleccionados.value.splice(index, 1); // Remove product
+      productosSeleccionados.value.splice(index, 1);
     }
   };
 
   return {
-    filtro,
-    placeholder,
-    modalAbierto,
-    modalSeleccionProductos,
-    modalVerProductos,
-    editando,
-    previewImage,
-    mostrarDescripcion,
-    campanaActual,
-    campanas,
-    campanasPaginadas,
-    formulario,
-    productos,
-    productosSeleccionados,
-    abrirModalNueva,
-    abrirModalEditar,
-    abrirModalVerProductos,
-    cerrarModal,
-    guardarCampana,
-    confirmarEliminar,
-    manejarSubidaImagen,
-    cargarCampanas,
-    paginaActual,
-    totalPaginas,
-    paginasVisibles,
-    paginaAnterior,
-    paginaSiguiente,
-    irAPagina,
-    totalCampanas,
-    isProductoSeleccionado,
-    toggleProductoSeleccionado,
+    filtro, placeholder, modalAbierto, modalSeleccionProductos, modalVerProductos, editando,
+    previewImage, mostrarDescripcion, campanaActual, campanas, campanasPaginadas, formulario,
+    productos, productosSeleccionados, abrirModalNueva, abrirModalEditar, abrirModalVerProductos,
+    cerrarModal, guardarCampana, manejarSubidaImagen, cargarCampanas, paginaActual, totalPaginas,
+    paginasVisibles, paginaAnterior, paginaSiguiente, irAPagina, totalCampanas,
+    isProductoSeleccionado, toggleProductoSeleccionado,
+    toggleEstado, // <-- Exportamos la nueva función
   };
 }

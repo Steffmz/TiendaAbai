@@ -6,7 +6,6 @@ const prisma = new PrismaClient();
 // FUNCIÓN PARA CORREGIR LA ZONA HORARIA
 const adjustDate = (dateString) => {
   if (!dateString) return null;
-  // Previene que se ajuste una fecha que ya es un objeto Date
   if (dateString instanceof Date) return dateString;
   const date = new Date(dateString);
   const userTimezoneOffset = date.getTimezoneOffset() * 60000;
@@ -32,11 +31,8 @@ const getCampanaById = async (req, res) => {
   try {
     const campana = await prisma.campana.findUnique({
       where: { id: parseInt(id) },
-      include: {
-        productos: true
-      }
+      include: { productos: true }
     });
-
     if (!campana) {
       return res.status(404).json({ message: "Campaña no encontrada" });
     }
@@ -47,18 +43,16 @@ const getCampanaById = async (req, res) => {
   }
 };
 
-
 // Crear campaña
 const createCampana = async (req, res) => {
   try {
-    const { titulo, descripcion, fechaInicio, fechaFin, aprobada: aprobadaStr, puntos: puntosStr, descuento: descuentoStr, productosIds } = req.body;
+    const { titulo, descripcion, fechaInicio, fechaFin, aprobada: aprobadaStr, productosIds } = req.body;
     const imagenUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
     if (!titulo || !fechaInicio || !fechaFin) {
       return res.status(400).json({ error: 'Título, fecha de inicio y fecha de fin son obligatorios' });
     }
     
-    // CORRECCIÓN: Ajustamos las fechas antes de guardarlas
     const fechaInicioDate = adjustDate(fechaInicio);
     const fechaFinDate = adjustDate(fechaFin);
 
@@ -72,8 +66,8 @@ const createCampana = async (req, res) => {
       fechaInicio: fechaInicioDate,
       fechaFin: fechaFinDate,
       aprobada: aprobadaStr === 'true',
-      puntos: puntosStr ? parseInt(puntosStr) : null,
-      descuento: descuentoStr ? parseInt(descuentoStr) : null,
+      puntos: null, // Campo eliminado de la UI
+      descuento: null, // Campo eliminado de la UI
       imagenUrl,
     };
 
@@ -102,22 +96,18 @@ const updateCampana = async (req, res) => {
     const campanaExistente = await prisma.campana.findUnique({
       where: { id: parseInt(id) }
     });
-
     if (!campanaExistente) {
       return res.status(404).json({ error: 'Campaña no encontrada' });
     }
     
-    const { titulo, descripcion, fechaInicio, fechaFin, aprobada: aprobadaStr, puntos: puntosStr, descuento: descuentoStr, productosIds } = req.body;
+    const { titulo, descripcion, fechaInicio, fechaFin, aprobada: aprobadaStr, productosIds } = req.body;
 
     const dataUpdate = {
       titulo: titulo ? titulo.trim() : campanaExistente.titulo,
       descripcion: descripcion ? descripcion.trim() : campanaExistente.descripcion,
       aprobada: aprobadaStr !== undefined ? (aprobadaStr === 'true') : campanaExistente.aprobada,
-      puntos: puntosStr ? parseInt(puntosStr) : campanaExistente.puntos,
-      descuento: descuentoStr ? parseInt(descuentoStr) : campanaExistente.descuento,
     };
 
-    // CORRECCIÓN: Ajustamos las fechas si se proporcionan
     if (fechaInicio) dataUpdate.fechaInicio = adjustDate(fechaInicio);
     if (fechaFin) dataUpdate.fechaFin = adjustDate(fechaFin);
 
@@ -149,31 +139,30 @@ const updateCampana = async (req, res) => {
   }
 };
 
-const deleteCampana = async (req, res) => {
+// ✅ --- NUEVA FUNCIÓN PARA ACTIVAR/DESACTIVAR --- ✅
+const toggleEstadoCampana = async (req, res) => {
   try {
     const { id } = req.params;
-    
     const campana = await prisma.campana.findUnique({
-      where: { id: parseInt(id) }
+      where: { id: parseInt(id) },
     });
-    
+
     if (!campana) {
       return res.status(404).json({ error: 'Campaña no encontrada' });
     }
 
-    if (campana.imagenUrl) {
-      const rutaImagen = path.join(__dirname, '..', '..', campana.imagenUrl);
-      if (fs.existsSync(rutaImagen)) fs.unlinkSync(rutaImagen);
-    }
-
-    await prisma.campana.delete({
-      where: { id: parseInt(id) }
+    const campanaActualizada = await prisma.campana.update({
+      where: { id: parseInt(id) },
+      data: { aprobada: !campana.aprobada },
     });
 
-    res.json({ message: 'Campaña eliminada correctamente' });
+    res.json({
+      message: `Campaña ${campanaActualizada.aprobada ? 'activada' : 'desactivada'} correctamente`,
+      campana: campanaActualizada,
+    });
   } catch (error) {
-    console.error('Error al eliminar campaña:', error);
-    res.status(500).json({ error: 'Error al eliminar campaña' });
+    console.error('Error al cambiar el estado de la campaña:', error);
+    res.status(500).json({ error: 'Error al cambiar el estado de la campaña' });
   }
 };
 
@@ -185,11 +174,7 @@ const asignarProducto = async (req, res) => {
     }
     const campana = await prisma.campana.update({
       where: { id: parseInt(campanaId) },
-      data: {
-        productos: {
-          connect: { id: parseInt(productoId) }
-        }
-      },
+      data: { productos: { connect: { id: parseInt(productoId) }}},
       include: { productos: true }
     });
     res.json(campana);
@@ -207,11 +192,7 @@ const quitarProducto = async (req, res) => {
     }
     const campana = await prisma.campana.update({
       where: { id: parseInt(campanaId) },
-      data: {
-        productos: {
-          disconnect: { id: parseInt(productoId) }
-        }
-      },
+      data: { productos: { disconnect: { id: parseInt(productoId) }}},
       include: { productos: true }
     });
     res.json(campana);
@@ -226,7 +207,7 @@ module.exports = {
   getCampanaById,
   createCampana,
   updateCampana,
-  deleteCampana,
   asignarProducto,
-  quitarProducto
+  quitarProducto,
+  toggleEstadoCampana, // <-- Exportamos la nueva función
 };
