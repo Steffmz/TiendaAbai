@@ -1,5 +1,3 @@
-// steffmz/tiendaabai/TiendaAbai-Wil/frontend/src/components/campanas/Campana.vue
-
 <template>
   <div class="max-w-7xl w-full mx-auto flex flex-col h-full">
 
@@ -29,8 +27,6 @@
               <th class="px-3 py-3 text-center font-semibold w-24">Imagen</th>
               <th class="px-3 py-3 text-center font-semibold w-40">Nombre</th>
               <th class="px-3 py-3 text-center font-semibold w-24">Descripción</th>
-              <th class="px-3 py-3 text-center font-semibold w-28">Puntos</th>
-              <th class="px-3 py-3 text-center font-semibold w-28">Descuento</th>
               <th class="px-3 py-3 text-center font-semibold w-48">Productos</th>
               <th class="px-3 py-3 text-center font-semibold w-32">Fecha Inicio</th>
               <th class="px-3 py-3 text-center font-semibold w-32">Fecha Fin</th>
@@ -62,12 +58,6 @@
                   class="bg-blue-100 hover:bg-blue-200 px-3 py-1 rounded-md text-sm text-blue-700 font-medium transition-colors">
                   Ver
                 </button>
-              </td>
-              <td data-label="Puntos" class="px-3 py-3 text-green-500 font-semibold text-center">
-                {{ campana.puntos ?? '-' }}
-              </td>
-              <td data-label="Descuento" class="px-3 py-3 text-green-500 font-semibold text-center">
-                {{ campana.descuento !== null && campana.descuento !== undefined ? campana.descuento + '%' : '-' }}
               </td>
               <td data-label="Productos" class="px-4 py-2 text-center">
                 <button @click="abrirModalVerProductos(campana)"
@@ -129,9 +119,9 @@
     </div>
     <div v-if="modalAbierto" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div class="modal-content bg-white rounded-xl shadow-lg relative">
-        <button @click="cerrarModal" class="absolute top-2 right-2 p-1 
-                text-gray-500 hover:text-white 
-                hover:bg-red-500 rounded-full 
+        <button @click="cerrarModal" class="absolute top-2 right-2 p-1
+                text-gray-500 hover:text-white
+                hover:bg-red-500 rounded-full
                 transition duration-200 text-xl">
           &times;
         </button>
@@ -156,14 +146,6 @@
             <div class="form-group">
               <label>Fecha Fin *</label>
               <input type="date" v-model="formulario.fechaFin" />
-            </div>
-            <div class="form-group">
-              <label>Puntos *</label>
-              <input v-model.number="formulario.puntos" type="number" required min="1" placeholder="100" />
-            </div>
-            <div class="form-group">
-              <label>Descuento (%) *</label>
-              <input v-model.number="formulario.descuento" type="number" required min="1" max="100" placeholder="15" />
             </div>
             <div class="form-group">
               <label>Estado *</label>
