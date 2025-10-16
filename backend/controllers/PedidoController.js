@@ -4,32 +4,34 @@ const prisma = new PrismaClient();
 // Función helper para generar mensajes de notificación personalizados
 const generarMensajeNotificacion = (estado, pedidoId) => {
   const mensajes = {
-    "Aprobado": {
+    Aprobado: {
       titulo: `¡Tu pedido #${pedidoId} ha sido aprobado!`,
-      mensaje: `Tu solicitud de canje ha sido aprobada por un administrador. Pronto será procesado para el envío.`
+      mensaje: `Tu solicitud de canje ha sido aprobada por un administrador. Pronto será procesado para el envío.`,
     },
-    "Enviado": {
+    Enviado: {
       titulo: `¡Tu pedido #${pedidoId} está en camino!`,
-      mensaje: `Tu pedido ha sido enviado y está en tránsito. Pronto lo recibirás.`
+      mensaje: `Tu pedido ha sido enviado y está en tránsito. Pronto lo recibirás.`,
     },
-    "Entregado": {
+    Entregado: {
       titulo: `¡Tu pedido #${pedidoId} ha sido entregado!`,
-      mensaje: `Tu pedido ha sido entregado exitosamente. ¡Esperamos que disfrutes tu canje! Gracias por tu preferencia.`
+      mensaje: `Tu pedido ha sido entregado exitosamente. ¡Esperamos que disfrutes tu canje! Gracias por tu preferencia.`,
     },
-    "Rechazado": {
+    Rechazado: {
       titulo: `Tu pedido #${pedidoId} ha sido rechazado`,
-      mensaje: `Lamentablemente, tu solicitud de canje no pudo ser aprobada. Tus puntos han sido devueltos a tu cuenta.`
+      mensaje: `Lamentablemente, tu solicitud de canje no pudo ser aprobada. Tus puntos han sido devueltos a tu cuenta.`,
     },
-    "Cancelado": {
+    Cancelado: {
       titulo: `Tu pedido #${pedidoId} ha sido cancelado`,
-      mensaje: `Tu pedido ha sido cancelado. Tus puntos han sido devueltos a tu cuenta.`
-    }
+      mensaje: `Tu pedido ha sido cancelado. Tus puntos han sido devueltos a tu cuenta.`,
+    },
   };
 
-  return mensajes[estado] || {
-    titulo: `Actualización de pedido #${pedidoId}`,
-    mensaje: `Tu pedido ha sido actualizado al estado: ${estado}.`
-  };
+  return (
+    mensajes[estado] || {
+      titulo: `Actualización de pedido #${pedidoId}`,
+      mensaje: `Tu pedido ha sido actualizado al estado: ${estado}.`,
+    }
+  );
 };
 
 // Obtener todos los pedidos con paginación
@@ -41,15 +43,15 @@ const getAllPedidos = async (req, res) => {
   try {
     const [pedidos, totalPedidos] = await prisma.$transaction([
       prisma.pedido.findMany({
-        orderBy: { fecha: 'desc' },
+        orderBy: { fecha: "desc" },
         skip,
         take: limit,
         include: {
           usuario: { select: { nombreCompleto: true } },
-          detalles: { include: { producto: true } }
-        }
+          detalles: { include: { producto: true } },
+        },
       }),
-      prisma.pedido.count()
+      prisma.pedido.count(),
     ]);
 
     res.json({ pedidos, total: totalPedidos, page, limit });
@@ -62,11 +64,11 @@ const getAllPedidos = async (req, res) => {
 // Actualizar el estado de un pedido (notifica al usuario)
 const updateEstadoPedido = async (req, res) => {
   const { id } = req.params;
-  const { estado } = req.body;
+  const { estado: nuevoEstado } = req.body;
   const adminId = req.usuario.userId;
 
-  const estadosValidos = ["Pendiente","Aprobado","Enviado","Entregado","Cancelado","Rechazado"];
-  if (!estado || !estadosValidos.includes(estado)) {
+  const estadosValidos = ["Pendiente", "Aprobado", "Enviado", "Entregado", "Cancelado", "Rechazado"];
+  if (!nuevoEstado || !estadosValidos.includes(nuevoEstado)) {
     return res.status(400).json({ message: "El estado proporcionado no es válido." });
   }
 
@@ -74,72 +76,109 @@ const updateEstadoPedido = async (req, res) => {
     const pedidoActualizado = await prisma.$transaction(async (tx) => {
       const pedido = await tx.pedido.findUnique({
         where: { id: parseInt(id) },
-        include: { 
+        include: {
           detalles: true,
-          usuario: { select: { nombreCompleto: true } }
+          usuario: { select: { nombreCompleto: true } },
         },
       });
       if (!pedido) throw new Error("Pedido no encontrado");
 
       const estadoAnterior = pedido.estado;
+      if (estadoAnterior === nuevoEstado) return pedido; // No hacer nada si el estado no cambia
 
-      // Evitar notificaciones duplicadas si el estado no cambió
-      if (estadoAnterior === estado) {
-        return pedido;
-      }
+      const eraReembolsado = ["Cancelado", "Rechazado"].includes(estadoAnterior);
+      const esReembolsado = ["Cancelado", "Rechazado"].includes(nuevoEstado);
 
-      // Devolver puntos y stock si se cancela/rechaza
-      if (["Cancelado","Rechazado"].includes(estado) && !["Cancelado","Rechazado"].includes(estadoAnterior)) {
+      // --- 🛡️ LÓGICA DE TRANSICIÓN MEJORADA 🛡️ ---
+
+      // CASO 1: Un pedido activo se cancela/rechaza (DEVOLVER PUNTOS Y STOCK)
+      if (!eraReembolsado && esReembolsado) {
+        // Devolver puntos al usuario
         await tx.usuario.update({
           where: { id: pedido.usuarioId },
           data: { puntosTotales: { increment: pedido.totalPuntos } },
         });
+
+        // Devolver stock a los productos
         for (const detalle of pedido.detalles) {
           await tx.producto.update({
             where: { id: detalle.productoId },
             data: { stock: { increment: detalle.cantidad } },
           });
         }
+        
+        // Registrar la devolución en el historial
         await tx.historialPuntos.create({
           data: {
-            puntos: pedido.totalPuntos,
+            puntos: pedido.totalPuntos, // Puntos en positivo
             tipo: "AJUSTE",
-            descripcion: `Devolución por pedido #${pedido.id} ${estado.toLowerCase()}`,
+            descripcion: `Devolución por pedido #${pedido.id} ${nuevoEstado.toLowerCase()}`,
             beneficiarioId: pedido.usuarioId,
             adminCreadorId: adminId,
           },
         });
       }
 
-      const dataToUpdate = { estado };
-      if (["Aprobado", "Rechazado", "Cancelado"].includes(estado)) {
+      // CASO 2: Un pedido cancelado/rechazado se reactiva (RESTAR PUNTOS Y STOCK)
+      else if (eraReembolsado && !esReembolsado) {
+        // Verificar si el usuario aún tiene puntos suficientes
+        const usuario = await tx.usuario.findUnique({ where: { id: pedido.usuarioId } });
+        if (usuario.puntosTotales < pedido.totalPuntos) {
+          throw new Error(`No se puede reactivar el pedido. El usuario solo tiene ${usuario.puntosTotales} puntos y se necesitan ${pedido.totalPuntos}.`);
+        }
+
+        // Restar puntos al usuario
+        await tx.usuario.update({
+          where: { id: pedido.usuarioId },
+          data: { puntosTotales: { decrement: pedido.totalPuntos } },
+        });
+
+        // Restar stock a los productos
+        for (const detalle of pedido.detalles) {
+          await tx.producto.update({
+            where: { id: detalle.productoId },
+            data: { stock: { decrement: detalle.cantidad } },
+          });
+        }
+        
+        // Registrar el nuevo canje en el historial
+        await tx.historialPuntos.create({
+          data: {
+            puntos: -pedido.totalPuntos, // Puntos en negativo
+            tipo: "CANJE",
+            descripcion: `Re-activación de canje para pedido #${pedido.id}`,
+            beneficiarioId: pedido.usuarioId,
+            adminCreadorId: adminId,
+            origenId: pedido.id,
+          },
+        });
+      }
+
+      // --- FIN DE LA LÓGICA MEJORADA ---
+
+      const dataToUpdate = { estado: nuevoEstado };
+      if (["Aprobado", "Rechazado", "Cancelado"].includes(nuevoEstado)) {
         dataToUpdate.aprobadoPorAdminId = adminId;
         dataToUpdate.fechaAprobacion = new Date();
       }
 
-      const pedidoActualizado = await tx.pedido.update({
+      const pedidoActualizadoFinal = await tx.pedido.update({
         where: { id: parseInt(id) },
         data: dataToUpdate,
       });
 
-      // 📩 Notificar al usuario con mensajes personalizados
-      if (["Aprobado","Enviado","Rechazado","Cancelado","Entregado"].includes(estado)) {
-        const { titulo, mensaje } = generarMensajeNotificacion(estado, pedido.id);
-        
-        const notificacion = await tx.notificacion.create({
-          data: {
-            titulo,
-            mensaje,
-            usuarioId: pedido.usuarioId,
-            pedidoId: pedido.id,
-          },
-        });
-        
-        console.log(`✅ Notificación "${estado}" creada para usuario ${pedido.usuario.nombreCompleto} (ID: ${pedido.usuarioId})`);
-        console.log(`   Título: ${titulo}`);
-      }
+      // Notificar al usuario sobre el cambio de estado
+      const { titulo, mensaje } = generarMensajeNotificacion(nuevoEstado, pedido.id);
+      await tx.notificacion.create({
+        data: {
+          titulo,
+          mensaje,
+          usuarioId: pedido.usuarioId,
+          pedidoId: pedido.id,
+        },
+      });
 
-      return pedidoActualizado;
+      return pedidoActualizadoFinal;
     });
 
     res.json({ message: "Estado actualizado correctamente.", pedido: pedidoActualizado });
@@ -148,6 +187,9 @@ const updateEstadoPedido = async (req, res) => {
     res.status(500).json({ message: error.message || "Error al actualizar estado del pedido." });
   }
 };
+
+
+// --- LAS DEMÁS FUNCIONES PERMANECEN IGUAL ---
 
 // Crear pedido desde producto individual (notifica al admin)
 const createPedido = async (req, res) => {
@@ -196,33 +238,23 @@ const createPedido = async (req, res) => {
         },
       });
 
-      // 📩 Notificar a todos los admins
       const admins = await tx.usuario.findMany({ 
         where: { rol: "Administrador" },
         select: { id: true, nombreCompleto: true }
       });
       
-      console.log(`📧 Encontrados ${admins.length} administradores para notificar sobre pedido #${nuevoPedido.id}`);
-      
-      if (admins.length === 0) {
-        console.warn('⚠️ No se encontraron administradores en el sistema');
-      }
-
-      const notificacionesCreadas = await Promise.all(
-        admins.map(async (admin) => {
-          console.log(`📧 Creando notificación para admin: ${admin.nombreCompleto} (ID: ${admin.id})`);
-          return tx.notificacion.create({
+      if (admins.length > 0) {
+        await Promise.all(
+          admins.map(admin => tx.notificacion.create({
             data: {
               titulo: "Nuevo Pedido Recibido",
               mensaje: `El usuario ${usuario.nombreCompleto} ha realizado un nuevo pedido (#${nuevoPedido.id}).`,
               usuarioId: admin.id,
               pedidoId: nuevoPedido.id,
             },
-          });
-        })
-      );
-
-      console.log(`✅ Se crearon ${notificacionesCreadas.length} notificaciones para admins`);
+          }))
+        );
+      }
 
       await tx.historialPuntos.create({
         data: {
@@ -296,33 +328,23 @@ const crearPedidoDesdeCarrito = async (req, res) => {
         },
       });
 
-      // 📩 Notificar a todos los admins
       const admins = await tx.usuario.findMany({ 
         where: { rol: "Administrador" },
         select: { id: true, nombreCompleto: true }
       });
       
-      console.log(`📧 Encontrados ${admins.length} administradores para notificar sobre pedido desde carrito #${nuevoPedido.id}`);
-      
-      if (admins.length === 0) {
-        console.warn('⚠️ No se encontraron administradores en el sistema');
-      }
-
-      const notificacionesCreadas = await Promise.all(
-        admins.map(async (admin) => {
-          console.log(`📧 Creando notificación para admin: ${admin.nombreCompleto} (ID: ${admin.id})`);
-          return tx.notificacion.create({
+      if(admins.length > 0) {
+        await Promise.all(
+          admins.map(admin => tx.notificacion.create({
             data: {
               titulo: "Nuevo Pedido Recibido",
               mensaje: `El usuario ${usuario.nombreCompleto} ha realizado un nuevo pedido (#${nuevoPedido.id}).`,
               usuarioId: admin.id,
               pedidoId: nuevoPedido.id,
             },
-          });
-        })
-      );
-
-      console.log(`✅ Se crearon ${notificacionesCreadas.length} notificaciones para admins`);
+          }))
+        );
+      }
 
       await tx.historialPuntos.create({
         data: {
@@ -365,6 +387,7 @@ const getMisPedidos = async (req, res) => {
     res.status(500).json({ message: "Error interno del servidor." });
   }
 };
+
 const getPedidoById = async (req, res) => {
   const { id } = req.params;
   const { userId, rol } = req.usuario;
