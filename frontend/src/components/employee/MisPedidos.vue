@@ -42,7 +42,13 @@
 
           <div class="pedido-footer">
             <span>Total del Pedido:</span>
-            <span class="total-puntos">{{ pedido.totalPuntos }} Puntos</span>
+            <div class="flex items-center gap-4">
+              <router-link v-if="['Aprobado', 'Enviado', 'Entregado'].includes(pedido.estado)"
+                :to="`/tienda/recibo/${pedido.id}`" class="btn-recibo">
+                Ver Recibo
+              </router-link>
+              <span class="total-puntos">{{ pedido.totalPuntos }} Puntos</span>
+            </div>
           </div>
         </div>
       </div>
@@ -284,5 +290,23 @@ onMounted(fetchPedidos);
 
 .badge.secondary {
   background-color: #6b7280;
+}
+.btn-recibo {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background-color: #e0e7ff;
+  color: #4338ca;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: background-color 0.2s;
+}
+.btn-recibo:hover {
+  background-color: #c7d2fe;
+}
+.pedido-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 </style>

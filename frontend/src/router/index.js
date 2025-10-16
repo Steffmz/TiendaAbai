@@ -77,6 +77,12 @@ const routes = [
         name: "MisPedidos",
         component: MisPedidos,
       },
+      {
+        path: "recibo/:pedidoId",
+        name: "ReciboPedidoEmpleado",
+        component: () => import("../components/admin/ReciboPedido.vue"),
+        props: true,
+      },
     ],
   },
 

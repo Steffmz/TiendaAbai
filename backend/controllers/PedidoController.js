@@ -365,20 +365,25 @@ const getMisPedidos = async (req, res) => {
     res.status(500).json({ message: "Error interno del servidor." });
   }
 };
-// Obtener un pedido por su ID con todos los detalles
 const getPedidoById = async (req, res) => {
   const { id } = req.params;
+  const { userId, rol } = req.usuario;
+
   try {
     const pedido = await prisma.pedido.findUnique({
       where: { id: parseInt(id) },
       include: {
         usuario: { select: { nombreCompleto: true } },
-        aprobadoPor: { select: { nombreCompleto: true } }, // <-- Esto ahora funcionará
+        aprobadoPor: { select: { nombreCompleto: true } },
         detalles: { include: { producto: true } },
       },
     });
+
     if (!pedido) {
       return res.status(404).json({ message: "Pedido no encontrado." });
+    }
+    if (rol !== 'Administrador' && pedido.usuarioId !== userId) {
+      return res.status(403).json({ message: "Acceso denegado. No tienes permiso para ver este recibo." });
     }
     res.json(pedido);
   } catch (error) {
