@@ -3,13 +3,14 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// IMPORTANTE: Importar el controlador de PRODUCTOS, no de Campañas
+// IMPORTANTE: Importar el controlador de PRODUCTOS
 const {
   getAllProductos,
   getProductosByCategoria,
   createProducto,
   updateProducto,
-  deleteProducto
+  desactivarProducto,
+  activarProducto
 } = require('../controllers/ProductoController');
 
 const router = express.Router();
@@ -39,7 +40,7 @@ const upload = multer({
     }
   },
   limits: {
-    fileSize: 5 * 1024 * 1024 
+    fileSize: 5 * 1024 * 1024 // 5 MB
   }
 });
 
@@ -48,6 +49,9 @@ router.get('/', getAllProductos);
 router.get('/categoria/:categoriaId', getProductosByCategoria);
 router.post('/', upload.single('imagen'), createProducto);
 router.put('/:id', upload.single('imagen'), updateProducto);
-router.delete('/:id', deleteProducto);
+
+// Rutas de activar / desactivar
+router.patch('/:id/desactivar', desactivarProducto);
+router.patch('/:id/activar', activarProducto);
 
 module.exports = router;
