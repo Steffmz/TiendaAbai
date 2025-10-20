@@ -27,21 +27,11 @@
           </thead>
           <tbody>
             <tr v-if="loading" v-for="i in 6" :key="i">
-              <td>
-                <BaseSkeleton width="60px" height="60px" radius="8px" />
-              </td>
-              <td>
-                <BaseSkeleton width="150px" height="24px" radius="6px" />
-              </td>
-              <td>
-                <BaseSkeleton width="60px" height="28px" radius="6px" />
-              </td>
-              <td>
-                <BaseSkeleton width="80px" height="24px" radius="6px" />
-              </td>
-              <td>
-                <BaseSkeleton width="50px" height="24px" radius="6px" />
-              </td>
+              <td><BaseSkeleton width="60px" height="60px" radius="8px" /></td>
+              <td><BaseSkeleton width="150px" height="24px" radius="6px" /></td>
+              <td><BaseSkeleton width="60px" height="28px" radius="6px" /></td>
+              <td><BaseSkeleton width="80px" height="24px" radius="6px" /></td>
+              <td><BaseSkeleton width="50px" height="24px" radius="6px" /></td>
               <td>
                 <div class="actions-cell">
                   <BaseSkeleton width="70px" height="32px" radius="6px" />
@@ -66,20 +56,8 @@
               <td>
                 <div class="actions-cell">
                   <button @click="editarProducto(producto)" class="btn-edit">Editar</button>
-                  <button
-                    v-if="producto.estado"
-                    @click="desactivarProducto(producto)"
-                    class="btn btn-danger"
-                  >
-                    Desactivar
-                  </button>
-                  <button
-                    v-else
-                    @click="activarProducto(producto)"
-                    class="btn btn-success"
-                  >
-                    Activar
-                  </button>
+                  <button v-if="producto.estado" @click="desactivarProducto(producto)" class="btn btn-danger">Desactivar</button>
+                  <button v-else @click="activarProducto(producto)" class="btn btn-success">Activar</button>
                 </div>
               </td>
             </tr>
@@ -105,26 +83,13 @@
             <div class="card-row"><strong>Stock:</strong> {{ producto.stock }}</div>
             <div class="card-row">
               <strong>Descripción:</strong>
-              <button @click="mostrarDescripcionCompleta = producto.descripcion"
-                class="btn btn-secondary text-xs px-2 py-1">Ver</button>
+              <button @click="mostrarDescripcionCompleta = producto.descripcion" class="btn btn-secondary text-xs px-2 py-1">Ver</button>
             </div>
           </div>
           <div class="card-actions">
             <button @click="editarProducto(producto)" class="btn-edit">Editar</button>
-            <button
-              v-if="producto.estado === 1"
-              @click="desactivarProducto(producto)"
-              class="btn btn-danger"
-            >
-              Desactivar
-            </button>
-            <button
-              v-else
-              @click="activarProducto(producto)"
-              class="btn btn-success"
-            >
-              Activar
-            </button>
+            <button v-if="producto.estado" @click="desactivarProducto(producto)" class="btn btn-danger">Desactivar</button>
+            <button v-else @click="activarProducto(producto)" class="btn btn-success">Activar</button>
          </div>
         </div>
       </div>
@@ -133,48 +98,32 @@
     <div v-if="!loading && totalPaginas > 1" class="pagination-controls">
       <button @click="paginaAnterior" :disabled="paginaActual === 1" class="btn btn-secondary">Anterior</button>
       <span>Página {{ paginaActual }} de {{ totalPaginas }}</span>
-      <button @click="paginaSiguiente" :disabled="paginaActual === totalPaginas"
-        class="btn btn-secondary">Siguiente</button>
+      <button @click="paginaSiguiente" :disabled="paginaActual === totalPaginas" class="btn btn-secondary">Siguiente</button>
     </div>
     <div v-if="mostrarModal" class="modal-overlay" @click.self="cerrarModal">
       <div class="modal-content">
         <h2 class="modal-title">{{ editando ? 'Editar Producto' : 'Nuevo Producto' }}</h2>
         <form @submit.prevent="guardarProducto" class="space-y-5">
           <div class="form-group"><label>Nombre *</label><input v-model="form.nombre" type="text" required /></div>
-          <div class="form-group"><label>Descripción</label><textarea v-model="form.descripcion" rows="3"></textarea>
-          </div>
+          <div class="form-group"><label>Descripción</label><textarea v-model="form.descripcion" rows="3"></textarea></div>
          <div class="form-grid grid grid-cols-2 gap-4">
           <div class="form-group">
             <label class="form-label">Precio (puntos) *</label>
-            <input
-              v-model="form.precioPuntos"
-              type="number"
-              min="1"
-              required
-              class="form-input"
-            />
+            <input v-model="form.precioPuntos" type="number" min="1" required class="form-input" />
           </div>
           <div class="form-group">
             <label class="form-label">Stock *</label>
-            <input
-              v-model="form.stock"
-              type="number"
-              min="0"
-              required
-              class="form-input"
-            />
+            <input v-model="form.stock" type="number" min="0" required class="form-input" />
           </div>
         </div>
           <div class="form-group">
             <label>Imagen</label>
             <input type="file" @change="handleImageUpload" accept="image/*" class="file-input" />
-            <img v-if="previewImage" :src="previewImage" class="preview-image mt-4 rounded-lg border max-w-[100px]"
-              alt="Preview" />
+            <img v-if="previewImage" :src="previewImage" class="preview-image mt-4 rounded-lg border max-w-[100px]" alt="Preview" />
           </div>
           <div class="modal-actions">
             <button type="button" @click="cerrarModal" class="btn btn-secondary">Cancelar</button>
-            <button type="submit" class="btn btn-primary" :disabled="loading">{{ loading ? 'Guardando...' : 'Guardar'
-              }}</button>
+            <button type="submit" class="btn btn-primary" :disabled="loading">{{ loading ? 'Guardando...' : 'Guardar' }}</button>
           </div>
         </form>
       </div>
@@ -350,6 +299,15 @@ const activarProducto = async (producto) => {
     Swal.fire('Error', error.response?.data?.error || 'No se pudo activar el producto.', 'error');
   }
 };
-
 </script>
 
+<style scoped>
+.btn-success {
+  background: #dcfce7;
+  color: #166534;
+  border-color: #bbf7d0;
+}
+.btn-success:hover {
+  background: #bbf7d0;
+}
+</style>
