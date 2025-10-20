@@ -3,8 +3,6 @@ const prisma = new PrismaClient();
 const bcrypt = require("bcryptjs");
 const xlsx = require('xlsx');
 
-// backend/controllers/UsuarioController.js
-
 exports.getAllUsuarios = async (req, res) => {
   const adminId = req.usuario.userId;
   const page = parseInt(req.query.page) || 1;
@@ -18,7 +16,6 @@ exports.getAllUsuarios = async (req, res) => {
       { rol: { not: "Administrador" } },
       {
         OR: [
-          // ✅ CORRECCIÓN: Se elimina 'mode: insensitive'
           { nombreCompleto: { contains: searchQuery } }, 
           { cedula: { contains: searchQuery } },
         ],
@@ -317,13 +314,11 @@ exports.getMiPerfil = async (req, res) => {
   }
 };
 exports.importarUsuarios = async (req, res) => {
-  // 1. Validar que se haya subido un archivo
   if (!req.file) {
     return res.status(400).json({ message: 'No se ha subido ningún archivo.' });
   }
 
   try {
-    // 2. Leer el archivo Excel desde la memoria
     const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
@@ -336,18 +331,14 @@ exports.importarUsuarios = async (req, res) => {
     let creados = 0;
     const errores = [];
 
-    // 3. Procesar cada usuario del Excel dentro de una transacción
     await prisma.$transaction(async (tx) => {
       for (const [index, usuarioData] of usuariosDesdeExcel.entries()) {
         const { Cedula, NombreCompleto, Email, Sede, Cargo, CentroDeCostos } = usuarioData;
-
-        // Validar campos obligatorios
         if (!Cedula || !NombreCompleto || !Email || !Sede || !Cargo || !CentroDeCostos) {
           errores.push(`Fila ${index + 2}: Faltan datos obligatorios.`);
           continue;
         }
 
-        // Verificar si el usuario ya existe por cédula o email
         const cedulaStr = String(Cedula);
         const existe = await tx.usuario.findFirst({
           where: { OR: [{ cedula: cedulaStr }, { email: Email }] },
@@ -358,11 +349,9 @@ exports.importarUsuarios = async (req, res) => {
           continue;
         }
 
-        // 4. Contraseña temporal (cédula) y hasheo
         const contrasenaTemporal = cedulaStr;
         const hashedPassword = await bcrypt.hash(contrasenaTemporal, 10);
 
-        // 5. Buscar o crear Cargo y Centro de Costos
         const [cargoRecord, centroRecord] = await Promise.all([
           tx.cargos.upsert({
             where: { nombre: Cargo },
@@ -376,7 +365,6 @@ exports.importarUsuarios = async (req, res) => {
           })
         ]);
 
-        // Crear el usuario
         await tx.usuario.create({
           data: {
             cedula: cedulaStr,

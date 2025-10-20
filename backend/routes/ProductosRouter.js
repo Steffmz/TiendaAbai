@@ -3,7 +3,6 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// IMPORTANTE: Importar el controlador de PRODUCTOS
 const {
   getAllProductos,
   getProductosByCategoria,
@@ -15,13 +14,11 @@ const {
 
 const router = express.Router();
 
-// Crear carpeta uploads si no existe
 const uploadDir = path.join(__dirname, '..', 'uploads');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Configuración de multer para productos
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadDir),
   filename: (req, file, cb) => {
@@ -40,17 +37,15 @@ const upload = multer({
     }
   },
   limits: {
-    fileSize: 5 * 1024 * 1024 // 5 MB
+    fileSize: 5 * 1024 * 1024 
   }
 });
 
-// RUTAS DE PRODUCTOS
 router.get('/', getAllProductos);
 router.get('/categoria/:categoriaId', getProductosByCategoria);
 router.post('/', upload.single('imagen'), createProducto);
 router.put('/:id', upload.single('imagen'), updateProducto);
 
-// Rutas de activar / desactivar
 router.patch('/:id/desactivar', desactivarProducto);
 router.patch('/:id/activar', activarProducto);
 

@@ -134,7 +134,6 @@ import useCampana from './useCampana'
 const isActiva = (campana) => {
   const hoy = new Date();
   const fechaFin = new Date(campana.fechaFin);
-  // Es visible para el usuario si está aprobada Y la fecha no ha pasado
   return campana.aprobada && hoy <= fechaFin;
 };
 
@@ -145,7 +144,7 @@ const {
   cerrarModal, guardarCampana, manejarSubidaImagen, totalCampanas, paginaAnterior,
   paginaSiguiente, paginaActual, totalPaginas, paginasVisibles, irAPagina,
   isProductoSeleccionado, toggleProductoSeleccionado,
-  toggleEstado, // <-- Nueva función
+  toggleEstado, 
 } = useCampana()
 </script>
 

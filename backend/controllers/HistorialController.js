@@ -1,16 +1,13 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-/**
- * Obtiene el historial de puntos del usuario autenticado.
- */
 exports.getHistorial = async (req, res) => {
   const usuarioId = req.usuario.userId;
 
   try {
     const historial = await prisma.historialPuntos.findMany({
       where: { beneficiarioId: usuarioId },
-      orderBy: { fecha: 'desc' }, // Ordenar del más reciente al más antiguo
+      orderBy: { fecha: 'desc' }, 
     });
 
     res.status(200).json(historial);

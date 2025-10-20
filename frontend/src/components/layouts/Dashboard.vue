@@ -45,7 +45,6 @@ import Sidebar from '../menu/Sidebar.vue'
 import Topbar from '../menu/Topbar.vue'
 import ProfileModal from '../admin/ProfileModal.vue'
 import NotificationsPanel from '../shared/NotificationsPanel.vue'
-// ✅ SE IMPORTA EL NUEVO COMPONENTE
 import Footer from '../shared/Footer.vue'
 
 const isCollapsed = ref(false)     

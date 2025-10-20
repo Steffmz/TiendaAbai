@@ -47,6 +47,5 @@
   padding-top: 1.5rem;
   padding-bottom: 1.5rem;
   margin-top: auto;
-  /* El color de fondo se manejará en el style.css global */
 }
 </style>

@@ -5,7 +5,6 @@
 </template>
 
 <style>
-/* Variables de color */
 :root {
   --primary: #4a90e2;
   --primary-contrast: #ffffff;
@@ -22,7 +21,6 @@
   --table-header: #4a90e2;
 }
 
-/* Base styles */
 body {
   font-family: 'Inter', sans-serif;
   margin: 0;
@@ -36,9 +34,6 @@ body {
   min-height: 100vh;
 }
 
-/* ❌ SE ELIMINÓ EL ESTILO '.page-content' DE AQUÍ ❌ */
-
-/* Utilidad para centrar contenido */
 .mx-auto {
   margin-left: auto;
   margin-right: auto;
@@ -48,7 +43,6 @@ body {
   width: 100%;
 }
 
-/* Estilos de botones genéricos */
 .btn {
   padding: 0.5rem 1rem;
   border-radius: 6px;
@@ -77,7 +71,6 @@ body {
   background-color: var(--border);
 }
 
-/* Modales */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -96,8 +89,8 @@ body {
   border-radius: 8px;
   width: 90%;
   max-width: 600px;
-  max-height: 90vh; /* Limita la altura del modal */
-  overflow-y: auto; /* Permite scroll si el contenido es muy largo */
+  max-height: 90vh; 
+  overflow-y: auto; 
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
@@ -115,7 +108,7 @@ body {
   gap: 1rem;
 }
 
-/* Formulario base */
+
 .form-group {
   margin-bottom: 1rem;
 }

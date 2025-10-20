@@ -11,8 +11,8 @@ import { initTheme } from './theme.js'
 initTheme()
 
 const app = createApp(App)
-const pinia = createPinia() // <-- 2. CREA UNA INSTANCIA DE PINIA
+const pinia = createPinia() 
 
-app.use(pinia) // <-- 3. DILE A VUE QUE USE PINIA
+app.use(pinia) 
 app.use(router) 
 app.mount('#app')

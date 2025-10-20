@@ -1,7 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { jwtDecode } from "jwt-decode";
-
-// Vistas y layouts
 import Login from "../components/login/Login.vue";
 import ForgotPassword from "../components/login/ForgotPassword.vue";
 import ResetPassword from "../components/login/ResetPassword.vue";
@@ -23,7 +21,6 @@ import MisPedidos from "../components/employee/MisPedidos.vue";
 import DashboardHome from "../components/admin/DashboardHome.vue";
 
 const routes = [
-  // --- RUTAS PÚBLICAS ---
   {
     path: "/",
     name: "InicioPublico",
@@ -49,18 +46,16 @@ const routes = [
     meta: { publicOnly: true },
   },
 
-  // --- RUTAS DE EMPLEADO (protegidas) ---
   {
     path: "/tienda",
     component: EmployeeLayout,
     meta: { requiresAuth: true },
     children: [
       {
-        path: "", // La ruta /tienda muestra el catálogo
+        path: "", 
         name: "Tienda",
         component: InicioLogueado,
       },
-      // --- ESTA ES LA RUTA NUEVA ---
       {
         path: "campana/:id",
         name: "CampaignProducts",
@@ -86,7 +81,6 @@ const routes = [
     ],
   },
 
-  // --- RUTAS DE ADMIN ---
   {
     path: "/dashboard",
     component: Dashboard,
@@ -123,7 +117,6 @@ const router = createRouter({
   routes,
 });
 
-// --- Middleware de protección ---
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem("authToken");
   let decodedToken = null;

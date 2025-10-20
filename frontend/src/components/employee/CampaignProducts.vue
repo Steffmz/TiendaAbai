@@ -11,8 +11,6 @@
         </svg>
         Volver a la tienda
       </router-link>
-      
-      <!-- Banner de campaña mejorado -->
       <div class="campaign-banner" :style="campaign.imagenUrl ? `background-image: url('${API_BASE_URL}${campaign.imagenUrl}')` : ''">
         <div class="banner-pattern"></div>
         <div class="campaign-banner-overlay">
@@ -150,13 +148,12 @@ onMounted(fetchCampaignProducts);
   min-height: 100vh;
 }
 
-/* Back Link */
 .back-link {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   margin: 1.5rem 0 1.5rem 2rem;
-  color: var(--text-color); /* usa variable adaptable */
+  color: var(--text-color);
   font-weight: 600;
   text-decoration: none;
   transition: all 0.3s ease;
@@ -165,24 +162,20 @@ onMounted(fetchCampaignProducts);
   border-radius: 8px;
 }
 
-/* Hover */
 .back-link:hover {
   color: #ffffff;
   background: rgba(43, 127, 255, 0.25);
   transform: translateX(-3px);
 }
 
-/* Modo claro */
 :root {
   --text-color: #000000;
 }
 
-/* Modo oscuro */
 .dark {
   --text-color: #ffffff;
 }
 
-/* Banner de campaña mejorado */
 .campaign-banner {
   position: relative;
   width: 95%;
@@ -192,8 +185,8 @@ onMounted(fetchCampaignProducts);
   background-color: #638de9;
   overflow: hidden;
   margin: 0 auto 2rem auto;
-  border-radius: 24px; /* <-- redondeado */
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); /* sombra elegante */
+  border-radius: 24px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); 
 }
 
 .banner-pattern {
@@ -222,7 +215,7 @@ onMounted(fetchCampaignProducts);
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(3px);
-  border-radius: 24px; /* mantener redondeado */
+  border-radius: 24px;
 }
 
 .campaign-header {
@@ -244,8 +237,6 @@ onMounted(fetchCampaignProducts);
   }
 }
 
-
-
 .campaign-title {
   font-size: 2.8rem;
   font-weight: 800;
@@ -261,7 +252,7 @@ onMounted(fetchCampaignProducts);
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
-/* Sección de productos */
+
 .products-section {
   max-width: 1400px;
   margin: 0 auto;
@@ -312,7 +303,7 @@ onMounted(fetchCampaignProducts);
   gap: 2rem;
 }
 
-/* Tarjetas de producto premium */
+
 .product-card {
   background: white;
   border-radius: 20px;
@@ -575,7 +566,6 @@ onMounted(fetchCampaignProducts);
   font-weight: 500;
 }
 
-/* Responsive */
 @media (max-width: 1024px) {
   .products-grid {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));

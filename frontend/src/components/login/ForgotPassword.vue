@@ -62,7 +62,6 @@ const requestReset = async () => {
 </script>
 
 <style scoped>
-/* Usamos los mismos estilos del login para consistencia */
 @import './Login.css';
 
 .info-text {

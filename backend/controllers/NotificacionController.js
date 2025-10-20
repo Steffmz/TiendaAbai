@@ -7,7 +7,7 @@ exports.getMisNotificaciones = async (req, res) => {
     const notificaciones = await prisma.notificacion.findMany({
       where: { usuarioId },
       orderBy: { fechaEnvio: 'desc' },
-      take: 20, // Traemos solo las últimas 20 para no sobrecargar
+      take: 20, 
     });
     res.json(notificaciones);
   } catch (error) {
@@ -29,7 +29,6 @@ exports.getUnreadCount = async (req, res) => {
   }
 };
 
-// Marcar todas las notificaciones como leídas
 exports.markAllAsRead = async (req, res) => {
   const usuarioId = req.usuario.userId;
   try {

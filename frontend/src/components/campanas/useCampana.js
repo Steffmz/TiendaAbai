@@ -127,7 +127,6 @@ export default function useCampana() {
     }
   };
 
-  // ✅ --- NUEVA FUNCIÓN PARA ACTIVAR/DESACTIVAR --- ✅
   const toggleEstado = async (campana) => {
     const accion = campana.aprobada ? 'desactivar' : 'activar';
     const result = await Swal.fire({
@@ -198,6 +197,6 @@ export default function useCampana() {
     cerrarModal, guardarCampana, manejarSubidaImagen, cargarCampanas, paginaActual, totalPaginas,
     paginasVisibles, paginaAnterior, paginaSiguiente, irAPagina, totalCampanas,
     isProductoSeleccionado, toggleProductoSeleccionado,
-    toggleEstado, // <-- Exportamos la nueva función
+    toggleEstado,
   };
 }

@@ -55,7 +55,7 @@ export const useCartStore = defineStore("cart", () => {
         imgClone.style.top = `${startRect.top}px`;
         imgClone.style.width = `${startRect.width}px`;
         imgClone.style.height = `${startRect.height}px`;
-        imgClone.getBoundingClientRect(); // Force reflow
+        imgClone.getBoundingClientRect(); 
         imgClone.style.left = `${endRect.left + endRect.width / 2}px`;
         imgClone.style.top = `${endRect.top + endRect.height / 2}px`;
         imgClone.style.width = "0px";
@@ -71,7 +71,7 @@ export const useCartStore = defineStore("cart", () => {
         { productoId, cantidad },
         getAuthHeaders()
       );
-      await fetchCarrito(); // Actualizamos el estado
+      await fetchCarrito(); 
       Swal.fire({
         icon: "success",
         title: "¡Agregado!",

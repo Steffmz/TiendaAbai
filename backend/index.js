@@ -1,4 +1,3 @@
-// backend/index.js
 
 require('dotenv').config();
 const express = require('express');
@@ -31,8 +30,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // --- DEFINICIÓN DE RUTAS DE LA API ---
-app.use('/api/auth', AuthRouter); // Rutas para login y registro
-app.use('/api/perfil', PerfilRouter); // Ruta para el perfil del usuario logueado
+app.use('/api/auth', AuthRouter); 
+app.use('/api/perfil', PerfilRouter); 
 app.use('/api/productos', ProductosRoutes);
 app.use('/api/categorias', CategoriasRoutes);
 app.use('/api/campanas', CampanaRouter);

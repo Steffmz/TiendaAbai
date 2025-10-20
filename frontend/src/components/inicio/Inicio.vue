@@ -79,7 +79,6 @@ import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import InicioNoL from "./InicioNoL.vue";
 import InicioLogueado from "./InicioLogueado.vue";
-// ✅ SE IMPORTA EL NUEVO COMPONENTE
 import Footer from '../shared/Footer.vue';
 
 const router = useRouter();
@@ -121,7 +120,7 @@ onMounted(checkLoginStatus);
 
 <style scoped>
 .main-content {
-  flex-grow: 1; /* Asegura que el contenido principal ocupe el espacio disponible */
+  flex-grow: 1; 
 }
 .points-badge { background-color: rgba(255, 255, 255, 0.2); padding: 0.4rem 0.8rem; border-radius: 9999px; font-weight: 600; font-size: 0.9rem; }
 </style>

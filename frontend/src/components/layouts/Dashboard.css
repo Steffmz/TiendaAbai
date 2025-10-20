@@ -1,4 +1,4 @@
-/* frontend/src/components/layouts/Dashboard.css */
+
 :root {
   --sidebar-width: 280px;
   --sidebar-width-collapsed: 80px;
@@ -10,7 +10,7 @@
   display: flex;
   width: 100vw;
   height: 100vh;
-  overflow: hidden; /* Previene el scroll en el nivel más alto */
+  overflow: hidden; 
 }
 
 .main-content {
@@ -20,8 +20,7 @@
   position: relative;
   transition: padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   padding-left: var(--sidebar-width);
-  
-  /* CLAVE 1: Asegura que este contenedor no pueda ser más alto que la ventana */
+ 
   overflow: hidden; 
 }
 
@@ -30,21 +29,17 @@
 }
 
 .page-content {
-  /* CLAVE 2: Hace que esta área crezca para ocupar todo el espacio disponible */
   flex-grow: 1; 
-  /* CLAVE 3: Este será el ÚNICO contenedor con scroll vertical */
   overflow-y: auto; 
   padding: 2rem;
   background-color: var(--background-color);
 }
 
-/* CLAVE 4: Asegura que el Topbar y el Footer no se estiren ni se encojan */
 .main-content > .topbar,
 .main-content > footer {
   flex-shrink: 0;
 }
 
-/* --- Responsive y Overlay (sin cambios) --- */
 @media (max-width: 768px) {
   .main-content {
     padding-left: 0;

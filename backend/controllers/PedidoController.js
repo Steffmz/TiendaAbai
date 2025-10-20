@@ -1,7 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-// Función helper para generar mensajes de notificación personalizados
 const generarMensajeNotificacion = (estado, pedidoId) => {
   const mensajes = {
     Aprobado: {
@@ -34,7 +33,6 @@ const generarMensajeNotificacion = (estado, pedidoId) => {
   );
 };
 
-// Obtener todos los pedidos con paginación
 const getAllPedidos = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 6;
@@ -61,7 +59,6 @@ const getAllPedidos = async (req, res) => {
   }
 };
 
-// Actualizar el estado de un pedido (notifica al usuario)
 const updateEstadoPedido = async (req, res) => {
   const { id } = req.params;
   const { estado: nuevoEstado } = req.body;
@@ -84,22 +81,17 @@ const updateEstadoPedido = async (req, res) => {
       if (!pedido) throw new Error("Pedido no encontrado");
 
       const estadoAnterior = pedido.estado;
-      if (estadoAnterior === nuevoEstado) return pedido; // No hacer nada si el estado no cambia
+      if (estadoAnterior === nuevoEstado) return pedido; 
 
       const eraReembolsado = ["Cancelado", "Rechazado"].includes(estadoAnterior);
       const esReembolsado = ["Cancelado", "Rechazado"].includes(nuevoEstado);
 
-      // --- 🛡️ LÓGICA DE TRANSICIÓN MEJORADA 🛡️ ---
-
-      // CASO 1: Un pedido activo se cancela/rechaza (DEVOLVER PUNTOS Y STOCK)
       if (!eraReembolsado && esReembolsado) {
-        // Devolver puntos al usuario
         await tx.usuario.update({
           where: { id: pedido.usuarioId },
           data: { puntosTotales: { increment: pedido.totalPuntos } },
         });
 
-        // Devolver stock a los productos
         for (const detalle of pedido.detalles) {
           await tx.producto.update({
             where: { id: detalle.productoId },
@@ -107,10 +99,9 @@ const updateEstadoPedido = async (req, res) => {
           });
         }
         
-        // Registrar la devolución en el historial
         await tx.historialPuntos.create({
           data: {
-            puntos: pedido.totalPuntos, // Puntos en positivo
+            puntos: pedido.totalPuntos, 
             tipo: "AJUSTE",
             descripcion: `Devolución por pedido #${pedido.id} ${nuevoEstado.toLowerCase()}`,
             beneficiarioId: pedido.usuarioId,
@@ -119,21 +110,17 @@ const updateEstadoPedido = async (req, res) => {
         });
       }
 
-      // CASO 2: Un pedido cancelado/rechazado se reactiva (RESTAR PUNTOS Y STOCK)
       else if (eraReembolsado && !esReembolsado) {
-        // Verificar si el usuario aún tiene puntos suficientes
         const usuario = await tx.usuario.findUnique({ where: { id: pedido.usuarioId } });
         if (usuario.puntosTotales < pedido.totalPuntos) {
           throw new Error(`No se puede reactivar el pedido. El usuario solo tiene ${usuario.puntosTotales} puntos y se necesitan ${pedido.totalPuntos}.`);
         }
 
-        // Restar puntos al usuario
         await tx.usuario.update({
           where: { id: pedido.usuarioId },
           data: { puntosTotales: { decrement: pedido.totalPuntos } },
         });
 
-        // Restar stock a los productos
         for (const detalle of pedido.detalles) {
           await tx.producto.update({
             where: { id: detalle.productoId },
@@ -141,10 +128,9 @@ const updateEstadoPedido = async (req, res) => {
           });
         }
         
-        // Registrar el nuevo canje en el historial
         await tx.historialPuntos.create({
           data: {
-            puntos: -pedido.totalPuntos, // Puntos en negativo
+            puntos: -pedido.totalPuntos, 
             tipo: "CANJE",
             descripcion: `Re-activación de canje para pedido #${pedido.id}`,
             beneficiarioId: pedido.usuarioId,
@@ -153,8 +139,6 @@ const updateEstadoPedido = async (req, res) => {
           },
         });
       }
-
-      // --- FIN DE LA LÓGICA MEJORADA ---
 
       const dataToUpdate = { estado: nuevoEstado };
       if (["Aprobado", "Rechazado", "Cancelado"].includes(nuevoEstado)) {
@@ -167,7 +151,6 @@ const updateEstadoPedido = async (req, res) => {
         data: dataToUpdate,
       });
 
-      // Notificar al usuario sobre el cambio de estado
       const { titulo, mensaje } = generarMensajeNotificacion(nuevoEstado, pedido.id);
       await tx.notificacion.create({
         data: {
@@ -188,10 +171,6 @@ const updateEstadoPedido = async (req, res) => {
   }
 };
 
-
-// --- LAS DEMÁS FUNCIONES PERMANECEN IGUAL ---
-
-// Crear pedido desde producto individual (notifica al admin)
 const createPedido = async (req, res) => {
   const { productoId, cantidad } = req.body;
   const usuarioId = req.usuario.userId;
@@ -279,7 +258,6 @@ const createPedido = async (req, res) => {
   }
 };
 
-// Crear pedido desde carrito (notifica al admin también)
 const crearPedidoDesdeCarrito = async (req, res) => {
   const usuarioId = req.usuario.userId;
   try {

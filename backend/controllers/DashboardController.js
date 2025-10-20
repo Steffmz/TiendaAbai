@@ -1,18 +1,15 @@
-// backend/controllers/DashboardController.js
+
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 exports.getStats = async (req, res) => {
   try {
-    // 1. Conteo total de usuarios (solo empleados)
     const totalUsuarios = await prisma.usuario.count({
       where: { rol: 'Empleado' },
     });
 
-    // 2. Conteo total de productos
     const totalProductos = await prisma.producto.count();
 
-    // 3. Conteo de pedidos por estado
     const pedidosPorEstado = await prisma.pedido.groupBy({
       by: ['estado'],
       _count: {
@@ -20,7 +17,6 @@ exports.getStats = async (req, res) => {
       },
     });
 
-    // 4. Productos más canjeados (Top 5)
     const productosPopulares = await prisma.pedidoDetalle.groupBy({
       by: ['productoId'],
       _sum: {
@@ -34,7 +30,6 @@ exports.getStats = async (req, res) => {
       take: 5,
     });
 
-    // Para obtener los nombres de los productos populares
     const productoIds = productosPopulares.map(p => p.productoId);
     const productosInfo = await prisma.producto.findMany({
       where: { id: { in: productoIds } },
@@ -49,7 +44,6 @@ exports.getStats = async (req, res) => {
       };
     });
 
-    // 5. Devolvemos todo en un solo objeto
     res.json({
       totalUsuarios,
       totalProductos,

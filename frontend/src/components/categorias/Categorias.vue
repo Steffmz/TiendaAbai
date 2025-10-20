@@ -1,13 +1,11 @@
 <template>
   <div class="max-w-7xl w-full mx-auto flex flex-col h-full">
 
-    <!-- Header -->
     <div class="page-header flex-shrink-0">
       <h1 class="page-title">Gestión de Categorías</h1>
       <p class="page-subtitle">Administra las categorías</p>
     </div>
 
-    <!-- Filtro + Nueva Categoría -->
     <div class="w-full flex justify-center mb-6 flex-shrink-0">
       <div class="flex flex-col md:flex-row items-center gap-3 w-full max-w-3xl">
         <input
@@ -28,10 +26,7 @@
       </div>
     </div>
 
-    <!-- Contenido principal -->
     <div class="flex-grow overflow-y-auto pb-4">
-
-      <!-- Tabla (desktop) -->
       <div class="table-container">
         <table>
           <thead>
@@ -44,7 +39,6 @@
           </thead>
 
           <tbody>
-            <!-- Skeleton loading -->
             <tr v-if="loading" v-for="i in 4" :key="i">
               <td><BaseSkeleton width="56px" height="56px" radius="8px" /></td>
               <td><BaseSkeleton width="150px" height="24px" radius="6px" /></td>
@@ -56,8 +50,6 @@
                 </div>
               </td>
             </tr>
-
-            <!-- Sin categorías -->
             <tr v-else-if="categoriasPaginadas.length === 0">
               <td colspan="4">
                 <EmptyState
@@ -67,8 +59,6 @@
                 />
               </td>
             </tr>
-
-            <!-- Datos -->
             <tr v-else v-for="categoria in categoriasPaginadas" :key="categoria.id">
               <td>
                 <div class="flex justify-center">
@@ -108,10 +98,7 @@
           </tbody>
         </table>
       </div>
-
-      <!-- Cards (mobile) -->
       <div class="cards-container md:hidden">
-        <!-- Skeleton -->
         <div v-if="loading">
           <div v-for="i in 4" :key="i" class="card">
             <div class="card-header">
@@ -127,8 +114,6 @@
             </div>
           </div>
         </div>
-
-        <!-- Sin categorías -->
         <div v-else-if="categoriasPaginadas.length === 0">
           <EmptyState
             icon="mdi:tag-off-outline"
@@ -136,8 +121,6 @@
             message="Prueba con otro término de búsqueda o crea una nueva categoría."
           />
         </div>
-
-        <!-- Datos -->
         <div v-else v-for="categoria in categoriasPaginadas" :key="categoria.id" class="card">
           <div class="card-header">
             <img
@@ -172,8 +155,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Paginación -->
     <div v-if="!loading && totalPaginas > 1" class="flex flex-col items-center justify-center mt-4">
       <p class="text-gray-700">
         Existen <span class="text-blue-500 font-semibold">{{ totalCategorias }}</span> categorías
@@ -211,8 +192,6 @@
         </button>
       </div>
     </div>
-
-    <!-- Modal -->
     <div v-if="mostrarModal" class="modal-overlay" @click.self="cerrarModal">
       <div class="modal-content">
         <h2 class="modal-title">

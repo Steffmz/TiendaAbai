@@ -1,4 +1,4 @@
-// backend/middleware/adminMiddleware.js
+
 const jwt = require('jsonwebtoken');
 
 const adminMiddleware = (req, res, next) => {
@@ -14,7 +14,6 @@ const adminMiddleware = (req, res, next) => {
       return res.status(403).json({ message: 'Token no válido.' });
     }
 
-    // ✅ ¡La verificación clave!
     if (usuario.rol !== 'Administrador') {
       return res.status(403).json({ message: 'Acceso denegado. Se requiere rol de administrador.' });
     }

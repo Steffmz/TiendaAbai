@@ -1,7 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-// Obtener todos los productos
 const getAllProductos = async (req, res) => {
   try {
     const productos = await prisma.producto.findMany({
@@ -18,7 +17,6 @@ const getAllProductos = async (req, res) => {
   }
 };
 
-// Obtener productos por categoría
 const getProductosByCategoria = async (req, res) => {
   try {
     const { categoriaId } = req.params;
@@ -42,7 +40,6 @@ const getProductosByCategoria = async (req, res) => {
   }
 };
 
-// Crear producto
 const createProducto = async (req, res) => {
   try {
     const { nombre, descripcion, precioPuntos, stock, categoriaId } = req.body;
@@ -86,7 +83,7 @@ const createProducto = async (req, res) => {
         stock: stockNum,
         imagenUrl,
         categoriaId: categoriaIdNum,
-        estado: true, // activo por defecto
+        estado: true, 
       },
       include: { categoria: true },
     });
@@ -98,7 +95,6 @@ const createProducto = async (req, res) => {
   }
 };
 
-// Actualizar producto
 const updateProducto = async (req, res) => {
   try {
     const { id } = req.params;
@@ -168,7 +164,6 @@ const updateProducto = async (req, res) => {
   }
 };
 
-// Activar producto
 const activarProducto = async (req, res) => {
   try {
     const { id } = req.params;
@@ -192,7 +187,6 @@ const activarProducto = async (req, res) => {
   }
 };
 
-// Desactivar producto
 const desactivarProducto = async (req, res) => {
   try {
     const { id } = req.params;

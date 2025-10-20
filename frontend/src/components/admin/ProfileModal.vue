@@ -34,7 +34,7 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 
 const props = defineProps({ show: Boolean });
-const emit = defineEmits(['close', 'profileUpdated']); // Añadimos 'profileUpdated'
+const emit = defineEmits(['close', 'profileUpdated']); 
 
 const form = ref({
   nombreCompleto: '',
@@ -66,7 +66,7 @@ const updateProfile = async () => {
       nombreCompleto: form.value.nombreCompleto,
       email: form.value.email
     };
-    if (form.value.contrasena) { // Solo si se intentó cambiar la contraseña
+    if (form.value.contrasena) { 
       payload.contrasena = form.value.contrasena;
       payload.contrasenaActual = form.value.contrasenaActual;
     }
@@ -74,7 +74,7 @@ const updateProfile = async () => {
     await axios.put(API_URL_UPDATE, payload, getAuthHeaders());
     Swal.fire('Éxito', 'Perfil actualizado correctamente.', 'success');
     emit('close');
-    emit('profileUpdated'); // Emitir evento para que el layout sepa que debe recargar
+    emit('profileUpdated'); 
   } catch (error) {
     Swal.fire('Error', error.response?.data?.message || 'No se pudo actualizar el perfil.', 'error');
   }
@@ -82,13 +82,12 @@ const updateProfile = async () => {
 
 watch(() => props.show, (newValue) => {
   if (newValue) {
-    fetchProfile(); // Cargar los datos solo cuando el modal se abre
+    fetchProfile(); 
   }
 });
 </script>
 
 <style scoped>
-/* Estilos del modal (asegúrate de que coincidan con tus estilos globales o usa variables CSS) */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -104,14 +103,12 @@ watch(() => props.show, (newValue) => {
 
 .modal-content {
   background: white;
-  /* Color de fondo blanco */
   padding: 2rem;
   border-radius: 8px;
   width: 90%;
   max-width: 500px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   color: #333;
-  /* Color de texto oscuro para contraste */
 }
 
 .modal-title {
@@ -139,7 +136,6 @@ watch(() => props.show, (newValue) => {
   border: 1px solid #e2e8f0;
   border-radius: 4px;
   box-sizing: border-box;
-  /* Para que el padding no añada ancho extra */
   background-color: #f7fafc;
   color: #1a202c;
 }
@@ -153,7 +149,6 @@ watch(() => props.show, (newValue) => {
 
 .btn-primary {
   background-color: #4299e1;
-  /* Un azul primario */
   color: white;
   padding: 0.75rem 1.25rem;
   border: none;
@@ -169,7 +164,6 @@ watch(() => props.show, (newValue) => {
 
 .btn-secondary {
   background-color: #e2e8f0;
-  /* Un gris secundario */
   color: #4a5568;
   padding: 0.75rem 1.25rem;
   border: 1px solid #cbd5e0;

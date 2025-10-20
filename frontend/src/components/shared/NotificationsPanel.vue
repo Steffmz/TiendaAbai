@@ -73,10 +73,10 @@ onUnmounted(() => {
 <style scoped>
 .notifications-panel {
   position: absolute;
-  top: 70px; /* Distancia desde la barra de navegación */
-  right: 1rem; /* Posición por defecto para móviles */
-  width: calc(100% - 2rem); /* Ocupa casi todo el ancho en móviles */
-  max-width: 360px; /* Ancho máximo para pantallas grandes */
+  top: 70px; 
+  right: 1rem; 
+  width: calc(100% - 2rem); 
+  max-width: 360px; 
   background-color: var(--surface, white);
   border: 1px solid var(--border);
   border-radius: 12px;
@@ -85,11 +85,10 @@ onUnmounted(() => {
   color: var(--text);
 }
 
-/* En pantallas más grandes, ajustamos la posición a la derecha */
 @media (min-width: 640px) {
   .notifications-panel {
     right: 2rem;
-    width: 360px; /* Volvemos al ancho fijo */
+    width: 360px; 
   }
 }
 
@@ -107,7 +106,7 @@ onUnmounted(() => {
   list-style: none;
   padding: 0;
   margin: 0;
-  max-height: 60vh; /* Usamos vh para que se adapte a la altura de la pantalla */
+  max-height: 60vh; 
   overflow-y: auto;
 }
 .notifications-list li { padding: 1rem; border-bottom: 1px solid var(--border); }
@@ -117,7 +116,6 @@ onUnmounted(() => {
 
 .loading, .empty { padding: 2rem; text-align: center; color: var(--text-muted); }
 
-/* Animación de entrada y salida */
 .fade-enter-active, .fade-leave-active {
   transition: opacity 0.2s ease, transform 0.2s ease;
 }

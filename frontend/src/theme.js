@@ -5,12 +5,9 @@ const isDark = ref(false);
 
 function applyTheme(dark) {
   isDark.value = dark;
-  const root = document.documentElement; // <html>
-  
-  // Aplica o remueve la clase dark
+  const root = document.documentElement; 
   root.classList.toggle('dark', dark);
   
-  // Guarda preferencia del usuario
   localStorage.setItem('theme', dark ? 'dark' : 'light');
 }
 

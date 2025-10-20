@@ -90,7 +90,6 @@ onMounted(fetchUnreadCount);
 
 <style src="./Topbar.css"></style>
 <style>
-/* Estilos para el badge de notificaciones */
 .notification-icon-wrapper {
   position: relative;
   display: flex;

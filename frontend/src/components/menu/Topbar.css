@@ -17,9 +17,9 @@
   cursor: pointer;
 }
 
-/* Logo */
+
 .logo img {
-  height: 50px;   /* Tamaño normal en PC */
+  height: 50px;   
   max-width: 100%;
   object-fit: contain;
 }
@@ -44,11 +44,10 @@
   color: var(--primary); 
 }
 
-/* Responsive tablet */
 @media (max-width: 768px) {
   .topbar {
     padding: 0.5rem 1rem; 
-    height: 70px; /* un poco más bajo */
+    height: 70px;
   }
 
   .menu-icon {
@@ -57,7 +56,6 @@
     margin-right: 1rem;   
   }
 
-  /* Logo más pequeño en tablet */
   .logo img {
     height: 40px;
   }
@@ -73,18 +71,15 @@
   }
 }
 
-/* Responsive móvil pequeño */
 @media (max-width: 480px) {
   .topbar {
-    height: 60px; /* aún más compacto */
+    height: 60px; 
   }
 
-  /* Logo más pequeño en celular */
   .logo img {
     height: 32px;
   }
 
-  /* Íconos aún más pequeños */
   .actions svg,
   .actions .iconify {
     width: 20px;

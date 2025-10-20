@@ -44,7 +44,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
-import { useRoute, useRouter } from 'vue-router'; // ✅ IMPORTAR useRouter
+import { useRoute, useRouter } from 'vue-router';
 import abaiLogo from '../../assets/img/abai-logo.png';
 
 const props = defineProps({
@@ -52,7 +52,7 @@ const props = defineProps({
 });
 
 const route = useRoute();
-const router = useRouter(); // ✅ INICIALIZAR ROUTER
+const router = useRouter(); 
 const pedido = ref(null);
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -81,7 +81,6 @@ onMounted(fetchPedidoDetalles);
 </script>
 
 <style scoped>
-/* ✅ NUEVOS ESTILOS ✅ */
 .page-container {
   padding: 1.5rem;
 }
@@ -105,7 +104,6 @@ onMounted(fetchPedidoDetalles);
   .page-container { padding: 0; }
   .back-button { display: none; }
 }
-/* --- Fin de nuevos estilos --- */
 
 .recibo-container { background-color: transparent; padding: 0; }
 .recibo-card { max-width: 600px; margin: auto; background: var(--surface); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid var(--border); }

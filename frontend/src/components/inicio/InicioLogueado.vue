@@ -138,8 +138,7 @@ const cargarDatosIniciales = async () => {
       axios.get(`${API_BASE_URL}/api/campanas`, getAuthHeaders()),
       axios.get(`${API_BASE_URL}/api/productos`, getAuthHeaders()),
     ]);
-    
-    // ✅ CORRECCIÓN: Filtrar categorías con productos y luego mapear
+
     categorias.value = resCategorias.data
       .filter(c => c.activo && c._count.productos > 0)
       .map(c => ({
@@ -191,7 +190,6 @@ const verCampana = (campana) => {
 </script>
 
 <style scoped lang="postcss">
-/* Estilos para los nuevos elementos de categoría */
 .category-item {
   @apply flex flex-col items-center cursor-pointer transition-transform duration-200;
 }
@@ -208,7 +206,6 @@ const verCampana = (campana) => {
   @apply mt-2 text-[var(--text-muted)] font-medium;
 }
 
-/* Estilos para las tarjetas de campaña y productos */
 .campaign-card, .product-card {
   @apply bg-[var(--surface)] rounded-xl shadow-md flex flex-col transition-all duration-300;
 }
@@ -216,7 +213,6 @@ const verCampana = (campana) => {
   @apply shadow-xl -translate-y-1;
 }
 
-/* Paginación */
 .pagination-btn {
   @apply px-4 py-2 rounded-lg bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 transition;
 }

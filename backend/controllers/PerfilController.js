@@ -1,17 +1,12 @@
-// backend/controllers/PerfilController.js
 
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-/**
- * Obtiene el perfil del usuario actualmente autenticado.
- * Se usa en los layouts para mostrar el nombre, puntos, etc.
- */
 exports.getPerfil = async (req, res) => {
   try {
     const usuario = await prisma.usuario.findUnique({
       where: { id: req.usuario.userId },
-      select: { // Seleccionamos qué campos devolver para no enviar la contraseña
+      select: { 
         id: true,
         nombreCompleto: true,
         email: true,

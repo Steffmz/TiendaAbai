@@ -222,7 +222,6 @@ onMounted(fetchStats);
   color: var(--text-muted);
 }
 
-/* 🎨 Ajustes modo oscuro */
 html.dark .stat-card {
   background: linear-gradient(135deg, #242b3d, #2f3a4e);
   border: 1px solid var(--border);

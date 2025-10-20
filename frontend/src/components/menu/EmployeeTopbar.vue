@@ -1,8 +1,6 @@
 <template>
   <div class="topbar">
-    <!-- Menú hamburguesa para móvil (a futuro) -->
     <div class="menu-icon md:hidden">
-      <!-- Puedes añadir lógica para un menú desplegable aquí -->
     </div>
 
     <!-- Logo -->
@@ -12,14 +10,12 @@
         alt="ABAI Logo" 
       />
     </div>
-  
-    <!-- Navegación Principal (visible en desktop) -->
+
     <nav class="nav-links">
       <router-link to="/tienda">Tienda</router-link>
       <router-link to="/tienda/mis-pedidos">Mis Pedidos</router-link>
     </nav>
-
-    <!-- Acciones del Usuario -->
+    
     <div class="actions">
       <span class="points-badge">{{ userData.puntosTotales }} Puntos</span>
       

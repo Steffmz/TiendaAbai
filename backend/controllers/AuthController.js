@@ -35,7 +35,7 @@ const register = async (req, res) => {
                 sede,
                 email,
                 contrasena: hashedPassword,
-                rol: 'Empleado', // Rol por defecto
+                rol: 'Empleado', 
                 cargoId: cargoRecord.id,
                 centroDeCostosId: centroDeCostosRecord.id,
             },
@@ -102,11 +102,10 @@ const forgotPassword = async (req, res) => {
             return res.status(200).json({ message: 'Si tu correo está registrado, recibirás un enlace para restablecer tu contraseña.' });
         }
 
-        // Generar un token de reseteo seguro
+        
         const resetToken = crypto.randomBytes(32).toString('hex');
         const passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-        
-        // El token expira en 10 minutos
+
         const passwordResetExpires = new Date(Date.now() + 10 * 60 * 1000);
 
         await prisma.usuario.update({
@@ -114,28 +113,22 @@ const forgotPassword = async (req, res) => {
             data: { passwordResetToken, passwordResetExpires },
         });
 
-        // --- SIMULACIÓN DE ENVÍO DE CORREO ---
-        // En un proyecto real, configurarías nodemailer con un servicio como Gmail, SendGrid, etc.
         const resetURL = `http://localhost:5173/reset-password/${resetToken}`;
         
         console.log('--- ENLACE PARA REESTABLECER CONTRASEÑA ---');
         console.log(`Copia y pega este enlace en tu navegador: ${resetURL}`);
         console.log('-------------------------------------------');
-        // Aquí iría la lógica de nodemailer para enviar el email.
+    
         
         res.status(200).json({ message: 'Si existe una cuenta con este correo, recibirás un enlace para reestablecer tu contraseña.' });
 
     } catch (error) {
         console.error("Error en forgotPassword:", error);
-        // Limpiamos los tokens si algo sale mal
         await prisma.usuario.update({ where: { email }, data: { passwordResetToken: null, passwordResetExpires: null } });
         res.status(500).json({ message: 'Error interno del servidor.' });
     }
 };
 
-/**
- * Endpoint para reestablecer la contraseña usando el token.
- */
 const resetPassword = async (req, res) => {
     const { token } = req.params;
     const { contrasena } = req.body;
@@ -146,7 +139,7 @@ const resetPassword = async (req, res) => {
         const usuario = await prisma.usuario.findFirst({
             where: {
                 passwordResetToken: hashedToken,
-                passwordResetExpires: { gt: new Date() }, // El token no ha expirado
+                passwordResetExpires: { gt: new Date() }, 
             },
         });
 
@@ -177,6 +170,6 @@ const resetPassword = async (req, res) => {
 module.exports = {
     register,
     login,
-    forgotPassword, // <-- AÑADE ESTO
-    resetPassword,  // <-- AÑADE ESTO
+    forgotPassword, 
+    resetPassword,  
 };

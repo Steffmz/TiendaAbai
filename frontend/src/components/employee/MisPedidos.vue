@@ -102,13 +102,10 @@ onMounted(fetchPedidos);
 </script>
 
 <style scoped>
-/* Contenedor principal que centra todo */
 .mis-pedidos-container {
   display: flex;
   flex-direction: column;
-  /* Apila los hijos verticalmente */
   align-items: center;
-  /* Centra los hijos horizontalmente */
   width: 100%;
   max-width: 900px;
   margin: 0 auto;
@@ -131,7 +128,6 @@ onMounted(fetchPedidos);
   color: var(--text-muted);
 }
 
-/* Contenedor para la lista, loading o estado vacío */
 .content-section {
   width: 100%;
 }
@@ -257,7 +253,6 @@ onMounted(fetchPedidos);
   cursor: pointer;
 }
 
-/* Badge Styles */
 .badge {
   padding: 5px 12px;
   border-radius: 9999px;

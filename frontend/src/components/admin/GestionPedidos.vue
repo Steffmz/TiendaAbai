@@ -30,7 +30,6 @@
             <td class="actions-cell">
               <button @click="openDetailsModal(pedido)" class="btn btn-secondary">Detalles</button>
               
-              <!-- ✅ BOTÓN DE RECIBO AÑADIDO ✅ -->
               <router-link
                 v-if="['Aprobado', 'Enviado', 'Entregado'].includes(pedido.estado)"
                 :to="`/dashboard/recibo/${pedido.id}`"
@@ -70,7 +69,6 @@
                   <div class="card-actions">
                        <button @click="openDetailsModal(pedido)" class="btn btn-secondary">Detalles</button>
                        
-                       <!-- ✅ BOTÓN DE RECIBO AÑADIDO (MÓVIL) ✅ -->
                        <router-link
                          v-if="['Aprobado', 'Enviado', 'Entregado'].includes(pedido.estado)"
                          :to="`/dashboard/recibo/${pedido.id}`"
@@ -92,8 +90,7 @@
           </div>
       </div>
     </div>
-    
-    <!-- Paginación y Modal (sin cambios) -->
+  
     <div v-if="!loading && totalPages > 1" class="flex flex-col items-center justify-center mt-4">
         <p class="text-gray-700">
             Existen <span class="text-blue-500 font-semibold">{{ totalPedidos }}</span> pedidos
@@ -154,7 +151,6 @@ const nextPage = () => { if (currentPage.value < totalPages.value) { currentPage
 const prevPage = () => { if (currentPage.value > 1) { currentPage.value--; fetchPedidos(); }};
 const goToPage = (pagina) => { if (typeof pagina === 'number') { currentPage.value = pagina; fetchPedidos(); }};
 
-// ✅ LÓGICA DE LA ALERTA ELIMINADA ✅
 const updateStatus = async (pedidoId, nuevoEstado) => {
   if (!nuevoEstado) return;
   const result = await Swal.fire({ title: '¿Confirmar cambio de estado?', text: `El pedido cambiará a "${nuevoEstado}".`, icon: 'warning', showCancelButton: true, confirmButtonText: 'Sí, cambiar', cancelButtonText: 'Cancelar', });
@@ -162,7 +158,7 @@ const updateStatus = async (pedidoId, nuevoEstado) => {
     try {
       await axios.put(`${API_URL}/${pedidoId}/estado`, { estado: nuevoEstado }, getAuthHeaders());
       Swal.fire('Éxito', 'Estado actualizado.', 'success');
-      fetchPedidos(); // Recargar los pedidos para mostrar el estado actualizado
+      fetchPedidos(); 
     } catch (error) {
       Swal.fire('Error', error.response?.data?.message || 'No se pudo actualizar.', 'error');
     }
@@ -215,7 +211,6 @@ onMounted(fetchPedidos);
   padding-right: 2rem;
 }
 
-/* ✅ ESTILOS PARA EL NUEVO BOTÓN ✅ */
 .btn-recibo {
   background-color: #f0abfc;
   color: #701a75;

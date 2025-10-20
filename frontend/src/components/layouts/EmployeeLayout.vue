@@ -23,7 +23,6 @@ import NotificationsPanel from '../shared/NotificationsPanel.vue';
 import { useNotifications } from '../../composables/useNotifications';
 import { useCartStore } from '../../stores/cartStore'; 
 import EmployeeTopbar from '../menu/EmployeeTopbar.vue';
-// ✅ SE IMPORTA EL NUEVO COMPONENTE
 import Footer from '../shared/Footer.vue';
 
 const router = useRouter();
@@ -80,9 +79,8 @@ onMounted(fetchUserData);
   max-width: 1280px;
   margin: 0 auto;
   
-  /* ✅ ESTOS ESTILOS SE MUEVEN AQUÍ */
   padding: 2rem;
-  padding-top: 100px; /* Espacio para el Topbar fijo */
+  padding-top: 100px; 
 }
 
 @media (max-width: 768px) {

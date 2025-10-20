@@ -66,7 +66,6 @@ defineEmits(['close']);
   gap: 1rem;
 }
 
-/* Transición del modal */
 .modal-fade-enter-active,
 .modal-fade-leave-active {
   transition: opacity 0.3s ease;

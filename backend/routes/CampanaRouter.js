@@ -9,7 +9,7 @@ const {
   updateCampana,
   asignarProducto,
   quitarProducto,
-  toggleEstadoCampana // <-- Importamos la nueva función
+  toggleEstadoCampana 
 } = require('../controllers/CampanaController');
 
 const router = express.Router();
@@ -61,7 +61,7 @@ router.get('/', getCampanas);
 router.get('/:id', getCampanaById); 
 router.post('/', upload.single('imagen'), handleMulterError, createCampana);
 router.put('/:id', upload.single('imagen'), handleMulterError, updateCampana);
-router.patch('/:id/toggle-estado', toggleEstadoCampana); // <-- ✅ NUEVA RUTA
+router.patch('/:id/toggle-estado', toggleEstadoCampana); 
 router.post('/asignar-producto', asignarProducto);
 router.post('/quitar-producto', quitarProducto);
 

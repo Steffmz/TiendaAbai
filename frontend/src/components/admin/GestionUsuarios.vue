@@ -6,7 +6,6 @@
       <p class="page-subtitle">Administra los usuarios del sistema.</p>
     </div>
 
-    <!-- Barra de acciones -->
     <div class="w-full flex justify-center mb-6">
       <div class="flex flex-col md:flex-row items-center gap-3 w-full max-w-3xl">
         <input v-model="searchQuery" type="text" placeholder="Buscar por nombre o cédula..." class="w-64 md:flex-1 px-3 py-2 border border-yellow-400 rounded-lg text-blue-800 bg-blue-50
@@ -27,7 +26,6 @@
       </div>
     </div>
 
-    <!-- Vista Desktop - Tabla -->
     <div class="table-container">
       <table class="w-full border-collapse">
         <thead class="bg-[#74B9E7] text-black">
@@ -44,7 +42,6 @@
           </tr>
         </thead>
         <tbody>
-          <!-- Skeletons mientras carga -->
           <template v-if="loading">
             <tr>
               <td colspan="7" class="p-0">
@@ -66,7 +63,6 @@
             </tr>
           </template>
 
-          <!-- Usuarios -->
           <template v-else-if="usuarios.length > 0">
             <tr v-for="usuario in usuarios" :key="usuario.id">
               <td>{{ usuario.nombreCompleto }}</td>
@@ -92,7 +88,6 @@
             </tr>
           </template>
 
-          <!-- Estado vacío -->
           <template v-else>
             <tr>
               <td colspan="7">
@@ -105,7 +100,6 @@
       </table>
     </div>
 
-    <!-- ✅ VISTA MOBILE MEJORADA - Cards -->
     <div class="cards-container">
       <!-- Skeletons para móvil -->
       <template v-if="loading">
@@ -129,7 +123,6 @@
         </div>
       </template>
 
-      <!-- Cards de usuarios -->
       <template v-else-if="usuarios.length > 0">
         <div v-for="usuario in usuarios" :key="usuario.id" class="mobile-card">
           <div class="mobile-card-header">
@@ -177,14 +170,12 @@
         </div>
       </template>
 
-      <!-- Estado vacío para mobile -->
       <template v-else>
         <EmptyState icon="mdi:account-search-outline" title="No se encontraron usuarios"
           message="Prueba con otro término de búsqueda o crea un nuevo usuario." />
       </template>
     </div>
 
-    <!-- Paginación -->
     <div v-if="!loading && totalPages > 1" class="flex flex-col items-center justify-center mt-4">
       <p class="text-gray-700">
           Existen <span class="text-blue-500 font-semibold">{{ totalUsers }}</span> usuarios
@@ -210,7 +201,6 @@
       </div>
     </div>
 
-    <!-- Modal Crear/Editar -->
     <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
       <div class="modal-content">
         <h2 class="modal-title">{{ isEditMode ? 'Editar Usuario' : 'Crear Usuario' }}</h2>
@@ -250,7 +240,6 @@
       </div>
     </div>
 
-    <!-- Modal Ajustar Puntos -->
     <BaseModal :show="showPuntosModal" :title="`Ajustar Puntos a ${formPuntos.nombreCompleto}`" @close="closePuntosModal" width="500px">
       <form id="puntosForm" @submit.prevent="savePuntos">
         <div class="form-group"><label>Puntos a Añadir/Quitar</label><input v-model.number="formPuntos.puntos" type="number" required placeholder="Ej: 100 para añadir, -50 para quitar" /></div>

@@ -182,11 +182,10 @@ onMounted(fetchCarrito);
   transition: background 0.3s ease;
 }
 .btn-checkout:hover {
-  background-color: #facc15; /* Amarillo */
+  background-color: #facc15; 
   color: #000;
 }
 
-/* --- Responsive --- */
 @media (max-width: 900px) {
   .cart-content {
     grid-template-columns: 1fr;

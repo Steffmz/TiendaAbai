@@ -3,7 +3,6 @@ const fs = require('fs');
 const path = require('path');
 const prisma = new PrismaClient();
 
-// FUNCIÓN PARA CORREGIR LA ZONA HORARIA
 const adjustDate = (dateString) => {
   if (!dateString) return null;
   if (dateString instanceof Date) return dateString;
@@ -12,7 +11,6 @@ const adjustDate = (dateString) => {
   return new Date(date.getTime() + userTimezoneOffset);
 };
 
-// Obtener campañas con productos
 const getCampanas = async (req, res) => {
   try {
     const campanas = await prisma.campana.findMany({
@@ -43,7 +41,7 @@ const getCampanaById = async (req, res) => {
   }
 };
 
-// Crear campaña
+
 const createCampana = async (req, res) => {
   try {
     const { titulo, descripcion, fechaInicio, fechaFin, aprobada: aprobadaStr, productosIds } = req.body;
@@ -66,8 +64,8 @@ const createCampana = async (req, res) => {
       fechaInicio: fechaInicioDate,
       fechaFin: fechaFinDate,
       aprobada: aprobadaStr === 'true',
-      puntos: null, // Campo eliminado de la UI
-      descuento: null, // Campo eliminado de la UI
+      puntos: null, 
+      descuento: null, 
       imagenUrl,
     };
 
@@ -89,7 +87,6 @@ const createCampana = async (req, res) => {
   }
 };
 
-// Actualizar campaña
 const updateCampana = async (req, res) => {
   try {
     const { id } = req.params;
@@ -139,7 +136,6 @@ const updateCampana = async (req, res) => {
   }
 };
 
-// ✅ --- NUEVA FUNCIÓN PARA ACTIVAR/DESACTIVAR --- ✅
 const toggleEstadoCampana = async (req, res) => {
   try {
     const { id } = req.params;
@@ -209,5 +205,5 @@ module.exports = {
   updateCampana,
   asignarProducto,
   quitarProducto,
-  toggleEstadoCampana, // <-- Exportamos la nueva función
+  toggleEstadoCampana, 
 };

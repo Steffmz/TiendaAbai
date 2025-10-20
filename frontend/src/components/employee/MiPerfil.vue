@@ -42,7 +42,6 @@
 </template>
 
 <script setup>
-// El script ahora no carga el historial, haciendo la página más rápida.
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import Swal from 'sweetalert2';

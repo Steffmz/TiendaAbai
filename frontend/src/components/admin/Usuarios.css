@@ -11,7 +11,6 @@
 .page-title { font-size: 1.8rem; font-weight: 700; color: var(--text); }
 .page-subtitle { color: var(--text-muted); }
 
-/* --- Tabla (Desktop) --- */
 .table-container {
   display: none; 
   background: var(--surface);
@@ -32,8 +31,6 @@ tbody tr:last-child { border-bottom: none; }
 tbody tr:hover { background-color: var(--surface-2); }
 .actions-cell { display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap; }
 
-
-/* ---  (Móvil) --- */
 .cards-container {
   display: grid;
   gap: 1rem;

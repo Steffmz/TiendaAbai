@@ -3,7 +3,6 @@ const fs = require('fs');
 const path = require('path');
 const prisma = new PrismaClient();
 
-// Helper para convertir valores a booleano de forma segura
 const convertirABoolean = (valor) => {
   if (typeof valor === 'boolean') return valor;
   if (typeof valor === 'string') {
@@ -13,7 +12,6 @@ const convertirABoolean = (valor) => {
   return !!valor;
 };
 
-// Obtener todas las categorías
 exports.getCategorias = async (req, res) => {
   try {
     const categorias = await prisma.categoria.findMany({
@@ -27,7 +25,6 @@ exports.getCategorias = async (req, res) => {
   }
 };
 
-// Obtener categoría por ID
 exports.getCategoriaById = async (req, res) => {
   const { id } = req.params;
   try {
@@ -43,7 +40,6 @@ exports.getCategoriaById = async (req, res) => {
   }
 };
 
-// Crear categoría
 exports.createCategoria = async (req, res) => {
   const { nombre, descripcion } = req.body;
   try {
@@ -71,7 +67,6 @@ exports.createCategoria = async (req, res) => {
   }
 };
 
-// Actualizar categoría
 exports.updateCategoria = async (req, res) => {
   const { id } = req.params;
   const { nombre, descripcion, activo } = req.body;
@@ -101,7 +96,6 @@ exports.updateCategoria = async (req, res) => {
   }
 };
 
-// Eliminar categoría
 exports.deleteCategoria = async (req, res) => {
   const { id } = req.params;
   try {
@@ -112,7 +106,6 @@ exports.deleteCategoria = async (req, res) => {
     if (!categoria) return res.status(404).json({ error: "Categoría no encontrada" });
 
 if (categoria._count.productos > 0) {
-      // Devolvemos un error claro en lugar de desactivar la categoría
       return res.status(400).json({ 
         error: "No se puede eliminar la categoría porque tiene productos asociados. Primero elimine los productos o muévalos a otra categoría." 
       });
@@ -131,7 +124,6 @@ if (categoria._count.productos > 0) {
   }
 };
 
-// Activar / Desactivar categoría
 exports.toggleEstadoCategoria = async (req, res) => {
   const { id } = req.params;
   try {

@@ -5,7 +5,6 @@ import { PAGINATION } from "../../config";
 
 const API_URL = `${import.meta.env.VITE_API_BASE_URL}/api/categorias`;
 
-// Helper for authentication headers
 const getAuthHeaders = (isFormData = false) => {
   const token = localStorage.getItem("authToken");
   const headers = {
@@ -28,8 +27,6 @@ export default function useCategorias() {
   const categoriasPorPagina = PAGINATION.CATEGORIES;
   const previewImage = ref(null);
 
-  // --- MODIFICADO ---
-  // Se eliminó 'descripcion' del formulario
   const form = ref({
     id: null,
     nombre: "",
@@ -37,8 +34,6 @@ export default function useCategorias() {
   });
 
   const placeholder = "/img/no-image.png";
-
-  // Pagination and filtering logic
   const categoriasFiltradas = computed(() => {
     if (!filtro.value) return categorias.value;
     return categorias.value.filter((cat) =>
@@ -96,7 +91,6 @@ export default function useCategorias() {
     if (paginaActual.value < totalPaginas.value) paginaActual.value++;
   };
 
-  // API calls with Axios and authentication
   const obtenerCategorias = async () => {
     loading.value = true;
     try {
@@ -191,10 +185,7 @@ const confirmarEliminar = async (categoria) => {
     }
   };
 
-  // Modal control
   const limpiarFormulario = () => {
-    // --- MODIFICADO ---
-    // Se eliminó 'descripcion' del formulario
     form.value = { id: null, nombre: "", imagen: null };
     previewImage.value = null;
   };
@@ -207,8 +198,6 @@ const confirmarEliminar = async (categoria) => {
 
   const abrirModalEditar = (categoria) => {
     editando.value = true;
-    // --- MODIFICADO ---
-    // Se eliminó 'descripcion' del formulario
     form.value = {
       id: categoria.id,
       nombre: categoria.nombre,
@@ -232,7 +221,6 @@ const confirmarEliminar = async (categoria) => {
       return Swal.fire("Error", "Please select an image file.", "error");
     }
     if (file.size > 5 * 1024 * 1024) {
-      // 5MB
       return Swal.fire(
         "Error",
         "The image cannot be larger than 5MB.",

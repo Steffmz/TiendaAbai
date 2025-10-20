@@ -1,9 +1,9 @@
-// backend/controllers/CarritoController.js
+
 
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-// Obtener el carrito de un usuario
+
 exports.getCarrito = async (req, res) => {
   const usuarioId = req.usuario.userId;
   try {
@@ -31,7 +31,6 @@ exports.getCarrito = async (req, res) => {
   }
 };
 
-// Agregar un producto al carrito
 exports.agregarAlCarrito = async (req, res) => {
   const usuarioId = req.usuario.userId;
   const { productoId, cantidad } = req.body;
@@ -57,7 +56,6 @@ exports.agregarAlCarrito = async (req, res) => {
     });
 
     if (itemExistente) {
-      // Si el item ya existe, actualizamos la cantidad
       const nuevaCantidad = itemExistente.cantidad + cantidad;
       if (producto.stock < nuevaCantidad) {
         return res.status(400).json({ message: 'La cantidad solicitada excede el stock disponible.' });
@@ -68,7 +66,6 @@ exports.agregarAlCarrito = async (req, res) => {
       });
       res.status(200).json({ message: 'Cantidad actualizada en el carrito.', item: itemActualizado });
     } else {
-      // Si no existe, creamos un nuevo item en el carrito
       const nuevoItem = await prisma.carrito.create({
         data: {
           usuarioId,
@@ -84,7 +81,6 @@ exports.agregarAlCarrito = async (req, res) => {
   }
 };
 
-// Eliminar un producto del carrito
 exports.eliminarDelCarrito = async (req, res) => {
   const usuarioId = req.usuario.userId;
   const { productoId } = req.params;

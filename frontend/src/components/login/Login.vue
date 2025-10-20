@@ -12,12 +12,9 @@ const cedula = ref("");
 const password = ref("");
 const showModal = ref(false);
 const errorMessage = ref("");
-
-// Estados para mostrar/ocultar contraseñas
 const showPassword = ref(false);
 const showPasswordReg = ref(false);
 
-// Estado para detectar modo oscuro
 const isDarkMode = ref(false);
 
 const registro = ref({
@@ -31,15 +28,13 @@ const registro = ref({
   rol: 'Empleado'
 });
 
-// --- Función para detectar modo oscuro ---
 const checkDarkMode = () => {
   isDarkMode.value = document.documentElement.classList.contains('dark');
 };
 
-// --- Funciones de Validación ---
 const onCedulaInput = (event, isRegistro = false) => {
-  const value = event.target.value.replace(/\D/g, ''); // Solo números
-  const limitedValue = value.slice(0, 15); // Máximo 15 caracteres
+  const value = event.target.value.replace(/\D/g, ''); 
+  const limitedValue = value.slice(0, 15); 
 
   if (isRegistro) {
     registro.value.cedula = limitedValue;
@@ -51,7 +46,7 @@ const onCedulaInput = (event, isRegistro = false) => {
 };
 
 const onPasswordInput = (event, isRegistro = false) => {
-  const limitedValue = event.target.value.slice(0, 18); // Máximo 18 caracteres
+  const limitedValue = event.target.value.slice(0, 18); 
 
   if (isRegistro) {
     registro.value.contrasena = limitedValue;
@@ -70,11 +65,9 @@ const togglePasswordVisibility = (isRegistro = false) => {
   }
 };
 
-// --- Lógica de Login ---
 const login = async () => {
   errorMessage.value = '';
   try {
-    // URL CORRECTA (de tu rama)
     const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/login`, {
       cedula: cedula.value,
       contrasena: password.value,
@@ -100,7 +93,6 @@ const login = async () => {
   }
 };
 
-// --- Lógica de Registro ---
 const register = async () => {
   errorMessage.value = '';
   try {
@@ -130,7 +122,7 @@ const closeModal = () => {
   showPasswordReg.value = false;
 };
 
-// --- Animación del Canvas (Optimizada) ---
+
 onMounted(() => {
   checkDarkMode();
 

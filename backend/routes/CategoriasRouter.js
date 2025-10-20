@@ -3,7 +3,6 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// Importamos las funciones del controlador
 const {
   getCategorias,
   getCategoriaById,
@@ -38,8 +37,6 @@ const upload = multer({
     cb(new Error('Solo se permiten archivos de imagen'));
   }
 });
-
-// Definición de Rutas
 router.get('/', getCategorias);
 router.get('/:id', getCategoriaById);
 router.post('/', upload.single('imagen'), createCategoria);
